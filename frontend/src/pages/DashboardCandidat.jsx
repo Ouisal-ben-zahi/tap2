@@ -22,21 +22,13 @@ const GRADIENTS = [
   "linear-gradient(145deg,#0f0f20 0%,#1e1e40 100%)",
 ];
 
-const PORTFOLIO_ITEMS = [
-  { id:1, title:"Brand Identity — Luxora",    desc:"Identité visuelle complète pour une maison de luxe parisienne.",          tags:["Branding","Logo"],   date:"Mar 2025", color:GRADIENTS[0] },
-  { id:2, title:"App Mobile — Kora",          desc:"Expérience utilisateur pour une appli de gestion sportive.",               tags:["Mobile","UX"],       date:"Jan 2025", color:GRADIENTS[1] },
-  { id:3, title:"Dashboard Analytics",        desc:"Tableau de bord interactif avec visualisations de données en temps réel.", tags:["React","UI"],        date:"Nov 2024", color:GRADIENTS[2] },
-  { id:4, title:"Campagne Digital — Velvet",  desc:"Stratégie visuelle & visuels pour une campagne digitale 360°.",            tags:["Motion","Social"],   date:"Sep 2024", color:GRADIENTS[3] },
-  { id:5, title:"Site E-commerce — Botanica", desc:"Design et intégration boutique premium pour une marque naturelle.",        tags:["Web","Shopify"],     date:"Juil 2024",color:GRADIENTS[4] },
-  { id:6, title:"Packaging — Céleste",        desc:"Design packaging pour une gamme de cosmétiques artisanaux.",               tags:["Print","3D"],        date:"Mai 2024", color:GRADIENTS[5] },
-];
-
 const MENU = [
   { id:"dashboard",  label:"Dashboard",    icon:LayoutDashboard },
   { id:"fichiers",   label:"Mes fichiers", icon:FolderOpen      },
   { id:"talentcard", label:"Talent Card",  icon:CreditCard      },
   { id:"cv",         label:"CV",           icon:FileText        },
   { id:"projets",    label:"Projets",      icon:Briefcase       },
+  { id:"candidatures", label:"Mes candidatures", icon:BriefcaseBusiness },
   { id:"portfolio",  label:"Portfolio",    icon:Image           },
   { id:"entretiens", label:"Entretiens",   icon:CalendarCheck   },
 ];
@@ -46,6 +38,7 @@ const PAGE_CONTENT = {
   talentcard: "Votre Talent Card est votre vitrine professionnelle. Mettez-la à jour pour maximiser votre visibilité.",
   cv:         "Gérez plusieurs versions de CV, activez celle de votre choix et consultez les statistiques en temps réel.",
   projets:    "Répertoriez vos projets et réalisations. Chaque entrée renforce automatiquement votre profil TAP.",
+  candidatures: "Consultez l’historique de toutes vos candidatures, leur statut (en cours, acceptée, refusée) et les détails associés.",
   entretiens: "Historique de vos entretiens passés, prochaines étapes et rappels automatiques pour ne rien manquer.",
 };
 
@@ -66,6 +59,9 @@ export default function DashboardCandidat() {
     statusAccepted: null,
     statusRefused: null,
   });
+  const [portfolio,   setPortfolio]    = useState([]);
+  const [applications,setApplications] = useState([]);
+  const [cvFiles,     setCvFiles]      = useState([]);
 
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
@@ -118,6 +114,78 @@ export default function DashboardCandidat() {
     };
 
     loadStats();
+
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+
+    const loadCvFiles = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/cv-files`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) return;
+
+        setCvFiles(Array.isArray(data.cvFiles) ? data.cvFiles : []);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    };
+
+    loadCvFiles();
+
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+
+    const loadApplications = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/applications`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) return;
+
+        setApplications(Array.isArray(data.applications) ? data.applications : []);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    };
+
+    loadApplications();
+
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+
+    const loadPortfolio = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/portfolio`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) return;
+
+        setPortfolio(Array.isArray(data.projects) ? data.projects : []);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    };
+
+    loadPortfolio();
 
     return () => controller.abort();
   }, [userId]);
@@ -396,57 +464,232 @@ export default function DashboardCandidat() {
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">Portfolio</h1>
-                <p className="dash-page-sub">Vos réalisations et projets · {PORTFOLIO_ITEMS.length} travaux</p>
+                <p className="dash-page-sub">
+                  Vos réalisations et projets · {portfolio.length} travaux
+                </p>
               </div>
               <div className="portfolio-shell">
                 <div className="portfolio-tabs">
-                  <button type="button" className={`portfolio-tab${pfTab==="grid"?" portfolio-tab--active":""}`} onClick={()=>setPfTab("grid")}>Vue Galerie</button>
-                  <button type="button" className={`portfolio-tab${pfTab==="list"?" portfolio-tab--active":""}`} onClick={()=>setPfTab("list")}>Vue Détaillée</button>
+                  <button
+                    type="button"
+                    className={`portfolio-tab${pfTab==="grid"?" portfolio-tab--active":""}`}
+                    onClick={()=>setPfTab("grid")}
+                  >
+                    Portfolio court
+                  </button>
+                  <button
+                    type="button"
+                    className={`portfolio-tab${pfTab==="list"?" portfolio-tab--active":""}`}
+                    onClick={()=>setPfTab("list")}
+                  >
+                    Portfolio long
+                  </button>
                 </div>
 
                 {pfTab === "grid" && (
                   <div className="pf-grid" key="grid">
-                    {PORTFOLIO_ITEMS.map(({ id, title, desc, tags, color }) => (
-                      <div className="pf-card" key={id}>
+                    {portfolio.map((item, index) => {
+                      const color = GRADIENTS[index % GRADIENTS.length];
+                      const desc =
+                        item.shortDescription ||
+                        (item.longDescription
+                          ? `${item.longDescription.slice(0, 140)}…`
+                          : "");
+                      const tags = Array.isArray(item.tags) ? item.tags : [];
+                      return (
+                        <div className="pf-card" key={item.id}>
                         <div className="pf-thumb">
                           <div className="pf-thumb-bg" style={{ background:color }} />
                           <div className="pf-thumb-overlay" />
-                          <span className="pf-thumb-num">0{id}</span>
+                          <span className="pf-thumb-num">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
                         </div>
                         <div className="pf-body">
-                          <div className="pf-title">{title}</div>
+                          <div className="pf-title">{item.title}</div>
                           <div className="pf-desc">{desc}</div>
-                          <div className="pf-tags">{tags.map(t=><span className="pf-tag" key={t}>{t}</span>)}</div>
+                          <div className="pf-tags">
+                            {tags.map(t => (
+                              <span className="pf-tag" key={t}>{t}</span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
                 {pfTab === "list" && (
                   <div className="pf-list" key="list">
-                    {PORTFOLIO_ITEMS.map(({ id, title, desc, tags, date, color }) => (
-                      <div className="pf-row" key={id}>
-                        <div className="pf-row-thumb"><div className="pf-row-thumb-bg" style={{ background:color }} /></div>
+                    {portfolio.map((item, index) => {
+                      const color = GRADIENTS[index % GRADIENTS.length];
+                      const tags = Array.isArray(item.tags) ? item.tags : [];
+                      const date = item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString("fr-FR", {
+                            year: "numeric",
+                            month: "short",
+                          })
+                        : "";
+                      const desc =
+                        item.longDescription ||
+                        item.shortDescription ||
+                        "";
+
+                      return (
+                        <div className="pf-row" key={item.id}>
+                        <div className="pf-row-thumb">
+                          <div className="pf-row-thumb-bg" style={{ background:color }} />
+                        </div>
                         <div className="pf-row-info">
-                          <div className="pf-row-title">{title}</div>
+                          <div className="pf-row-title">{item.title}</div>
                           <div className="pf-row-desc">{desc}</div>
-                          <div className="pf-tags" style={{marginTop:4}}>{tags.map(t=><span className="pf-tag" key={t}>{t}</span>)}</div>
+                          <div className="pf-tags" style={{marginTop:4}}>
+                            {tags.map(t => (
+                              <span className="pf-tag" key={t}>{t}</span>
+                            ))}
+                          </div>
                         </div>
                         <div className="pf-row-meta">
                           <span className="pf-row-date">{date}</span>
                           <ArrowRight size={15} className="pf-row-arrow" />
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </div>
           )}
 
+          {/* ── MES FICHIERS (CV) ── */}
+          {active === "fichiers" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Mes fichiers</h1>
+                <p className="dash-page-sub">
+                  Tous vos CV enregistrés dans TAP (fichiers commençant par <em>cv_</em>).
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {cvFiles.length === 0 ? (
+                    <p>Aucun CV enregistré pour l’instant.</p>
+                  ) : (
+                    <div className="files-list">
+                      {cvFiles.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+
+                        const sizeKb =
+                          typeof file.size === "number"
+                            ? Math.round(file.size / 1024)
+                            : null;
+
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && (
+                                  <span>· {sizeKb} Ko</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="files-actions">
+                              <a
+                                href={file.publicUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="files-btn"
+                              >
+                                Télécharger
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── MES CANDIDATURES ── */}
+          {active === "candidatures" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Mes candidatures</h1>
+                <p className="dash-page-sub">
+                  Suivez le statut de chacune de vos candidatures et les postes associés.
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {applications.length === 0 ? (
+                    <p>Aucune candidature enregistrée pour le moment.</p>
+                  ) : (
+                    <div className="cand-list">
+                      {applications.map((app) => {
+                        const status = (app.status || "").toUpperCase();
+                        let statusLabel = "En cours";
+                        let statusClass = "cand-status-pill--pending";
+                        if (status === "ACCEPTEE") {
+                          statusLabel = "Acceptée";
+                          statusClass = "cand-status-pill--accepted";
+                        } else if (status === "REFUSEE") {
+                          statusLabel = "Refusée";
+                          statusClass = "cand-status-pill--refused";
+                        }
+
+                        const date = app.validatedAt
+                          ? new Date(app.validatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+
+                        return (
+                          <div className="cand-row" key={app.id}>
+                            <div className="cand-job">
+                              <div className="cand-job-title">
+                                {app.jobTitle || "Poste non renseigné"}
+                              </div>
+                              {app.company && (
+                                <div className="cand-job-company">
+                                  {app.company}
+                                </div>
+                              )}
+                            </div>
+                            <div className="cand-status">
+                              <span className={`cand-status-pill ${statusClass}`}>
+                                {statusLabel}
+                              </span>
+                            </div>
+                            <div className="cand-date">
+                              <span>{date}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── OTHER PAGES ── */}
-          {active !== "dashboard" && active !== "portfolio" && (
+          {active !== "dashboard" && active !== "portfolio" && active !== "candidatures" && active !== "fichiers" && (
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">{currentLabel}</h1>

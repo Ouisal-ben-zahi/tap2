@@ -14,6 +14,33 @@ export interface CandidateDashboardStats {
   statusRefused: number;
 }
 
+export interface CandidatePortfolioItem {
+  id: number;
+  title: string;
+  shortDescription: string | null;
+  longDescription: string | null;
+  tags: string[];
+  createdAt: string | null;
+}
+
+export interface CandidateApplicationItem {
+  id: number;
+  jobId: number | null;
+  jobTitle: string | null;
+  company: string | null;
+  status: string | null;
+  validate: boolean;
+  validatedAt: string | null;
+}
+
+export interface CandidateCvFileItem {
+  name: string;
+  path: string;
+  publicUrl: string;
+  updatedAt: string | null;
+  size: number | null;
+}
+
 @Injectable()
 export class DashboardService {
   private supabase: SupabaseClient;
@@ -31,11 +58,7 @@ export class DashboardService {
     this.supabase = createClient(url, key);
   }
 
-  async getCandidateStats(userId: number): Promise<CandidateDashboardStats> {
-    if (!userId || Number.isNaN(userId)) {
-      throw new BadRequestException('userId invalide');
-    }
-
+  private async getCandidateIdForUser(userId: number): Promise<{ id: number; created_at: string } | null> {
     const {
       data: candidate,
       error: candidateError,
@@ -52,6 +75,20 @@ export class DashboardService {
         candidateError.message || 'Erreur lors du chargement du candidat',
       );
     }
+
+    if (!candidate) {
+      return null;
+    }
+
+    return candidate as { id: number; created_at: string };
+  }
+
+  async getCandidateStats(userId: number): Promise<CandidateDashboardStats> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const candidate = await this.getCandidateIdForUser(userId);
 
     if (!candidate) {
       return {
@@ -113,6 +150,178 @@ export class DashboardService {
       statusAccepted: statusAccepted ?? 0,
       statusRefused: statusRefused ?? 0,
     };
+  }
+
+  async getCandidatePortfolio(userId: number): Promise<{ projects: CandidatePortfolioItem[] }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const candidate = await this.getCandidateIdForUser(userId);
+
+    if (!candidate) {
+      return { projects: [] };
+    }
+
+    const { data, error } = await this.supabase
+      .from('candidate_projects')
+      .select('id, project_name, project_description, detailed_description, technologies, created_at')
+      .eq('candidate_id', candidate.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new BadRequestException(
+        error.message || 'Erreur lors du chargement du portfolio',
+      );
+    }
+
+    const projects: CandidatePortfolioItem[] =
+      (data ?? []).map((row: any) => {
+        const tech = Array.isArray(row.technologies) ? row.technologies : [];
+        const tags = tech
+          .map((t: any) =>
+            typeof t === 'string'
+              ? t
+              : t?.name ?? t?.label ?? '',
+          )
+          .filter((x: string) => !!x)
+          .slice(0, 5);
+
+        return {
+          id: row.id as number,
+          title: row.project_name as string,
+          shortDescription: (row.project_description as string) ?? null,
+          longDescription:
+            (row.detailed_description as string) ??
+            (row.project_description as string) ??
+            null,
+          tags,
+          createdAt: (row.created_at as string) ?? null,
+        };
+      });
+
+    return { projects };
+  }
+
+  async getCandidateApplications(
+    userId: number,
+  ): Promise<{ applications: CandidateApplicationItem[] }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const candidate = await this.getCandidateIdForUser(userId);
+
+    if (!candidate) {
+      return { applications: [] };
+    }
+
+    const { data, error } = await this.supabase
+      .from('candidate_postule')
+      .select(
+        'id, job_id, validated_at, status, validate, jobs ( id, title, entreprise )',
+      )
+      .eq('candidate_id', candidate.id)
+      .order('validated_at', { ascending: false });
+
+    if (error) {
+      throw new BadRequestException(
+        error.message || 'Erreur lors du chargement des candidatures',
+      );
+    }
+
+    const applications: CandidateApplicationItem[] = (data ?? []).map(
+      (row: any) => {
+        const job = row.jobs || row.job || null;
+        return {
+          id: row.id as number,
+          jobId: (row.job_id as number) ?? (job?.id ?? null),
+          jobTitle: (job?.title as string) ?? null,
+          company: (job?.entreprise as string) ?? null,
+          status: (row.status as string) ?? null,
+          validate: Boolean(row.validate),
+          validatedAt: (row.validated_at as string) ?? null,
+        };
+      },
+    );
+
+    return { applications };
+  }
+
+  async getCandidateCvFiles(
+    userId: number,
+  ): Promise<{ cvFiles: CandidateCvFileItem[] }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const {
+      data: candidate,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidate) {
+      return { cvFiles: [] };
+    }
+
+    const category =
+      (candidate.categorie_profil as string | null) || 'Autres';
+    const candidateId = candidate.id as number;
+
+    // Exemple de structure dans le bucket:
+    // tap_files / candidates / <categorie_profil> / <candidateId> / ...
+    const basePath = `candidates/${category}/${candidateId}`;
+
+    const { data: listed, error: listError } = await this.supabase
+      .storage
+      .from('tap_files')
+      .list(basePath, {
+        limit: 100,
+      });
+
+    if (listError) {
+      throw new BadRequestException(
+        listError.message || 'Erreur lors du listing des fichiers CV',
+      );
+    }
+
+    const files = (listed ?? []).filter(
+      (f: any) => typeof f.name === 'string' && f.name.startsWith('cv_'),
+    );
+
+    const cvFiles: CandidateCvFileItem[] = files.map((file: any) => {
+      const path = `${basePath}/${file.name}`;
+      const {
+        data: { publicUrl },
+      } = this.supabase.storage.from('tap_files').getPublicUrl(path);
+
+      const size =
+        typeof file.metadata?.size === 'number'
+          ? (file.metadata.size as number)
+          : null;
+
+      return {
+        name: file.name as string,
+        path,
+        publicUrl,
+        updatedAt: (file.updated_at as string) ?? null,
+        size,
+      };
+    });
+
+    return { cvFiles };
   }
 }
 

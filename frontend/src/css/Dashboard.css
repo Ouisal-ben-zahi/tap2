@@ -535,6 +535,159 @@
 .dash-section-card { background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:28px 30px; }
 .dash-section-card p { font-size:15px; color:var(--t2); line-height:1.8; font-weight:300; }
 
+/* ══════════ MES CANDIDATURES ══════════ */
+.cand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cand-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) 1fr 120px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(15, 17, 32, 0.9);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+}
+
+.cand-row:hover {
+  border-color: rgba(192,57,43,0.35);
+  background: rgba(19, 22, 38, 0.95);
+  transform: translateY(-1px);
+}
+
+.cand-job-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.cand-job-company {
+  font-size: 13px;
+  color: var(--t2);
+  margin-top: 2px;
+}
+
+.cand-status {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.cand-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.cand-status-pill--pending {
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.5);
+  color: var(--gold);
+}
+
+.cand-status-pill--accepted {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.5);
+  color: #4ade80;
+}
+
+.cand-status-pill--refused {
+  background: rgba(192,57,43,0.1);
+  border: 1px solid rgba(192,57,43,0.5);
+  color: var(--cr-bright);
+}
+
+.cand-date {
+  font-size: 12px;
+  color: var(--t3);
+  text-align: right;
+}
+
+/* ══════════ MES FICHIERS (CV) ══════════ */
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.files-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.5fr) auto;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(15, 17, 32, 0.9);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+}
+
+.files-row:hover {
+  border-color: rgba(201,168,76,0.4);
+  background: rgba(19, 22, 38, 0.95);
+  transform: translateY(-1px);
+}
+
+.files-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.files-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t1);
+  word-break: break-all;
+}
+
+.files-meta {
+  font-size: 12px;
+  color: var(--t3);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.files-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.files-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(201,168,76,0.5);
+  color: var(--gold);
+  font-size: 12px;
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.files-btn:hover {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+
 /* ══════════ RESPONSIVE ══════════ */
 @media (max-width:1200px) { .pf-grid{grid-template-columns:repeat(2,1fr)} .dash-cards-row{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:900px)  { .dash-grid-2{grid-template-columns:1fr} }

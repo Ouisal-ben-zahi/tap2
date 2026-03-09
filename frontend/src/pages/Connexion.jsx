@@ -6,8 +6,6 @@ import "../css/Connexion.css";
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 /* ── small SVG icons (inline, no extra dep) ── */
-const IconUser    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>;
-const IconLock    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 const IconStar    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
 const IconBolt    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>;
 const IconShield  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
@@ -22,6 +20,14 @@ function Connexion() {
   const [showPwd,     setShowPwd]     = useState(false);
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState("");
+  const [resetMode,   setResetMode]   = useState(false);
+  const [resetStep,   setResetStep]   = useState(1);
+  const [resetEmail,  setResetEmail]  = useState("");
+  const [resetCode,   setResetCode]   = useState("");
+  const [resetNewPwd, setResetNewPwd] = useState("");
+  const [resetLoading,setResetLoading]= useState(false);
+  const [resetMsg,    setResetMsg]    = useState("");
+  const [resetError,  setResetError]  = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,6 +68,88 @@ function Connexion() {
       setError("Erreur de connexion au serveur.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRequestReset = async (e) => {
+    e.preventDefault();
+    setResetError("");
+    setResetMsg("");
+
+    const targetEmail = resetEmail.trim() || email.trim();
+    if (!targetEmail) {
+      setResetError("Merci de renseigner votre adresse e-mail.");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/request-password-reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setResetError(data.message || "Erreur lors de l’envoi du code.");
+        return;
+      }
+      setResetEmail(targetEmail);
+      setResetMsg(
+        data.message ||
+        "Si un compte existe pour cet email, un code de réinitialisation a été envoyé."
+      );
+      setResetStep(2);
+    } catch {
+      setResetError("Erreur de connexion au serveur.");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleConfirmReset = async (e) => {
+    e.preventDefault();
+    setResetError("");
+    setResetMsg("");
+
+    if (!resetEmail.trim() || !resetCode.trim() || !resetNewPwd.trim()) {
+      setResetError("Email, code et nouveau mot de passe sont obligatoires.");
+      return;
+    }
+    if (resetNewPwd.length < 8) {
+      setResetError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: resetEmail.trim(),
+          code: resetCode.trim(),
+          newPassword: resetNewPwd,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setResetError(data.message || "Code invalide ou expiré.");
+        return;
+      }
+
+      setResetMsg(data.message || "Votre mot de passe a été réinitialisé.");
+      // Pré-remplir l’email de connexion et revenir au formulaire de login
+      setEmail(resetEmail.trim());
+      setPassword("");
+      setResetMode(false);
+      setResetStep(1);
+      setResetCode("");
+      setResetNewPwd("");
+    } catch {
+      setResetError("Erreur de connexion au serveur.");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -120,11 +208,18 @@ function Connexion() {
         <div className="login-right">
           <header className="login-header">
             <span className="login-badge">Espace membre</span>
-            <h2 className="login-heading-main">Connexion à votre compte</h2>
-            <p className="login-heading-sub">Accédez à votre espace TAP en toute sécurité.</p>
+            <h2 className="login-heading-main">
+              {resetMode ? "Réinitialiser votre mot de passe" : "Connexion à votre compte"}
+            </h2>
+            <p className="login-heading-sub">
+              {resetMode
+                ? "Recevez un code par email puis choisissez un nouveau mot de passe."
+                : "Accédez à votre espace TAP en toute sécurité."}
+            </p>
           </header>
 
-          <form className="login-form" onSubmit={handleSubmit} noValidate>
+          {!resetMode && (
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
 
             {/* email */}
             <div className="login-field">
@@ -186,7 +281,13 @@ function Connexion() {
                 <button
                   type="button"
                   className="login-link"
-                  onClick={() => { /* TODO: navigate to reset */ }}
+                  onClick={() => {
+                    setResetMode(true);
+                    setResetStep(1);
+                    setResetEmail(email);
+                    setResetError("");
+                    setResetMsg("");
+                  }}
                 >
                   Mot de passe oublié ?
                 </button>
@@ -200,7 +301,113 @@ function Connexion() {
               </div>
             </div>
 
-          </form>
+            </form>
+          )}
+
+          {resetMode && (
+            <form
+              className="login-form"
+              onSubmit={resetStep === 1 ? handleRequestReset : handleConfirmReset}
+              noValidate
+            >
+              {/* email */}
+              <div className="login-field">
+                <label htmlFor="reset-email">Adresse e-mail</label>
+                <input
+                  id="reset-email"
+                  type="email"
+                  placeholder="vous@exemple.com"
+                  value={resetEmail}
+                  onChange={e => setResetEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              {/* step 1 : demande code */}
+              {resetStep === 1 && (
+                <p className="login-heading-sub">
+                  Nous vous enverrons un code à 6 chiffres à cette adresse si un compte existe.
+                </p>
+              )}
+
+              {/* step 2 : code + nouveau mot de passe */}
+              {resetStep === 2 && (
+                <>
+                  <div className="login-field">
+                    <label htmlFor="reset-code">Code reçu par email</label>
+                    <input
+                      id="reset-code"
+                      type="text"
+                      placeholder="123456"
+                      value={resetCode}
+                      onChange={e => setResetCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    />
+                  </div>
+
+                  <div className="login-field">
+                    <label htmlFor="reset-password">Nouveau mot de passe</label>
+                    <input
+                      id="reset-password"
+                      type="password"
+                      placeholder="Minimum 8 caractères"
+                      value={resetNewPwd}
+                      onChange={e => setResetNewPwd(e.target.value)}
+                      minLength={8}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* error / message */}
+              {resetError && (
+                <div className="login-error">
+                  <span>⚠</span> {resetError}
+                </div>
+              )}
+              {resetMsg && !resetError && (
+                <div className="login-error" style={{ borderColor: "rgba(34,197,94,0.4)", background: "rgba(22,163,74,0.12)", color: "#bbf7d0" }}>
+                  {resetMsg}
+                </div>
+              )}
+
+              <div className="login-submit-wrapper">
+                <button type="submit" className="login-submit" disabled={resetLoading}>
+                  {resetLoading
+                    ? "Traitement…"
+                    : resetStep === 1
+                      ? "Envoyer le code"
+                      : "Confirmer le nouveau mot de passe"}
+                </button>
+
+                <div className="login-footer-links">
+                  <button
+                    type="button"
+                    className="login-link"
+                    onClick={() => {
+                      setResetMode(false);
+                      setResetStep(1);
+                      setResetEmail("");
+                      setResetCode("");
+                      setResetNewPwd("");
+                      setResetError("");
+                      setResetMsg("");
+                    }}
+                  >
+                    ← Retour à la connexion
+                  </button>
+                  <button
+                    type="button"
+                    className="login-link login-link--accent"
+                    onClick={() => navigate("/creer-compte")}
+                  >
+                    Créer un compte →
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
 
           {/* subtle divider + tagline */}
           <div className="login-divider">Plateforme sécurisée</div>

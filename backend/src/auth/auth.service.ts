@@ -37,6 +37,16 @@ export interface LoginDto {
   password: string;
 }
 
+export interface RequestPasswordResetDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 @Injectable()
 export class AuthService {
   private supabase: SupabaseClient;
@@ -390,6 +400,191 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role,
+    };
+  }
+
+  async requestPasswordReset(
+    dto: RequestPasswordResetDto,
+  ): Promise<{ email: string; message: string }> {
+    const email = dto.email?.trim().toLowerCase();
+    if (!email) {
+      throw new BadRequestException('Email est requis');
+    }
+
+    const {
+      data: users,
+      error: userError,
+    } = await this.supabase
+      .from('users')
+      .select('id, email, is_verified')
+      .eq('email', email)
+      .limit(1);
+
+    if (userError) {
+      throw new BadRequestException(
+        userError.message || "Erreur lors de la recherche de l'utilisateur",
+      );
+    }
+
+    if (!users || users.length === 0) {
+      // On renvoie un message générique pour ne pas révéler si l'email existe
+      return {
+        email,
+        message:
+          "Si un compte existe pour cet email, un code de réinitialisation a été envoyé.",
+      };
+    }
+
+    const user = users[0] as { id: number; email: string; is_verified: boolean };
+
+    const code = this.randomCode();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + CODE_EXPIRY_MINUTES);
+
+    await this.supabase
+      .from('password_reset_tokens')
+      .update({ used: true })
+      .eq('user_id', user.id)
+      .eq('used', false);
+
+    const { error: tokenError } = await this.supabase
+      .from('password_reset_tokens')
+      .insert({
+        user_id: user.id,
+        code,
+        expires_at: expiresAt.toISOString(),
+        used: false,
+      });
+
+    if (tokenError) {
+      throw new BadRequestException(
+        tokenError.message ||
+          'Erreur lors de la génération du code de réinitialisation',
+      );
+    }
+
+    if (this.mailer) {
+      const from =
+        this.config.get<string>('MAILER_FROM') ||
+        this.config.get<string>('MAILER_USER') ||
+        'noreply@tap.com';
+      await this.mailer.sendMail({
+        from: `"TAP" <${from}>`,
+        to: email,
+        subject: 'Réinitialisation de votre mot de passe TAP',
+        text: `Votre code de réinitialisation TAP : ${code}\n\nCe code expire dans ${CODE_EXPIRY_MINUTES} minutes. Si vous n'avez pas demandé cet email, ignorez-le.`,
+        html: `<p>Vous avez demandé à réinitialiser votre mot de passe TAP.</p><p>Votre code : <strong>${code}</strong></p><p>Ce code expire dans ${CODE_EXPIRY_MINUTES} minutes.</p><p>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email.</p>`,
+      });
+    }
+
+    return {
+      email,
+      message:
+        "Si un compte existe pour cet email, un code de réinitialisation a été envoyé.",
+    };
+  }
+
+  async resetPassword(
+    dto: ResetPasswordDto,
+  ): Promise<{ email: string; message: string }> {
+    const email = dto.email?.trim().toLowerCase();
+    const code = dto.code?.trim().replace(/\s/g, '');
+    const newPassword = dto.newPassword;
+
+    if (!email || !code || !newPassword) {
+      throw new BadRequestException(
+        'Email, code et nouveau mot de passe sont requis',
+      );
+    }
+
+    if (newPassword.length < 8) {
+      throw new BadRequestException(
+        'Le mot de passe doit contenir au moins 8 caractères',
+      );
+    }
+
+    const {
+      data: users,
+      error: userError,
+    } = await this.supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', email)
+      .limit(1);
+
+    if (userError) {
+      throw new BadRequestException(
+        userError.message ||
+          "Erreur lors de la vérification de l'utilisateur pour la réinitialisation",
+      );
+    }
+
+    if (!users || users.length === 0) {
+      throw new BadRequestException(
+        'Code invalide ou expiré pour cet email',
+      );
+    }
+
+    const user = users[0] as { id: number; email: string };
+
+    const {
+      data: tokens,
+      error: tokenError,
+    } = await this.supabase
+      .from('password_reset_tokens')
+      .select('id, code, expires_at, used')
+      .eq('user_id', user.id)
+      .eq('code', code)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (tokenError) {
+      throw new BadRequestException(
+        tokenError.message || 'Erreur lors de la vérification du code',
+      );
+    }
+
+    if (!tokens || tokens.length === 0) {
+      throw new BadRequestException('Code invalide ou expiré');
+    }
+
+    const token = tokens[0] as {
+      id: number;
+      expires_at: string;
+      used: boolean;
+    };
+
+    const expiresAt = new Date(token.expires_at);
+    if (expiresAt < new Date()) {
+      await this.supabase
+        .from('password_reset_tokens')
+        .update({ used: true })
+        .eq('id', token.id);
+      throw new BadRequestException('Code expiré. Demandez un nouveau code.');
+    }
+
+    const password_hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    const { error: updateError } = await this.supabase
+      .from('users')
+      .update({ password_hash })
+      .eq('id', user.id);
+
+    if (updateError) {
+      throw new BadRequestException(
+        updateError.message || 'Erreur lors de la mise à jour du mot de passe',
+      );
+    }
+
+    await this.supabase
+      .from('password_reset_tokens')
+      .update({ used: true })
+      .eq('id', token.id);
+
+    return {
+      email: user.email,
+      message: 'Votre mot de passe a été réinitialisé avec succès.',
     };
   }
 }

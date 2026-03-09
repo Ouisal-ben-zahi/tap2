@@ -164,12 +164,7 @@ CREATE INDEX idx_cc_created_at ON chatbot_conversations(created_at);
 -- ============================================
 -- TABLE: contract_types
 -- ============================================
-CREATE TABLE contract_types (
-  id SERIAL PRIMARY KEY,
-  candidate_id INT NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
-  type_name VARCHAR(50)
-);
-
+§
 -- ============================================
 -- TABLE: corrected_cv_versions
 -- ============================================
@@ -205,6 +200,21 @@ CREATE TABLE email_verification_tokens (
 
 CREATE INDEX idx_evt_user ON email_verification_tokens(user_id);
 CREATE INDEX idx_evt_code ON email_verification_tokens(code);
+
+-- ============================================
+-- TABLE: password_reset_tokens
+-- ============================================
+CREATE TABLE password_reset_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id),
+  code VARCHAR(10) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_prt_user ON password_reset_tokens(user_id);
+CREATE INDEX idx_prt_code ON password_reset_tokens(code);
 
 -- ============================================
 -- TABLE: experiences
