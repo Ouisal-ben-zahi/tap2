@@ -2,268 +2,330 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FolderOpen, CreditCard, FileText,
-  Briefcase, Image, CalendarCheck, Layers,
+  Briefcase, Image, CalendarCheck,
   LogOut, Search, TrendingUp, TrendingDown,
   Users, Bookmark, Bell, BriefcaseBusiness,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, ArrowRight
 } from "lucide-react";
 import "../css/Dashboard.css";
+import logo from "../assets/logo.svg";
 
-/* ── mock bar heights for fake chart ── */
-const BARS = [55, 72, 48, 85, 63, 91, 70, 58, 80, 67, 74, 88];
+/* ─── data ─────────────────────────────── */
+const BARS = [42, 68, 55, 88, 60, 76, 91, 52, 80, 70, 64, 85];
 
-function DashboardCandidat() {
-  const navigate  = useNavigate();
-  const [active, setActive] = useState("bienvenue");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+const MONTHS = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
 
-  const profileType = sessionStorage.getItem("profileType") || "candidat";
+const GRADIENTS = [
+  "linear-gradient(145deg,#1a1428 0%,#2d1b4e 100%)",
+  "linear-gradient(145deg,#0f1e2a 0%,#1a3a4a 100%)",
+  "linear-gradient(145deg,#1f0a0a 0%,#3d1515 100%)",
+  "linear-gradient(145deg,#0a1a0f 0%,#16322a 100%)",
+  "linear-gradient(145deg,#1c1408 0%,#382a10 100%)",
+  "linear-gradient(145deg,#0f0f20 0%,#1e1e40 100%)",
+];
+
+const PORTFOLIO_ITEMS = [
+  { id:1, title:"Brand Identity — Luxora",    desc:"Identité visuelle complète pour une maison de luxe parisienne.",      tags:["Branding","Logo"],    date:"Mar 2025", color:GRADIENTS[0] },
+  { id:2, title:"App Mobile — Kora",          desc:"Expérience utilisateur pour une appli de gestion sportive.",           tags:["Mobile","UX"],        date:"Jan 2025", color:GRADIENTS[1] },
+  { id:3, title:"Dashboard Analytics",        desc:"Tableau de bord interactif avec visualisations de données en temps réel.", tags:["React","UI"],        date:"Nov 2024", color:GRADIENTS[2] },
+  { id:4, title:"Campagne Digital — Velvet",  desc:"Stratégie visuelle & visuels pour une campagne digitale 360°.",         tags:["Motion","Social"],    date:"Sep 2024", color:GRADIENTS[3] },
+  { id:5, title:"Site E-commerce — Botanica", desc:"Design et intégration boutique premium pour une marque naturelle.",    tags:["Web","Shopify"],      date:"Juil 2024", color:GRADIENTS[4] },
+  { id:6, title:"Packaging — Céleste",        desc:"Design packaging pour une gamme de cosmétiques artisanaux.",           tags:["Print","3D"],         date:"Mai 2024", color:GRADIENTS[5] },
+];
+
+const STAT_CARDS = [
+  { label:"Candidatures",      value:"8",  icon:BriefcaseBusiness, trend:"+3 ce mois",      dir:"up"   },
+  { label:"Entretiens",        value:"2",  icon:CalendarCheck,     trend:"+1 cette semaine", dir:"up"   },
+  { label:"Offres sauvegardées", value:"5", icon:Bookmark,         trend:"Inchangé",         dir:"flat" },
+  { label:"Notifications",     value:"3",  icon:Bell,              trend:"-1 aujourd'hui",   dir:"down", danger:true },
+];
+
+const STATUSES = [
+  { label:"En cours",   pct:62, mod:"cr"    },
+  { label:"Acceptées",  pct:25, mod:"green" },
+  { label:"Refusées",   pct:13, mod:"mute"  },
+];
+
+const MENU = [
+  { id:"dashboard",  label:"Dashboard",    icon:LayoutDashboard },
+  { id:"fichiers",   label:"Mes fichiers", icon:FolderOpen      },
+  { id:"talentcard", label:"Talent Card",  icon:CreditCard      },
+  { id:"cv",         label:"CV",           icon:FileText        },
+  { id:"projets",    label:"Projets",      icon:Briefcase       },
+  { id:"portfolio",  label:"Portfolio",    icon:Image           },
+  { id:"entretiens", label:"Entretiens",   icon:CalendarCheck   },
+];
+
+const PAGE_CONTENT = {
+  fichiers:   "Retrouvez tous vos documents : CV, lettres de motivation, pièces jointes. Organisez et partagez en un clic.",
+  talentcard: "Votre Talent Card est votre vitrine professionnelle. Mettez-la à jour pour maximiser votre visibilité.",
+  cv:         "Gérez plusieurs versions de CV, activez celle de votre choix et consultez les statistiques en temps réel.",
+  projets:    "Répertoriez vos projets et réalisations. Chaque entrée renforce automatiquement votre profil TAP.",
+  entretiens: "Historique de vos entretiens passés, prochaines étapes et rappels automatiques pour ne rien manquer.",
+};
+
+/* ─── component ────────────────────────── */
+export default function DashboardCandidat() {
+  const navigate   = useNavigate();
+  const [active,   setActive]   = useState("dashboard");
+  const [collapsed,setCollapsed]= useState(false);
+  const [pfTab,    setPfTab]    = useState("grid"); // "grid" | "list"
+
   const userEmail   = sessionStorage.getItem("userEmail")   || "vous@exemple.com";
-  const userName    = sessionStorage.getItem("userName")    || userEmail.split("@")[0];
+  const userName    = (sessionStorage.getItem("userName") || userEmail.split("@")[0])
+                        .charAt(0).toUpperCase() + (sessionStorage.getItem("userName") || userEmail.split("@")[0]).slice(1);
 
-  const handleLogout = () => {
-    ["authToken","profileType","userEmail","userId","userName"]
-      .forEach(k => sessionStorage.removeItem(k));
+  const logout = () => {
+    ["authToken","profileType","userEmail","userId","userName"].forEach(k => sessionStorage.removeItem(k));
     navigate("/connexion");
   };
 
-  /* ── nav items ── */
-  const menuItems = [
-    { id: "bienvenue",  label: "Tableau de bord", icon: LayoutDashboard },
-    { id: "fichiers",   label: "Mes fichiers",    icon: FolderOpen       },
-    { id: "talentcard", label: "Talent Card",     icon: CreditCard       },
-    { id: "cv",         label: "CV",              icon: FileText         },
-    { id: "projects",   label: "Projets",         icon: Briefcase        },
-    { id: "portfolio",  label: "Portfolio",       icon: Image            },
-    { id: "entretiens", label: "Entretiens",      icon: CalendarCheck    },
-    { id: "portfolio2", label: "Portfolio  II",   icon: Layers           },
-  ];
-
-  /* ── page title helper ── */
-  const pageTitle = () => {
-    if (active === "bienvenue") return <>Bienvenue, <span>{userName} !</span></>;
-    return menuItems.find(m => m.id === active)?.label;
-  };
-
-  /* ── stat cards data ── */
-  const cards = [
-    {
-      label: "Candidatures envoyées",
-      value: "8",
-      icon: BriefcaseBusiness,
-      trend: "+3 ce mois",
-      up: true,
-    },
-    {
-      label: "Entretiens à venir",
-      value: "2",
-      icon: CalendarCheck,
-      trend: "+1 cette semaine",
-      up: true,
-    },
-    {
-      label: "Offres sauvegardées",
-      value: "5",
-      icon: Bookmark,
-      trend: "inchangé",
-      up: null,
-    },
-    {
-      label: "Notifications non lues",
-      value: "3",
-      icon: Bell,
-      trend: "-1 aujourd'hui",
-      up: false,
-      danger: true,
-    },
-  ];
-
-  /* ── status items ── */
-  const statuses = [
-    { label: "Candidatures en cours", pct: 62, fill: "red"   },
-    { label: "Candidatures acceptées", pct: 25, fill: "green" },
-    { label: "Candidatures refusées",  pct: 13, fill: "muted" },
-  ];
+  const currentLabel = MENU.find(m => m.id === active)?.label ?? "Dashboard";
 
   return (
     <section className="dash-section">
-      <div className={`dash-layout${sidebarCollapsed ? " dash-layout--collapsed" : ""}`}>
+      <div className={`dash-layout${collapsed ? " dash-layout--collapsed" : ""}`}>
 
-        {/* ════ SIDEBAR ════ */}
-        <aside className={`dash-sidebar${sidebarCollapsed ? " dash-sidebar--collapsed" : ""}`}>
-          {/* user block + toggle */}
-          <div className="dash-sidebar-header">
-            <button
-              type="button"
-              className="dash-toggle-btn"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              aria-label={sidebarCollapsed ? "Ouvrir le menu" : "Réduire le menu"}
-            >
-              {sidebarCollapsed ? (
-                <ChevronRight size={18} strokeWidth={2.2} color="#fee2e2" />
-              ) : (
-                <ChevronLeft size={18} strokeWidth={2.2} color="#fee2e2" />
-              )}
-            </button>
-            <div className="dash-user-block">
-              <div className="dash-avatar">
-                {(userEmail || "?").charAt(0).toUpperCase()}
-              </div>
-              {!sidebarCollapsed && (
-                <div className="dash-user-info">
-                  <span className="dash-user-role">
-                    {profileType === "recruteur" ? "Recruteur" : "Candidat"}
-                  </span>
-                  <span className="dash-user-email">{userEmail}</span>
-                </div>
-              )}
+        {/* ══════ SIDEBAR ══════ */}
+        <aside className="dash-sidebar">
+
+          {/* toggle */}
+          <button
+            type="button"
+            className="dash-toggle-btn"
+            onClick={() => setCollapsed(c => !c)}
+            aria-label={collapsed ? "Expand" : "Collapse"}
+          >
+            <ChevronLeft size={14} strokeWidth={2} />
+          </button>
+
+          {/* logo */}
+          <div className="dash-logo-zone">
+            <img src={logo} alt="Logo TAP" className="dash-logo-img" />
+          </div>
+
+          {/* user */}
+          <div className="dash-user-block">
+            <div className="dash-avatar">
+              {(userName || userEmail || "?").charAt(0).toUpperCase()}
+            </div>
+            <div className="dash-user-text">
+              <div className="dash-user-name">{userName}</div>
+              <div className="dash-user-email">{userEmail}</div>
             </div>
           </div>
 
-          {/* navigation */}
-          <nav className="dash-menu">
-            {menuItems.map(({ id, label, icon: Icon }) => (
+          {/* nav */}
+          <nav className="dash-nav">
+            <div className="dash-nav-section-label">Navigation</div>
+            {MENU.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 type="button"
+                data-label={label}
                 className={`dash-menu-item${active === id ? " dash-menu-item--active" : ""}`}
                 onClick={() => setActive(id)}
               >
-                <Icon size={14} strokeWidth={active === id ? 2.2 : 1.7} />
+                <span className="dash-menu-icon">
+                  <Icon size={18} strokeWidth={active === id ? 2 : 1.6} />
+                </span>
                 <span className="dash-menu-label">{label}</span>
               </button>
             ))}
           </nav>
 
-          {/* logout */}
-          <button type="button" className="dash-logout" onClick={handleLogout}>
-            <LogOut size={13} strokeWidth={1.8} />
-            <span className="dash-logout-label">Se déconnecter</span>
-          </button>
+          {/* footer */}
+          <div className="dash-sidebar-footer">
+            <button type="button" className="dash-logout" onClick={logout}>
+              <LogOut size={17} strokeWidth={1.6} />
+              <span className="dash-logout-label">Se déconnecter</span>
+            </button>
+          </div>
         </aside>
 
-        {/* ════ MAIN ════ */}
+        {/* ══════ MAIN ══════ */}
         <main className="dash-main">
 
-          {/* header */}
-          <header className="dash-main-header">
-            <div>
-              <h1 className="dash-main-title">{pageTitle()}</h1>
-              <p className="dash-main-subtitle">
-                Profil · {profileType === "recruteur" ? "Recruteur" : "Candidat TAP"}
-              </p>
+          {/* topbar */}
+          <div className="dash-topbar">
+            <div className="dash-topbar-left">
+              <div className="dash-breadcrumb">
+                <span>Espace</span>
+                <span className="dash-breadcrumb-sep">›</span>
+                <span className="dash-breadcrumb-current">{currentLabel}</span>
+              </div>
             </div>
-
-            <div className="dash-search-wrap">
-              <Search size={13} color="var(--text-muted)" />
-              <input
-                type="search"
-                className="dash-search"
-                placeholder="Rechercher…"
-              />
+            <div className="dash-topbar-right">
+              <div className="dash-search-wrap">
+                <Search size={14} color="var(--t3)" />
+                <input type="search" className="dash-search" placeholder="Rechercher…" />
+              </div>
+              <button className="dash-topbar-btn" aria-label="Notifications">
+                <Bell size={16} strokeWidth={1.6} />
+              </button>
             </div>
-          </header>
+          </div>
 
-          {/* ── dashboard home ── */}
-          {active === "bienvenue" ? (
-            <>
+          {/* ── DASHBOARD ── */}
+          {active === "dashboard" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">
+                  Bonjour, <em>{userName}</em>
+                </h1>
+                <p className="dash-page-sub">
+                  Voici un aperçu de votre activité · {new Date().toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long" })}
+                </p>
+              </div>
+
               {/* stat cards */}
               <div className="dash-cards-row">
-                {cards.map(({ label, value, icon: Icon, trend, up, danger }) => (
+                {STAT_CARDS.map(({ label, value, icon: Icon, trend, dir, danger }) => (
                   <div key={label} className={`dash-card${danger ? " dash-card--danger" : ""}`}>
-                    <div className="dash-card-top">
+                    <div className="dash-card-row1">
                       <span className="dash-card-label">{label}</span>
-                      <div className="dash-card-icon">
-                        <Icon size={14} />
-                      </div>
+                      <div className="dash-card-icon-wrap"><Icon size={16} /></div>
                     </div>
                     <div className="dash-card-value">{value}</div>
-                    <div className={`dash-card-trend ${up === true ? "dash-card-trend--up" : up === false ? "dash-card-trend--down" : ""}`}
-                         style={up === null ? { color: "var(--text-muted)" } : {}}>
-                      {up === true  && <TrendingUp  size={11} />}
-                      {up === false && <TrendingDown size={11} />}
+                    <div className={`dash-card-trend dash-card-trend--${dir === "up" ? "up" : dir === "down" ? "down" : "flat"}`}>
+                      {dir === "up"   && <TrendingUp   size={13} />}
+                      {dir === "down" && <TrendingDown  size={13} />}
                       {trend}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* chart row */}
-              <div className="dash-grid-row">
-                {/* activity chart */}
-                <div className="dash-panel dash-panel-large">
-                  <div className="dash-panel-header">
-                    <span className="dash-panel-title">Activité — 12 derniers mois</span>
-                    <span className="dash-panel-badge">Live</span>
+              {/* charts */}
+              <div className="dash-grid-2">
+                <div className="dash-panel dash-panel-1">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Activité mensuelle</span>
+                    <span className="dash-panel-chip">12 mois</span>
                   </div>
-                  <div className="dash-fake-chart">
+                  <div className="dash-chart">
                     {BARS.map((h, i) => (
-                      <div
-                        key={i}
-                        className="dash-fake-bar"
-                        style={{ height: `${h}%` }}
-                      />
+                      <div key={i} className="dash-bar" style={{ height:`${h}%` }} title={MONTHS[i]} />
                     ))}
                   </div>
                 </div>
 
-                {/* status panel */}
-                <div className="dash-panel dash-panel-side">
-                  <div className="dash-panel-header">
-                    <span className="dash-panel-title">Statut candidatures</span>
-                    <Users size={14} color="var(--text-muted)" />
+                <div className="dash-panel dash-panel-2">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Candidatures</span>
+                    <Users size={15} color="var(--t3)" />
                   </div>
-                  <ul className="dash-status-list">
-                    {statuses.map(({ label, pct, fill }) => (
-                      <li key={label}>
+                  <div className="dash-status-list">
+                    {STATUSES.map(({ label, pct, mod }) => (
+                      <div className="dash-status-item" key={label}>
                         <div className="dash-status-row">
-                          <span className="dash-status-label">{label}</span>
+                          <span className="dash-status-name">{label}</span>
                           <span className="dash-status-pct">{pct}%</span>
                         </div>
                         <div className="dash-status-track">
-                          <div
-                            className={`dash-status-fill dash-status-fill--${fill}`}
-                            style={{ width: `${pct}%` }}
-                          />
+                          <div className={`dash-status-bar dash-status-bar--${mod}`} style={{ width:`${pct}%` }} />
                         </div>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               </div>
-            </>
-          ) : (
-            /* ── inner page ── */
-            <div className="dash-panel">
-              <div className="dash-panel-header">
-                <span className="dash-panel-title">
-                  {menuItems.find(m => m.id === active)?.label}
-                </span>
-                <span className="dash-panel-badge">Section</span>
-              </div>
-              <p className="dash-panel-content">
-                {renderContent(active)}
-              </p>
             </div>
           )}
+
+          {/* ── PORTFOLIO ── */}
+          {active === "portfolio" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Portfolio</h1>
+                <p className="dash-page-sub">Vos réalisations et projets · {PORTFOLIO_ITEMS.length} travaux</p>
+              </div>
+
+              <div className="portfolio-shell">
+                {/* tab switcher */}
+                <div className="portfolio-tabs">
+                  <button
+                    type="button"
+                    className={`portfolio-tab${pfTab === "grid" ? " portfolio-tab--active" : ""}`}
+                    onClick={() => setPfTab("grid")}
+                  >
+                    Vue Galerie
+                  </button>
+                  <button
+                    type="button"
+                    className={`portfolio-tab${pfTab === "list" ? " portfolio-tab--active" : ""}`}
+                    onClick={() => setPfTab("list")}
+                  >
+                    Vue Détaillée
+                  </button>
+                </div>
+
+                {/* GRID */}
+                {pfTab === "grid" && (
+                  <div className="pf-grid" key="grid">
+                    {PORTFOLIO_ITEMS.map(({ id, title, desc, tags, color }) => (
+                      <div className="pf-card" key={id}>
+                        <div className="pf-thumb">
+                          <div className="pf-thumb-bg" style={{ background: color }} />
+                          <div className="pf-thumb-overlay" />
+                          <span className="pf-thumb-num">0{id}</span>
+                        </div>
+                        <div className="pf-body">
+                          <div className="pf-title">{title}</div>
+                          <div className="pf-desc">{desc}</div>
+                          <div className="pf-tags">
+                            {tags.map(t => <span className="pf-tag" key={t}>{t}</span>)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* LIST */}
+                {pfTab === "list" && (
+                  <div className="pf-list" key="list">
+                    {PORTFOLIO_ITEMS.map(({ id, title, desc, tags, date, color }) => (
+                      <div className="pf-row" key={id}>
+                        <div className="pf-row-thumb">
+                          <div className="pf-row-thumb-bg" style={{ background: color }} />
+                        </div>
+                        <div className="pf-row-info">
+                          <div className="pf-row-title">{title}</div>
+                          <div className="pf-row-desc">{desc}</div>
+                          <div className="pf-tags" style={{ marginTop:4 }}>
+                            {tags.map(t => <span className="pf-tag" key={t}>{t}</span>)}
+                          </div>
+                        </div>
+                        <div className="pf-row-meta">
+                          <span className="pf-row-date">{date}</span>
+                          <ArrowRight size={15} className="pf-row-arrow" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── OTHER PAGES ── */}
+          {active !== "dashboard" && active !== "portfolio" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">{currentLabel}</h1>
+                <p className="dash-page-sub">Gérez et organisez votre espace personnel</p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  <p>{PAGE_CONTENT[active] || "Section en cours de construction."}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
     </section>
   );
 }
-
-/* ── content map ── */
-function renderContent(active) {
-  const map = {
-    fichiers:   "Ici vous retrouvez tous vos documents : CV, portfolio, lettres de motivation et pièces jointes uploadées.",
-    talentcard: "Consultez et mettez à jour votre Talent Card pour maximiser votre visibilité auprès des recruteurs.",
-    cv:         "Gérez toutes vos versions de CV, activez celle de votre choix et suivez les consultations.",
-    projects:   "Listez vos projets et réalisations clés. Chaque entrée enrichit votre profil TAP.",
-    portfolio:  "Votre portfolio principal : images, liens, descriptions. Présentez votre meilleur travail.",
-    entretiens: "Historique complet de vos entretiens passés et prochaines étapes planifiées.",
-    portfolio2: "Espace portfolio alternatif — idéal pour segmenter vos travaux par thématique.",
-  };
-  return map[active] || "";
-}
-
-export default DashboardCandidat;
