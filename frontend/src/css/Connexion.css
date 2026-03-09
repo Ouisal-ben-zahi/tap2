@@ -1,0 +1,130 @@
+.login-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 140px 0 40px;
+  box-sizing: border-box;
+}
+
+.login-inner {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #f5f5f5;
+}
+
+.login-header {
+  width: 100%;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+.login-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.login-heading-main {
+  background-color: #e01f26;
+  color: white;
+  padding: 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: 100%;
+  max-width: 800px;
+}
+
+
+
+.login-card {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background-color: #e6e6e6;
+  padding: 32px 40px 40px 40px;
+  box-sizing: border-box;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field label {
+  font-size: 14px;
+  color: #000;
+  font-weight: 500;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #b3b3b3;
+  background-color: #ffffff;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.login-field input::placeholder {
+  color: #999;
+}
+
+.login-field input:focus {
+  outline: none;
+  border-color: #e01f26;
+}
+
+.login-submit-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.login-submit {
+  padding: 12px 40px;
+  background-color: #e01f26;
+  color: #fff;
+  border: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.login-submit:hover {
+  background-color: #c01822;
+}
+
+@media (max-width: 768px) {
+  .login-section {
+    padding: 100px 0 50px 0;
+  }
+
+  .login-card {
+    padding: 24px 16px 28px 16px;
+    max-width: 100%;
+  }
+
+  .login-heading-main,
+  .login-heading-sub {
+    max-width: 100%;
+  }
+}
+

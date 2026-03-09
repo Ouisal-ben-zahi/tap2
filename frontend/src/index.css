@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Titres de section harmonisés (h2 et titres principaux) */
+.app-content section h2,
+.app-content .main-title,
+.app-content .cta-title {
+  font-size: 28px;
+}
+
+/* Sous-titres / paragraphes de section harmonisés */
+.app-content section p.pourquoi-note,
+.app-content section .pourquoi-subtitle {
+  font-size: 1rem;
+}
+
+
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}

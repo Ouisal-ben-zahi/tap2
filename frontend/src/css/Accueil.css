@@ -1,0 +1,8 @@
+/* Page d'accueil : fond image unique, sans overlay ni gradient */
+.page-accueil {
+  min-height: 100vh;
+  background-image: url("../assets/bgaccueil.jpg");
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+}

@@ -1,0 +1,191 @@
+
+.footer-container {
+  background-color: #E6E6E6;
+  color: #000;
+  width: 100%;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  padding: 80px  0;
+  gap: 40px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.footer-brand {
+  flex: 1;
+}
+
+.footer-logo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 12px;
+  object-fit: contain;
+}
+
+.brand-description {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  display: -webkit-box;
+}
+
+/* LA LIGNE SÉPARATRICE CENTRÉE VERTICALEMENT */
+.footer-divider {
+  width: 1px;
+  background-color: #999;
+  height: 160px; /* Taille fixe */
+  align-self: center; /* Force le centrage vertical uniquement pour cet élément */
+}
+
+.footer-grid {
+  flex: 3.5;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* En-tête de colonne : titre + flèche (style select) */
+.footer-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0 0 12px 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.footer-column-header h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* Flèche visible uniquement en mobile */
+.footer-column-arrow {
+  display: none;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.footer-column.open .footer-column-arrow {
+  transform: rotate(180deg);
+}
+
+.footer-column ul,
+.footer-column-content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: 400;
+  text-align: left;
+}
+
+/* SECTION CONTACT SANS MARGIN ENTRE LABEL ET VALEUR */
+.contact-block {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-block strong {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0; /* Pas de marge */
+  padding: 0;
+}
+
+.contact-block span,
+.contact-block .contact-link {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-block .contact-link {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.contact-block .contact-link:hover {
+  color: #e01f26;
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.footer-copyright p {
+  font-size: 14px;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* Responsive : accordéon + tout aligné à gauche */
+@media (max-width: 1024px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 40px 0 10px 0;
+  }
+  .footer-divider { display: none; }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: 100%;
+  }
+  .footer-brand {
+    width: 100%;
+  }
+  .footer-logo {
+    margin: 0 0 20px 0;
+    max-width: 140px;
+  }
+  .brand-description {
+    font-size: 16px;
+  }
+  .footer-column-arrow {
+    display: inline-block;
+  }
+
+  /* Colonnes en accordéon : contenu masqué par défaut */
+  .footer-column-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .footer-column.open .footer-column-content {
+    max-height: 500px;
+  }
+  .footer-column {
+    border-bottom: 1px solid #ccc;
+  }
+  .footer-column-header {
+    padding: 16px 0;
+  }
+}
