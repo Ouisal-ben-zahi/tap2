@@ -4,7 +4,8 @@ import {
   LayoutDashboard, FolderOpen, CreditCard, FileText,
   Briefcase, Image, CalendarCheck, Layers,
   LogOut, Search, TrendingUp, TrendingDown,
-  Users, Bookmark, Bell, BriefcaseBusiness
+  Users, Bookmark, Bell, BriefcaseBusiness,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 import "../css/Dashboard.css";
 
@@ -14,6 +15,7 @@ const BARS = [55, 72, 48, 85, 63, 91, 70, 58, 80, 67, 74, 88];
 function DashboardCandidat() {
   const navigate  = useNavigate();
   const [active, setActive] = useState("bienvenue");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const profileType = sessionStorage.getItem("profileType") || "candidat";
   const userEmail   = sessionStorage.getItem("userEmail")   || "vous@exemple.com";
@@ -85,20 +87,36 @@ function DashboardCandidat() {
 
   return (
     <section className="dash-section">
-      <div className="dash-layout">
+      <div className={`dash-layout${sidebarCollapsed ? " dash-layout--collapsed" : ""}`}>
 
         {/* ════ SIDEBAR ════ */}
-        <aside className="dash-sidebar">
-          {/* user block */}
+        <aside className={`dash-sidebar${sidebarCollapsed ? " dash-sidebar--collapsed" : ""}`}>
+          {/* user block + toggle */}
           <div className="dash-sidebar-header">
-            <div className="dash-avatar">
-              {(userEmail || "?").charAt(0).toUpperCase()}
-            </div>
-            <div className="dash-user-info">
-              <span className="dash-user-role">
-                {profileType === "recruteur" ? "Recruteur" : "Candidat"}
-              </span>
-              <span className="dash-user-email">{userEmail}</span>
+            <button
+              type="button"
+              className="dash-toggle-btn"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              aria-label={sidebarCollapsed ? "Ouvrir le menu" : "Réduire le menu"}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight size={18} strokeWidth={2.2} color="#fee2e2" />
+              ) : (
+                <ChevronLeft size={18} strokeWidth={2.2} color="#fee2e2" />
+              )}
+            </button>
+            <div className="dash-user-block">
+              <div className="dash-avatar">
+                {(userEmail || "?").charAt(0).toUpperCase()}
+              </div>
+              {!sidebarCollapsed && (
+                <div className="dash-user-info">
+                  <span className="dash-user-role">
+                    {profileType === "recruteur" ? "Recruteur" : "Candidat"}
+                  </span>
+                  <span className="dash-user-email">{userEmail}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -112,7 +130,7 @@ function DashboardCandidat() {
                 onClick={() => setActive(id)}
               >
                 <Icon size={14} strokeWidth={active === id ? 2.2 : 1.7} />
-                {label}
+                <span className="dash-menu-label">{label}</span>
               </button>
             ))}
           </nav>
@@ -120,7 +138,7 @@ function DashboardCandidat() {
           {/* logout */}
           <button type="button" className="dash-logout" onClick={handleLogout}>
             <LogOut size={13} strokeWidth={1.8} />
-            Se déconnecter
+            <span className="dash-logout-label">Se déconnecter</span>
           </button>
         </aside>
 

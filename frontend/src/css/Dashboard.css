@@ -42,9 +42,13 @@
 /* ── LAYOUT ─────────────────────────────────────── */
 .dash-layout {
   display: grid;
-  grid-template-columns: 230px 1fr;
+  grid-template-columns: 260px 1fr;
   width: 100vw;
   height: 100vh;
+}
+
+.dash-layout--collapsed {
+  grid-template-columns: 90px 1fr;
 }
 
 /* ── SIDEBAR ────────────────────────────────────── */
@@ -72,16 +76,24 @@
 
 .dash-sidebar-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
   padding: 0 6px 22px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 10px;
 }
 
+.dash-user-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
 .dash-avatar {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 14px;
   background: linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%);
   display: flex;
@@ -120,6 +132,28 @@
   text-overflow: ellipsis;
 }
 
+.dash-toggle-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(239,68,68,0.4);
+  background: var(--red-dim);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.dash-toggle-btn:hover {
+  background: rgba(239,68,68,0.18);
+  color: #fee2e2;
+  transform: translateY(-1px);
+}
+
 /* ── NAV MENU ───────────────────────────────────── */
 .dash-menu {
   display: flex;
@@ -146,6 +180,10 @@
   position: relative;
   letter-spacing: 0.01em;
   white-space: nowrap;
+}
+
+.dash-menu-label {
+  flex: 1;
 }
 
 .dash-menu-item:hover {
@@ -187,6 +225,45 @@
   cursor: pointer;
   transition: all var(--transition);
   letter-spacing: 0.02em;
+}
+
+.dash-logout-label {
+  white-space: nowrap;
+}
+
+.dash-sidebar--collapsed .dash-user-info {
+  display: none;
+}
+
+.dash-sidebar--collapsed .dash-avatar {
+  width: 50px;
+  height: 50px;
+  margin-inline: auto;
+}
+
+.dash-sidebar--collapsed .dash-user-block {
+  justify-content: center;
+}
+
+.dash-sidebar--collapsed .dash-toggle-btn {
+  align-self: center;
+}
+
+.dash-sidebar--collapsed .dash-menu-item {
+  justify-content: center;
+  padding-inline: 10px;
+}
+
+.dash-sidebar--collapsed .dash-menu-label {
+  display: none;
+}
+
+.dash-sidebar--collapsed .dash-logout {
+  justify-content: center;
+}
+
+.dash-sidebar--collapsed .dash-logout-label {
+  display: none;
 }
 
 .dash-logout:hover {
