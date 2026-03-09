@@ -297,9 +297,11 @@ export class DashboardService {
       );
     }
 
-    const files = (listed ?? []).filter(
-      (f: any) => typeof f.name === 'string' && f.name.startsWith('cv_'),
-    );
+    const files = (listed ?? []).filter((f: any) => {
+      if (typeof f.name !== 'string') return false;
+      const name = f.name.toLowerCase();
+      return name.startsWith('cv') && name.endsWith('.pdf');
+    });
 
     const cvFiles: CandidateCvFileItem[] = files.map((file: any) => {
       const path = `${basePath}/${file.name}`;
