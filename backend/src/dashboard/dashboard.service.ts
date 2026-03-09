@@ -303,27 +303,122 @@ export class DashboardService {
       return name.startsWith('cv') && name.endsWith('.pdf');
     });
 
-    const cvFiles: CandidateCvFileItem[] = files.map((file: any) => {
+    const cvFiles: CandidateCvFileItem[] = [];
+
+    for (const file of files) {
       const path = `${basePath}/${file.name}`;
-      const {
-        data: { publicUrl },
-      } = this.supabase.storage.from('tap_files').getPublicUrl(path);
+      const { data: signed, error: signedError } = await this.supabase.storage
+        .from('tap_files')
+        .createSignedUrl(path, 60 * 60); // URL valable 1h
+
+      if (signedError || !signed) {
+        // on ignore juste ce fichier si la signature échoue
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       const size =
         typeof file.metadata?.size === 'number'
           ? (file.metadata.size as number)
           : null;
 
-      return {
+      cvFiles.push({
         name: file.name as string,
         path,
-        publicUrl,
+        publicUrl: signed.signedUrl,
         updatedAt: (file.updated_at as string) ?? null,
         size,
-      };
-    });
+      });
+    }
 
     return { cvFiles };
+  }
+
+  async uploadCandidateCv(
+    userId: number,
+    file: any,
+  ): Promise<CandidateCvFileItem> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+    if (!file || !file.buffer) {
+      throw new BadRequestException('Fichier CV manquant');
+    }
+    const mime = (file.mimetype as string | undefined) ?? '';
+    if (!mime.includes('pdf')) {
+      throw new BadRequestException('Seuls les fichiers PDF sont acceptés');
+    }
+
+    const {
+      data: candidate,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidate) {
+      throw new BadRequestException(
+        "Aucun profil candidat associé à cet utilisateur",
+      );
+    }
+
+    const category =
+      (candidate.categorie_profil as string | null) || 'Autres';
+    const candidateId = candidate.id as number;
+    const basePath = `candidates/${category}/${candidateId}`;
+
+    const safeName = `cv_${Date.now()}.pdf`;
+    const path = `${basePath}/${safeName}`;
+
+    const { error: uploadError } = await this.supabase.storage
+      .from('tap_files')
+      .upload(path, file.buffer, {
+        upsert: true,
+        contentType: 'application/pdf',
+      });
+
+    if (uploadError) {
+      throw new BadRequestException(
+        uploadError.message || "Erreur lors de l'upload du CV",
+      );
+    }
+
+    // Optionnel : garder le dernier CV dans la table candidates
+    await this.supabase
+      .from('candidates')
+      .update({ cv_minio_url: path })
+      .eq('id', candidateId);
+
+    const { data: signed, error: signedError } = await this.supabase.storage
+      .from('tap_files')
+      .createSignedUrl(path, 60 * 60);
+
+    if (signedError || !signed) {
+      throw new BadRequestException(
+        signedError?.message || "Erreur lors de la génération du lien de téléchargement",
+      );
+    }
+
+    const size =
+      typeof file.size === 'number' ? (file.size as number) : null;
+
+    return {
+      name: safeName,
+      path,
+      publicUrl: signed.signedUrl,
+      updatedAt: new Date().toISOString(),
+      size,
+    };
   }
 }
 

@@ -26,7 +26,7 @@ const MENU = [
   { id:"dashboard",  label:"Dashboard",    icon:LayoutDashboard },
   { id:"fichiers",   label:"Mes fichiers", icon:FolderOpen      },
   { id:"talentcard", label:"Talent Card",  icon:CreditCard      },
-  { id:"cv",         label:"CV",           icon:FileText        },
+  { id:"cv",         label:"Curriculum Vitae", icon:FileText    },
   { id:"projets",    label:"Projets",      icon:Briefcase       },
   { id:"candidatures", label:"Mes candidatures", icon:BriefcaseBusiness },
   { id:"portfolio",  label:"Portfolio",    icon:Image           },
@@ -62,6 +62,8 @@ export default function DashboardCandidat() {
   const [portfolio,   setPortfolio]    = useState([]);
   const [applications,setApplications] = useState([]);
   const [cvFiles,     setCvFiles]      = useState([]);
+  const [uploadingCv, setUploadingCv]  = useState(false);
+  const [uploadErrorCv, setUploadErrorCv] = useState("");
 
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
@@ -232,6 +234,43 @@ export default function DashboardCandidat() {
   const handleSidebarClick = () => {
     if (collapsed) {
       setCollapsed(false);
+    }
+  };
+
+  const handleUploadCv = async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file || !userId) return;
+
+    setUploadErrorCv("");
+
+    if (!file.type.includes("pdf")) {
+      setUploadErrorCv("Seuls les fichiers PDF sont acceptés.");
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingCv(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/upload-cv`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data) {
+        setUploadErrorCv(data?.message || "Erreur lors de l’upload du CV.");
+        return;
+      }
+
+      setCvFiles((prev) => [data, ...prev]);
+    } catch {
+      setUploadErrorCv("Erreur de connexion au serveur.");
+    } finally {
+      setUploadingCv(false);
+      event.target.value = "";
     }
   };
 
@@ -564,16 +603,41 @@ export default function DashboardCandidat() {
           )}
 
           {/* ── MES FICHIERS (CV) ── */}
-          {active === "fichiers" && (
+          {(active === "fichiers" || active === "cv") && (
             <div className="dash-content">
               <div className="dash-page-header">
-                <h1 className="dash-page-title">Mes fichiers</h1>
+                <h1 className="dash-page-title">
+                  {active === "cv" ? "Mes CV" : "Mes fichiers"}
+                </h1>
                 <p className="dash-page-sub">
-                  Tous vos CV enregistrés dans TAP (fichiers commençant par <em>cv_</em>).
+                  {active === "cv"
+                    ? "Gérez plusieurs versions de CV, activez celle de votre choix et consultez les statistiques en temps réel."
+                    : <>Tous vos CV enregistrés dans TAP (fichiers commençant par <em>cv_</em>).</>}
                 </p>
               </div>
               <div className="dash-section-page">
                 <div className="dash-section-card">
+                  <div className="files-upload-bar">
+                    <label className="files-upload-btn">
+                      {uploadingCv ? "Import du CV en cours…" : "Importer un nouveau CV"}
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleUploadCv}
+                        disabled={uploadingCv}
+                      />
+                    </label>
+                    <p className="files-upload-hint">
+                      Formats acceptés : PDF. Le fichier sera stocké dans votre dossier sécurisé TAP.
+                    </p>
+                  </div>
+
+                  {uploadErrorCv && (
+                    <div className="login-error" style={{ marginTop: 12 }}>
+                      <span>⚠</span> {uploadErrorCv}
+                    </div>
+                  )}
+
                   {cvFiles.length === 0 ? (
                     <p>Aucun CV enregistré pour l’instant.</p>
                   ) : (
@@ -689,7 +753,11 @@ export default function DashboardCandidat() {
           )}
 
           {/* ── OTHER PAGES ── */}
-          {active !== "dashboard" && active !== "portfolio" && active !== "candidatures" && active !== "fichiers" && (
+          {active !== "dashboard" &&
+           active !== "portfolio" &&
+           active !== "candidatures" &&
+           active !== "fichiers" &&
+           active !== "cv" && (
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">{currentLabel}</h1>

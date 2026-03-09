@@ -1,4 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -27,6 +28,16 @@ export class DashboardController {
   async getCandidateCvFiles(@Param('userId') userId: string) {
     const id = Number.parseInt(userId, 10);
     return this.dashboardService.getCandidateCvFiles(id);
+  }
+
+  @Post('candidat/:userId/upload-cv')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCandidateCv(
+    @Param('userId') userId: string,
+    @UploadedFile() file: any,
+  ) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.uploadCandidateCv(id, file);
   }
 }
 
