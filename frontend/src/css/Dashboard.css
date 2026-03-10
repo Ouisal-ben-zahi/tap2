@@ -725,6 +725,93 @@
 }
 .files-btn:hover{background:var(--gold-dim);color:var(--gold2)}
 
+/* Bouton d’ajout d’offre (dashboard recruteur) */
+.jobs-header-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:14px;
+}
+.jobs-add-offer-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 22px;
+  border-radius:999px;
+  border:1px solid var(--gold-line);
+  background:transparent;
+  color:var(--gold);
+  font-family:var(--display);
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.jobs-add-offer-btn:hover{
+  border-color:var(--gold2);
+  color:var(--gold2);
+  box-shadow:0 0 18px var(--gold-glow);
+}
+
+/* Tableau des offres */
+.jobs-table-wrap{
+  border-radius:14px;
+  border:1px solid var(--seam);
+  overflow:hidden;
+  background:var(--layer2);
+}
+.jobs-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.jobs-table thead{
+  background:var(--layer3);
+}
+.jobs-table th,
+.jobs-table td{
+  padding:10px 14px;
+  text-align:left;
+}
+.jobs-table th{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--t3);
+  border-bottom:1px solid var(--seam);
+}
+.jobs-table tbody tr{
+  border-bottom:1px solid var(--seam);
+}
+.jobs-table tbody tr:nth-child(even){
+  background:rgba(255,255,255,0.01);
+}
+.jobs-table tbody tr:hover{
+  background:rgba(201,168,76,0.04);
+}
+.jobs-table td{
+  color:var(--t1);
+}
+.jobs-table td.jobs-col-title{
+  font-weight:600;
+  color:var(--platinum);
+}
+.jobs-badge-urgent{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(224,82,82,0.4);
+  color:var(--ruby);
+  font-size:9px;
+  font-family:var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
 /* ─── CANDIDATURES ─── */
 .cand-list{display:flex;flex-direction:column;gap:8px}
 .cand-row{

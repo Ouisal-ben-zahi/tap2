@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DashboardService } from './dashboard.service';
+import { DashboardService, type RecruiterJobPayload } from './dashboard.service';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -50,6 +50,21 @@ export class DashboardController {
   ) {
     const id = Number.parseInt(userId, 10);
     return this.dashboardService.uploadCandidateCv(id, file);
+  }
+
+  @Post('recruteur/:userId/jobs')
+  async createRecruiterJob(
+    @Param('userId') userId: string,
+    @Body() body: RecruiterJobPayload,
+  ) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.createRecruiterJob(id, body);
+  }
+
+  @Get('recruteur/:userId/jobs')
+  async getRecruiterJobs(@Param('userId') userId: string) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.getRecruiterJobsWithCounts(id);
   }
 }
 

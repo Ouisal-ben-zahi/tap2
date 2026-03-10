@@ -10,6 +10,7 @@ import Connexion from "./pages/Connexion";
 import CreerCompte from "./pages/CreerCompte";
 import Contact from "./pages/Contact";
 import DashboardCandidat from "./pages/DashboardCandidat";
+import DashboardRecruteur from "./pages/DashboardRecruteur";
 import Footer from './layout/Footer';
 import CountdownPopup from "./components/CountdownPopup";
 
@@ -24,6 +25,7 @@ function AppShell() {
     return (
       <Routes>
         <Route path="/dashboard-candidat" element={<DashboardCandidat />} />
+        <Route path="/dashboard-recruteur" element={<DashboardRecruteur />} />
       </Routes>
     );
   }

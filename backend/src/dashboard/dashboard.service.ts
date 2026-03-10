@@ -41,6 +41,24 @@ export interface CandidateCvFileItem {
   size: number | null;
 }
 
+export interface RecruiterJobPayload {
+  title: string;
+  categorie_profil?: string | null;
+  niveau_attendu?: string | null;
+  experience_min?: string | null;
+  presence_sur_site?: string | null;
+  reason?: string | null;
+  main_mission?: string | null;
+  tasks_other?: string | null;
+  disponibilite?: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  urgent?: boolean;
+  contrat?: string | null;
+  niveau_seniorite?: string | null;
+  entreprise?: string | null;
+}
+
 export interface CandidatePortfolioPdfFiles {
   portfolioShort: CandidateCvFileItem[];
   portfolioLong: CandidateCvFileItem[];
@@ -622,6 +640,98 @@ export class DashboardService {
       updatedAt: new Date().toISOString(),
       size,
     };
+  }
+
+  async createRecruiterJob(
+    userId: number,
+    payload: RecruiterJobPayload,
+  ): Promise<{ job: any }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const title = payload.title?.trim();
+    if (!title) {
+      throw new BadRequestException('Le titre du poste est obligatoire');
+    }
+
+    const bodyToInsert: any = {
+      title,
+      categorie_profil: payload.categorie_profil ?? null,
+      niveau_attendu: payload.niveau_attendu ?? null,
+      experience_min: payload.experience_min ?? null,
+      presence_sur_site: payload.presence_sur_site ?? null,
+      reason: payload.reason ?? null,
+      main_mission: payload.main_mission ?? null,
+      tasks_other: payload.tasks_other ?? null,
+      disponibilite: payload.disponibilite ?? null,
+      salary_min: payload.salary_min ?? null,
+      salary_max: payload.salary_max ?? null,
+      urgent: Boolean(payload.urgent),
+      contrat: payload.contrat ?? 'stage',
+      niveau_seniorite: payload.niveau_seniorite ?? null,
+      entreprise: payload.entreprise ?? null,
+      user_id: userId,
+    };
+
+    const { data, error } = await this.supabase
+      .from('jobs')
+      .insert(bodyToInsert)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      throw new BadRequestException(
+        error?.message || 'Erreur lors de la création de l’offre',
+      );
+    }
+
+    return { job: data };
+  }
+
+  async getRecruiterJobsWithCounts(
+    userId: number,
+  ): Promise<{ jobs: any[] }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const { data, error } = await this.supabase
+      .from('jobs')
+      .select(
+        `
+        id,
+        title,
+        categorie_profil,
+        niveau_attendu,
+        experience_min,
+        salary_min,
+        salary_max,
+        urgent,
+        entreprise,
+        contrat,
+        created_at,
+        candidate_postule ( id )
+      `,
+      )
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new BadRequestException(
+        error.message || 'Erreur lors du chargement des offres',
+      );
+    }
+
+    const jobs =
+      (data ?? []).map((row: any) => ({
+        ...row,
+        applications_count: Array.isArray(row.candidate_postule)
+          ? row.candidate_postule.length
+          : 0,
+      })) ?? [];
+
+    return { jobs };
   }
 }
 
