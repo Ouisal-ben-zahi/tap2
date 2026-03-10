@@ -855,7 +855,7 @@ export default function DashboardCandidat() {
 
                   {wizardError && <div className="wizard-error-box">{wizardError}</div>}
 
-                  <form onSubmit={handleWizardSubmit} className="contact-form">
+                  <form onSubmit={handleWizardSubmit} className="contact-form" >
                     {currentWizardStep === 1 && (
                       <>
                         <div className="form-row">

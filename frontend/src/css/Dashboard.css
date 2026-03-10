@@ -37,7 +37,7 @@
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--layer4);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--layer4)}
 
 /* ─── ROOT ─── */
 .dash-section{
