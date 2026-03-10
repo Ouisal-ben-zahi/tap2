@@ -418,6 +418,13 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
+.form-field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin: 0;
+}
+
 .form-field input::placeholder,
 .form-field textarea::placeholder {
   color: #6b7280;  /* placeholder gris */
