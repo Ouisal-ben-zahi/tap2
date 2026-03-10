@@ -339,6 +339,90 @@ export class DashboardService {
     return { cvFiles };
   }
 
+  async getCandidateTalentcardFiles(
+    userId: number,
+  ): Promise<{ talentcardFiles: CandidateCvFileItem[] }> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const {
+      data: candidate,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidate) {
+      return { talentcardFiles: [] };
+    }
+
+    const category =
+      (candidate.categorie_profil as string | null) || 'Autres';
+    const candidateId = candidate.id as number;
+
+    const basePath = `candidates/${category}/${candidateId}`;
+
+    const { data: listed, error: listError } = await this.supabase.storage
+      .from('tap_files')
+      .list(basePath, {
+        limit: 100,
+      });
+
+    if (listError) {
+      throw new BadRequestException(
+        listError.message ||
+          'Erreur lors du listing des fichiers Talent Card',
+      );
+    }
+
+    const files = (listed ?? []).filter((f: any) => {
+      if (typeof f.name !== 'string') return false;
+      const name = f.name.toLowerCase();
+      return name.startsWith('talentcard') && name.endsWith('.pdf');
+    });
+
+    const talentcardFiles: CandidateCvFileItem[] = [];
+
+    for (const file of files) {
+      const path = `${basePath}/${file.name}`;
+      const { data: signed, error: signedError } = await this.supabase.storage
+        .from('tap_files')
+        .createSignedUrl(path, 60 * 60);
+
+      if (signedError || !signed) {
+        // on ignore ce fichier si la signature échoue
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      const size =
+        typeof file.metadata?.size === 'number'
+          ? (file.metadata.size as number)
+          : null;
+
+      talentcardFiles.push({
+        name: file.name as string,
+        path,
+        publicUrl: signed.signedUrl,
+        updatedAt: (file.updated_at as string) ?? null,
+        size,
+      });
+    }
+
+    return { talentcardFiles };
+  }
+
   async getCandidatePortfolioPdfFiles(
     userId: number,
   ): Promise<CandidatePortfolioPdfFiles> {

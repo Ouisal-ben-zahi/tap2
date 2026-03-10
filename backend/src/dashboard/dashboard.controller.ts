@@ -30,6 +30,12 @@ export class DashboardController {
     return this.dashboardService.getCandidateCvFiles(id);
   }
 
+  @Get('candidat/:userId/talentcard-files')
+  async getCandidateTalentcardFiles(@Param('userId') userId: string) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.getCandidateTalentcardFiles(id);
+  }
+
   @Get('candidat/:userId/portfolio-pdf-files')
   async getCandidatePortfolioPdfFiles(@Param('userId') userId: string) {
     const id = Number.parseInt(userId, 10);

@@ -64,6 +64,7 @@ export default function DashboardCandidat() {
   const [portfolioLong,  setPortfolioLong]  = useState([]);
   const [applications,setApplications] = useState([]);
   const [cvFiles,     setCvFiles]      = useState([]);
+  const [talentcardFiles, setTalentcardFiles] = useState([]);
   const [uploadingCv, setUploadingCv]  = useState(false);
   const [uploadErrorCv, setUploadErrorCv] = useState("");
 
@@ -142,6 +143,30 @@ export default function DashboardCandidat() {
     };
 
     loadCvFiles();
+
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+
+    const loadTalentcardFiles = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/talentcard-files`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) return;
+
+        setTalentcardFiles(Array.isArray(data.talentcardFiles) ? data.talentcardFiles : []);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    };
+
+    loadTalentcardFiles();
 
     return () => controller.abort();
   }, [userId]);
@@ -808,6 +833,66 @@ export default function DashboardCandidat() {
             </div>
           )}
 
+          {/* ── TALENT CARD ── */}
+          {active === "talentcard" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Talent Card</h1>
+                <p className="dash-page-sub">
+                  Consultez vos Talent Cards générées (PDF commençant par <em>talentcard</em>).
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {talentcardFiles.length === 0 ? (
+                    <p>Aucune Talent Card PDF enregistrée pour le moment.</p>
+                  ) : (
+                    <div className="files-list">
+                      {talentcardFiles.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+
+                        const sizeKb =
+                          typeof file.size === "number"
+                            ? Math.round(file.size / 1024)
+                            : null;
+
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && (
+                                  <span>· {sizeKb} Ko</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="files-actions">
+                              <a
+                                href={file.publicUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="files-btn"
+                              >
+                                Ouvrir
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── MES CANDIDATURES ── */}
           {active === "candidatures" && (
             <div className="dash-content">
@@ -878,7 +963,8 @@ export default function DashboardCandidat() {
            active !== "portfolio" &&
            active !== "candidatures" &&
            active !== "fichiers" &&
-           active !== "cv" && (
+           active !== "cv" &&
+           active !== "talentcard" && (
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">{currentLabel}</h1>
