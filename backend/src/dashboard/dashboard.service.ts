@@ -64,6 +64,24 @@ export interface CandidatePortfolioPdfFiles {
   portfolioLong: CandidateCvFileItem[];
 }
 
+export interface RecruiterOverviewStats {
+  totalJobs: number;
+  totalApplications: number;
+  totalCandidates: number;
+  urgentJobs: number;
+  lastJobDate: string | null;
+  jobsPerCategory: { label: string; value: number }[];
+  applicationsPerJob: { jobId: number; title: string; value: number }[];
+  recentApplications: {
+    id: number;
+    candidateName: string | null;
+    jobTitle: string | null;
+    status: string | null;
+    validatedAt: string | null;
+  }[];
+  alerts: { type: string; message: string }[];
+}
+
 @Injectable()
 export class DashboardService {
   private supabase: SupabaseClient;
@@ -732,6 +750,223 @@ export class DashboardService {
       })) ?? [];
 
     return { jobs };
+  }
+
+  async getRecruiterOverview(
+    userId: number,
+  ): Promise<RecruiterOverviewStats> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const { data: jobs, error } = await this.supabase
+      .from('jobs')
+      .select(
+        `
+        id,
+        title,
+        categorie_profil,
+        urgent,
+        created_at,
+        candidate_postule ( id, candidate_id, validated_at, status )
+      `,
+      )
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new BadRequestException(
+        error.message || 'Erreur lors du chargement du dashboard recruteur',
+      );
+    }
+
+    const safeJobs = (jobs ?? []) as any[];
+
+    const totalJobs = safeJobs.length;
+
+    let totalApplications = 0;
+    const candidateIds = new Set<number>();
+    let urgentJobs = 0;
+    let lastJobDate: string | null = null;
+
+    const categoryCount = new Map<string, number>();
+    const applicationsPerJob: { jobId: number; title: string; value: number }[] = [];
+    const allApplications: {
+      id: number;
+      jobId: number;
+      validatedAt: string | null;
+      status: string | null;
+      candidateId: number | null;
+    }[] = [];
+
+    for (const job of safeJobs) {
+      const apps = Array.isArray(job.candidate_postule)
+        ? job.candidate_postule
+        : [];
+
+      const count = apps.length;
+      totalApplications += count;
+
+      for (const app of apps) {
+        const cId =
+          typeof app.candidate_id === 'number' ? (app.candidate_id as number) : null;
+        if (cId !== null) candidateIds.add(cId);
+        allApplications.push({
+          id: app.id as number,
+          jobId: job.id as number,
+          validatedAt: (app.validated_at as string) ?? null,
+          status: (app.status as string) ?? null,
+          candidateId: cId,
+        });
+      }
+
+      if (job.urgent) {
+        urgentJobs += 1;
+      }
+
+      if (job.created_at) {
+        const d = new Date(job.created_at as string);
+        if (!Number.isNaN(d.getTime())) {
+          if (!lastJobDate || d > new Date(lastJobDate)) {
+            lastJobDate = d.toISOString();
+          }
+        }
+      }
+
+      const cat = (job.categorie_profil as string | null) || 'Autres';
+      categoryCount.set(cat, (categoryCount.get(cat) ?? 0) + 1);
+
+      applicationsPerJob.push({
+        jobId: job.id as number,
+        title: (job.title as string) ?? 'Offre',
+        value: count,
+      });
+    }
+
+    const jobsPerCategory = Array.from(categoryCount.entries()).map(
+      ([label, value]) => ({ label, value }),
+    );
+
+    // Trier les candidatures récentes (par validatedAt décroissant)
+    const recentSorted = allApplications
+      .filter((a) => !!a.validatedAt)
+      .sort((a, b) => {
+        const da = new Date(a.validatedAt as string).getTime();
+        const db = new Date(b.validatedAt as string).getTime();
+        return db - da;
+      })
+      .slice(0, 10);
+
+    let recentApplications: RecruiterOverviewStats['recentApplications'] = [];
+
+    if (recentSorted.length > 0) {
+      const candidateIdsArr = Array.from(
+        new Set(
+          recentSorted
+            .map((a) => a.candidateId)
+            .filter((id): id is number => typeof id === 'number'),
+        ),
+      );
+
+      let candidatesMap = new Map<number, { nom: string | null; prenom: string | null }>();
+      if (candidateIdsArr.length > 0) {
+        const { data: candidatesRows } = await this.supabase
+          .from('candidates')
+          .select('id, nom, prenom')
+          .in('id', candidateIdsArr);
+
+        (candidatesRows ?? []).forEach((row: any) => {
+          candidatesMap.set(row.id as number, {
+            nom: (row.nom as string) ?? null,
+            prenom: (row.prenom as string) ?? null,
+          });
+        });
+      }
+
+      const jobTitleMap = new Map<number, string>();
+      safeJobs.forEach((job: any) => {
+        jobTitleMap.set(job.id as number, (job.title as string) ?? 'Offre');
+      });
+
+      recentApplications = recentSorted.map((a) => {
+        const c = a.candidateId ? candidatesMap.get(a.candidateId) : undefined;
+        const name =
+          c && (c.nom || c.prenom)
+            ? [c.prenom, c.nom].filter(Boolean).join(' ')
+            : null;
+        return {
+          id: a.id,
+          candidateName: name,
+          jobTitle: jobTitleMap.get(a.jobId) ?? 'Offre',
+          status: a.status ?? null,
+          validatedAt: a.validatedAt,
+        };
+      });
+    }
+
+    // Alertes recruteur simples
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const offersNoApps7d = safeJobs.filter((job: any) => {
+      const createdAt = job.created_at ? new Date(job.created_at as string) : null;
+      const apps = Array.isArray(job.candidate_postule)
+        ? job.candidate_postule
+        : [];
+      return (
+        createdAt &&
+        createdAt < sevenDaysAgo &&
+        apps.length === 0
+      );
+    });
+
+    const urgentNoApps = safeJobs.filter((job: any) => {
+      const apps = Array.isArray(job.candidate_postule)
+        ? job.candidate_postule
+        : [];
+      return Boolean(job.urgent) && apps.length === 0;
+    });
+
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    const newAppsCount = allApplications.filter((a) => {
+      if (!a.validatedAt) return false;
+      const d = new Date(a.validatedAt);
+      return d > fortyEightHoursAgo;
+    }).length;
+
+    const alerts: RecruiterOverviewStats['alerts'] = [];
+
+    if (offersNoApps7d.length > 0) {
+      alerts.push({
+        type: 'no_apps_7d',
+        message: `${offersNoApps7d.length} offre(s) n'ont reçu aucune candidature depuis 7 jours.`,
+      });
+    }
+
+    if (urgentNoApps.length > 0) {
+      alerts.push({
+        type: 'urgent_no_apps',
+        message: `${urgentNoApps.length} offre(s) urgentes sans candidature.`,
+      });
+    }
+
+    if (newAppsCount > 0) {
+      alerts.push({
+        type: 'new_apps',
+        message: `${newAppsCount} nouvelle(s) candidature(s) reçue(s) ces dernières 48h.`,
+      });
+    }
+
+    return {
+      totalJobs,
+      totalApplications,
+      totalCandidates: candidateIds.size,
+      urgentJobs,
+      lastJobDate,
+      jobsPerCategory,
+      applicationsPerJob,
+      recentApplications,
+      alerts,
+    };
   }
 }
 

@@ -688,6 +688,17 @@
 }
 .dash-section-card p{font-size:13px;color:var(--t2);line-height:1.8;font-weight:300}
 
+/* Variante sans padding pour tableaux flush */
+.dash-section-card--flush{
+  padding:0;
+  background:transparent;
+  border:none;
+}
+.dash-section-card--flush .jobs-table-wrap{
+  border-radius:16px;
+  border:1px solid var(--seam);
+}
+
 /* ─── FILES ─── */
 .files-list{display:flex;flex-direction:column;gap:8px}
 .files-upload-bar{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
@@ -724,6 +735,73 @@
   transition:all .2s var(--ease);font-family:var(--mono);
 }
 .files-btn:hover{background:var(--gold-dim);color:var(--gold2)}
+
+/* ─── RECRUITER HERO / PREMIUM ─── */
+.recruiter-hero{
+  width:100%;
+  border-radius:18px;
+  padding:18px 22px;
+  background:radial-gradient(circle at 0 0,rgba(201,168,76,0.12),transparent 55%),
+             radial-gradient(circle at 100% 100%,rgba(91,141,238,0.08),transparent 55%),
+             var(--layer1);
+  border:1px solid var(--gold-line);
+  box-shadow:0 18px 40px rgba(0,0,0,0.7);
+  margin-bottom:18px;
+}
+.recruiter-hero-main{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+}
+.recruiter-hero-meta{
+  margin-top:10px;
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:11px;
+  color:var(--t2);
+  font-family:var(--mono);
+}
+.recruiter-hero-meta strong{color:var(--platinum)}
+.recruiter-hero-kpis{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.recruiter-hero-kpi{
+  min-width:120px;
+  padding:10px 14px;
+  border-radius:12px;
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(201,168,76,0.25);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.recruiter-hero-kpi span{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  color:var(--t3);
+  font-family:var(--mono);
+}
+.recruiter-hero-kpi strong{
+  font-family:var(--display);
+  font-size:18px;
+  color:var(--platinum);
+}
+
+/* ─── RECRUITER KPI CARDS ─── */
+.recruiter-kpi-card{
+  border-color:var(--gold-line);
+}
+.recruiter-insight-panel{
+  border-color:var(--gold-line);
+}
+.recruiter-alerts-panel{
+  border-color:rgba(224,82,82,0.25);
+}
 
 /* Bouton d’ajout d’offre (dashboard recruteur) */
 .jobs-header-actions{

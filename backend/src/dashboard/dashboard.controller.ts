@@ -66,5 +66,11 @@ export class DashboardController {
     const id = Number.parseInt(userId, 10);
     return this.dashboardService.getRecruiterJobsWithCounts(id);
   }
+
+  @Get('recruteur/:userId/overview')
+  async getRecruiterOverview(@Param('userId') userId: string) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.getRecruiterOverview(id);
+  }
 }
 

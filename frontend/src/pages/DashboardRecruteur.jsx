@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Dashboard.css";
 import {
   LayoutDashboard,
@@ -9,6 +9,9 @@ import {
   Bell,
   Search,
   LogOut,
+  Award,
+  Zap,
+  AlertTriangle,
 } from "lucide-react";
 import logo from "../assets/logo-white.svg";
 
@@ -24,6 +27,7 @@ export default function DashboardRecruteur() {
   const [active, setActive] = useState("overview");
   const [showJobForm, setShowJobForm] = useState(false);
   const [jobs, setJobs] = useState([]);
+  const [overview, setOverview] = useState(null);
   const [jobForm, setJobForm] = useState({
     title: "",
     categorie_profil: "",
@@ -44,7 +48,25 @@ export default function DashboardRecruteur() {
 
   const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (active !== "overview") return;
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) return;
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/recruteur/${userId}/overview`);
+        const data = await res.json().catch(() => null);
+        if (res.ok && data) {
+          setOverview(data);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, [active]);
+
+  useEffect(() => {
     if (active !== "jobs") return;
     const userId = sessionStorage.getItem("userId");
     if (!userId) return;
@@ -61,14 +83,6 @@ export default function DashboardRecruteur() {
       }
     })();
   }, [active]);
-
-  const fakeStats = {
-    totalJobs: 3,
-    totalCandidates: 25,
-    totalApplications: 42,
-    validatedApplications: 10,
-    pendingApplications: 32,
-  };
 
   const logout = () => {
     ["authToken","profileType","userEmail","userId","userName"].forEach(k => sessionStorage.removeItem(k));
@@ -145,12 +159,13 @@ export default function DashboardRecruteur() {
               <div className="dash-page-header">
                 <h1 className="dash-page-title">Vue d’ensemble recruteur</h1>
                 <p className="dash-page-sub">
-                  Suivez vos offres et candidatures en temps réel.
+                  Synthèse de vos offres, candidatures et alertes en temps réel.
                 </p>
               </div>
 
+              {/* KPI CARDS */}
               <div className="dash-cards-row">
-                <div className="dash-card">
+                <div className="dash-card recruiter-kpi-card">
                   <div className="dash-card-row1">
                     <span className="dash-card-label">Jobs postés</span>
                     <div className="dash-card-icon-wrap">
@@ -158,23 +173,23 @@ export default function DashboardRecruteur() {
                     </div>
                   </div>
                   <div className="dash-card-value">
-                    {fakeStats.totalJobs ?? "—"}
+                    {overview?.totalJobs ?? "—"}
                   </div>
                 </div>
 
-                <div className="dash-card">
+                <div className="dash-card recruiter-kpi-card">
                   <div className="dash-card-row1">
-                    <span className="dash-card-label">Candidats</span>
+                    <span className="dash-card-label">Candidats uniques</span>
                     <div className="dash-card-icon-wrap">
                       <Users size={16} />
                     </div>
                   </div>
                   <div className="dash-card-value">
-                    {fakeStats.totalCandidates ?? "—"}
+                    {overview?.totalCandidates ?? "—"}
                   </div>
                 </div>
 
-                <div className="dash-card">
+                <div className="dash-card recruiter-kpi-card">
                   <div className="dash-card-row1">
                     <span className="dash-card-label">Candidatures</span>
                     <div className="dash-card-icon-wrap">
@@ -182,41 +197,293 @@ export default function DashboardRecruteur() {
                     </div>
                   </div>
                   <div className="dash-card-value">
-                    {fakeStats.totalApplications ?? "—"}
+                    {overview?.totalApplications ?? "—"}
                   </div>
                 </div>
 
-                <div className="dash-card">
+                <div className="dash-card recruiter-kpi-card">
                   <div className="dash-card-row1">
-                    <span className="dash-card-label">Validées</span>
+                    <span className="dash-card-label">Offres urgentes</span>
                     <div className="dash-card-icon-wrap">
                       <BarChart2 size={16} />
                     </div>
                   </div>
                   <div className="dash-card-value">
-                    {fakeStats.validatedApplications ?? "—"}
-                  </div>
-                </div>
-
-                <div className="dash-card">
-                  <div className="dash-card-row1">
-                    <span className="dash-card-label">En attente</span>
-                    <div className="dash-card-icon-wrap">
-                      <BarChart2 size={16} />
-                    </div>
-                  </div>
-                  <div className="dash-card-value">
-                    {fakeStats.pendingApplications ?? "—"}
+                    {overview?.urgentJobs ?? "—"}
                   </div>
                 </div>
               </div>
 
-              <div className="dash-section-page">
-                <div className="dash-section-card">
-                  <p>
-                    Ici viendront les graphiques et tableaux (jobs, candidatures)
-                    pour le dashboard recruteur, avec le même design que le dashboard candidat.
-                  </p>
+              {/* GRAPHIQUES + ALERTES */}
+              <div className="dash-grid-2">
+                <div className="dash-panel dash-panel-1 recruiter-insight-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">
+                      Candidatures par offre
+                    </span>
+                    <Award size={14} color="var(--gold)" />
+                  </div>
+                  <div className="dash-chart">
+                    {overview?.applicationsPerJob &&
+                    overview.applicationsPerJob.length > 0 ? (
+                      overview.applicationsPerJob.slice(0, 8).map((item) => {
+                        const max = Math.max(
+                          ...overview.applicationsPerJob.map(
+                            (x) => x.value || 0
+                          )
+                        );
+                        const height = max > 0 ? (item.value / max) * 100 : 0;
+                        return (
+                          <div
+                            key={item.jobId}
+                            className="dash-chart-bar-wrap"
+                          >
+                            <div
+                              className="dash-bar"
+                              style={{
+                                height: `${Math.max(8, height)}%`,
+                              }}
+                            />
+                            <div className="dash-bar-label">
+                              {item.title.length > 10
+                                ? `${item.title.slice(0, 9)}…`
+                                : item.title}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ fontSize: 12, color: "var(--t3)" }}>
+                        Aucune candidature pour l’instant.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="dash-panel dash-panel-2 recruiter-insight-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Jobs par catégorie</span>
+                    <Zap size={14} color="var(--gold)" />
+                  </div>
+                  <div className="dash-status-list">
+                    {overview?.jobsPerCategory &&
+                    overview.jobsPerCategory.length > 0 ? (
+                      overview.jobsPerCategory.map((cat) => {
+                        const total = overview.totalJobs || 1;
+                        const pct = Math.round((cat.value / total) * 100);
+                        return (
+                          <div
+                            key={cat.label}
+                            className="dash-status-item"
+                          >
+                            <div className="dash-status-row">
+                              <span className="dash-status-name">
+                                {cat.label}
+                              </span>
+                              <span className="dash-status-pct">
+                                {cat.value} ({pct}%)
+                              </span>
+                            </div>
+                            <div className="dash-status-track">
+                              <div
+                                className="dash-status-bar dash-status-bar--cr"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p style={{ fontSize: 12, color: "var(--t3)" }}>
+                        Aucune offre publiée pour le moment.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* DERNIÈRES CANDIDATURES + ALERTES */}
+              <div className="dash-grid-2" style={{ marginTop: 16 }}>
+                <div className="dash-recent-panel">
+                  <div className="dash-recent-head">
+                    <span className="dash-recent-title">
+                      Dernières candidatures
+                    </span>
+                  </div>
+                  {overview?.recentApplications &&
+                  overview.recentApplications.length > 0 ? (
+                    overview.recentApplications.map((app) => {
+                      const st = (app.status || "").toUpperCase();
+                      const label =
+                        st === "ACCEPTEE"
+                          ? "Acceptée"
+                          : st === "REFUSEE"
+                          ? "Refusée"
+                          : "En cours";
+                      const pillClass =
+                        st === "ACCEPTEE"
+                          ? "accepted"
+                          : st === "REFUSEE"
+                          ? "refused"
+                          : "pending";
+                      const date = app.validatedAt
+                        ? new Date(app.validatedAt).toLocaleDateString(
+                            "fr-FR",
+                            { day: "2-digit", month: "short" }
+                          )
+                        : "-";
+                      return (
+                        <div className="dash-recent-row" key={app.id}>
+                          <div>
+                            <div className="dash-recent-title-job">
+                              {app.jobTitle || "Offre"}
+                            </div>
+                            {app.candidateName && (
+                              <div className="dash-recent-company">
+                                {app.candidateName}
+                              </div>
+                            )}
+                          </div>
+                          <span
+                            className={`dash-status-pill dash-status-pill--${pillClass}`}
+                          >
+                            {label}
+                          </span>
+                          <div className="dash-recent-date">{date}</div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: "var(--t3)",
+                      }}
+                    >
+                      Aucune candidature récente.
+                    </p>
+                  )}
+                </div>
+
+                <div className="dash-panel recruiter-insight-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Vue synthétique</span>
+                    <Award size={14} color="var(--gold)" />
+                  </div>
+                  <div className="dash-status-list">
+                    <div className="dash-status-item">
+                      <div className="dash-status-row">
+                        <span className="dash-status-name">Moyenne de candidatures par offre</span>
+                        <span className="dash-status-pct">
+                          {overview?.totalJobs
+                            ? ((overview.totalApplications || 0) / overview.totalJobs).toFixed(1)
+                            : "—"}
+                        </span>
+                      </div>
+                      <div className="dash-status-track">
+                        <div
+                          className="dash-status-bar dash-status-bar--cr"
+                          style={{
+                            width: `${
+                              overview?.totalJobs
+                                ? Math.min(
+                                    100,
+                                    (((overview.totalApplications || 0) / overview.totalJobs) /
+                                      10) *
+                                      100
+                                  )
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="dash-status-item">
+                      <div className="dash-status-row">
+                        <span className="dash-status-name">Part d’offres urgentes</span>
+                        <span className="dash-status-pct">
+                          {overview?.totalJobs
+                            ? `${Math.round(
+                                ((overview.urgentJobs || 0) / overview.totalJobs) * 100
+                              )}%`
+                            : "—"}
+                        </span>
+                      </div>
+                      <div className="dash-status-track">
+                        <div
+                          className="dash-status-bar dash-status-bar--green"
+                          style={{
+                            width: `${
+                              overview?.totalJobs
+                                ? Math.round(
+                                    ((overview.urgentJobs || 0) / overview.totalJobs) * 100
+                                  )
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="dash-status-item">
+                      <div className="dash-status-row">
+                        <span className="dash-status-name">Ratio candidats / candidatures</span>
+                        <span className="dash-status-pct">
+                          {overview?.totalApplications
+                            ? (overview.totalCandidates || 0) > 0
+                              ? (
+                                  overview.totalApplications / (overview.totalCandidates || 1)
+                                ).toFixed(1)
+                              : "—"
+                            : "—"}
+                        </span>
+                      </div>
+                      <div className="dash-status-track">
+                        <div
+                          className="dash-status-bar dash-status-bar--mute"
+                          style={{
+                            width: `${
+                              overview?.totalApplications && overview.totalCandidates
+                                ? Math.min(
+                                    100,
+                                    (
+                                      overview.totalApplications /
+                                      (overview.totalCandidates || 1) /
+                                      10
+                                    ) * 100
+                                  )
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="dash-panel recruiter-alerts-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Alertes recruteur</span>
+                    <AlertTriangle size={14} color="var(--gold)" />
+                  </div>
+                  {overview?.alerts && overview.alerts.length > 0 ? (
+                    <div className="dash-anomaly-list">
+                      {overview.alerts.map((a) => (
+                        <div
+                          key={a.type}
+                          className="dash-anomaly-item dash-anomaly-item--bad"
+                        >
+                          <div className="dash-anomaly-dot" />
+                          <span>{a.message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 13, color: "var(--t3)" }}>
+                      Aucune alerte critique pour le moment.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -232,18 +499,18 @@ export default function DashboardRecruteur() {
                 </p>
               </div>
               <div className="dash-section-page">
-                <div className="dash-section-card">
-                  <div className="jobs-header-actions">
-                    <button
-                      type="button"
-                      className="jobs-add-offer-btn"
-                      onClick={() => setShowJobForm((v) => !v)}
-                    >
-                      {showJobForm ? "Masquer le formulaire" : "Ajouter une offre"}
-                    </button>
-                  </div>
+                <div className="jobs-header-actions">
+                  <button
+                    type="button"
+                    className="jobs-add-offer-btn"
+                    onClick={() => setShowJobForm((v) => !v)}
+                  >
+                    {showJobForm ? "Masquer le formulaire" : "Ajouter une offre"}
+                  </button>
+                </div>
 
-                  {showJobForm && (
+                {showJobForm && (
+                  <div className="dash-section-card">
                     <form
                       style={{ marginTop: 16 }}
                       onSubmit={async (e) => {
@@ -531,14 +798,11 @@ export default function DashboardRecruteur() {
                         </button>
                       </div>
                     </form>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Table des offres (simple pour l'instant, basée sur l'état jobs) */}
-                <div className="dash-section-card" style={{ marginTop: 16 }}>
-                  <h2 className="dash-panel-title" style={{ marginBottom: 8 }}>
-                    Liste des offres
-                  </h2>
+                {/* Table des offres */}
+                <div className="dash-section-card dash-section-card--flush" style={{ marginTop: 16 }}>
                   <div className="jobs-table-wrap">
                     <table className="jobs-table">
                       <thead>
