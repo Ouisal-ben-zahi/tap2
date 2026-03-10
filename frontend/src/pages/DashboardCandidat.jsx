@@ -60,6 +60,8 @@ export default function DashboardCandidat() {
     statusRefused: null,
   });
   const [portfolio,   setPortfolio]    = useState([]);
+  const [portfolioShort, setPortfolioShort] = useState([]);
+  const [portfolioLong,  setPortfolioLong]  = useState([]);
   const [applications,setApplications] = useState([]);
   const [cvFiles,     setCvFiles]      = useState([]);
   const [uploadingCv, setUploadingCv]  = useState(false);
@@ -188,6 +190,31 @@ export default function DashboardCandidat() {
     };
 
     loadPortfolio();
+
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+
+    const loadPortfolioPdfs = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/candidat/${userId}/portfolio-pdf-files`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) return;
+
+        setPortfolioShort(Array.isArray(data.portfolioShort) ? data.portfolioShort : []);
+        setPortfolioLong(Array.isArray(data.portfolioLong) ? data.portfolioLong : []);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    };
+
+    loadPortfolioPdfs();
 
     return () => controller.abort();
   }, [userId]);
@@ -504,7 +531,7 @@ export default function DashboardCandidat() {
               <div className="dash-page-header">
                 <h1 className="dash-page-title">Portfolio</h1>
                 <p className="dash-page-sub">
-                  Vos réalisations et projets · {portfolio.length} travaux
+                  Vos réalisations et projets · {portfolio.length} travaux et fichiers portfolio
                 </p>
               </div>
               <div className="portfolio-shell">
@@ -527,75 +554,169 @@ export default function DashboardCandidat() {
 
                 {pfTab === "grid" && (
                   <div className="pf-grid" key="grid">
-                    {portfolio.map((item, index) => {
-                      const color = GRADIENTS[index % GRADIENTS.length];
-                      const desc =
-                        item.shortDescription ||
-                        (item.longDescription
-                          ? `${item.longDescription.slice(0, 140)}…`
-                          : "");
-                      const tags = Array.isArray(item.tags) ? item.tags : [];
-                      return (
-                        <div className="pf-card" key={item.id}>
-                        <div className="pf-thumb">
-                          <div className="pf-thumb-bg" style={{ background:color }} />
-                          <div className="pf-thumb-overlay" />
-                          <span className="pf-thumb-num">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
-                        </div>
-                        <div className="pf-body">
-                          <div className="pf-title">{item.title}</div>
-                          <div className="pf-desc">{desc}</div>
-                          <div className="pf-tags">
-                            {tags.map(t => (
-                              <span className="pf-tag" key={t}>{t}</span>
-                            ))}
+                    {portfolioShort.length === 0 && portfolio.length === 0 ? (
+                      <p>Aucun portfolio court (PDF ou projet) n’est encore disponible.</p>
+                    ) : (
+                      <>
+                        {portfolioShort.length > 0 && (
+                          <div className="pf-files-section">
+                            <div className="files-list">
+                              {portfolioShort.map((file) => {
+                                const date = file.updatedAt
+                                  ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "2-digit",
+                                    })
+                                  : "-";
+
+                                return (
+                                  <div className="files-row" key={file.path}>
+                                    <div className="files-main">
+                                      <div className="files-name">{file.name}</div>
+                                      <div className="files-meta">
+                                        <span>{date}</span>
+                                      </div>
+                                    </div>
+                                    <div className="files-actions">
+                                      <a
+                                        href={file.publicUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="files-btn"
+                                      >
+                                        Ouvrir
+                                      </a>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      );
-                    })}
+                        )}
+
+                        {portfolio.length > 0 && (
+                          <div className="pf-grid" style={{ marginTop: 24 }}>
+                            {portfolio.map((item, index) => {
+                              const color = GRADIENTS[index % GRADIENTS.length];
+                              const desc =
+                                item.shortDescription ||
+                                (item.longDescription
+                                  ? `${item.longDescription.slice(0, 140)}…`
+                                  : "");
+                              const tags = Array.isArray(item.tags) ? item.tags : [];
+                              return (
+                                <div className="pf-card" key={item.id}>
+                                  <div className="pf-thumb">
+                                    <div className="pf-thumb-bg" style={{ background: color }} />
+                                    <div className="pf-thumb-overlay" />
+                                    <span className="pf-thumb-num">
+                                      {String(index + 1).padStart(2, "0")}
+                                    </span>
+                                  </div>
+                                  <div className="pf-body">
+                                    <div className="pf-title">{item.title}</div>
+                                    <div className="pf-desc">{desc}</div>
+                                    <div className="pf-tags">
+                                      {tags.map((t) => (
+                                        <span className="pf-tag" key={t}>{t}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
 
                 {pfTab === "list" && (
                   <div className="pf-list" key="list">
-                    {portfolio.map((item, index) => {
-                      const color = GRADIENTS[index % GRADIENTS.length];
-                      const tags = Array.isArray(item.tags) ? item.tags : [];
-                      const date = item.createdAt
-                        ? new Date(item.createdAt).toLocaleDateString("fr-FR", {
-                            year: "numeric",
-                            month: "short",
-                          })
-                        : "";
-                      const desc =
-                        item.longDescription ||
-                        item.shortDescription ||
-                        "";
+                    {portfolioLong.length === 0 && portfolio.length === 0 ? (
+                      <p>Aucun portfolio long (PDF ou projet) n’est encore disponible.</p>
+                    ) : (
+                      <>
+                        {portfolioLong.length > 0 && (
+                          <div className="pf-files-section">
+                            <div className="files-list">
+                              {portfolioLong.map((file) => {
+                                const date = file.updatedAt
+                                  ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "2-digit",
+                                    })
+                                  : "-";
 
-                      return (
-                        <div className="pf-row" key={item.id}>
-                        <div className="pf-row-thumb">
-                          <div className="pf-row-thumb-bg" style={{ background:color }} />
-                        </div>
-                        <div className="pf-row-info">
-                          <div className="pf-row-title">{item.title}</div>
-                          <div className="pf-row-desc">{desc}</div>
-                          <div className="pf-tags" style={{marginTop:4}}>
-                            {tags.map(t => (
-                              <span className="pf-tag" key={t}>{t}</span>
-                            ))}
+                                return (
+                                  <div className="files-row" key={file.path}>
+                                    <div className="files-main">
+                                      <div className="files-name">{file.name}</div>
+                                      <div className="files-meta">
+                                        <span>{date}</span>
+                                      </div>
+                                    </div>
+                                    <div className="files-actions">
+                                      <a
+                                        href={file.publicUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="files-btn"
+                                      >
+                                        Ouvrir
+                                      </a>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                        <div className="pf-row-meta">
-                          <span className="pf-row-date">{date}</span>
-                          <ArrowRight size={15} className="pf-row-arrow" />
-                        </div>
-                      </div>
-                      );
-                    })}
+                        )}
+
+                        {portfolio.length > 0 && (
+                          <div className="pf-list" style={{ marginTop: 24 }}>
+                            {portfolio.map((item, index) => {
+                              const color = GRADIENTS[index % GRADIENTS.length];
+                              const tags = Array.isArray(item.tags) ? item.tags : [];
+                              const date = item.createdAt
+                                ? new Date(item.createdAt).toLocaleDateString("fr-FR", {
+                                    year: "numeric",
+                                    month: "short",
+                                  })
+                                : "";
+                              const desc =
+                                item.longDescription ||
+                                item.shortDescription ||
+                                "";
+
+                              return (
+                                <div className="pf-row" key={item.id}>
+                                  <div className="pf-row-thumb">
+                                    <div className="pf-row-thumb-bg" style={{ background: color }} />
+                                  </div>
+                                  <div className="pf-row-info">
+                                    <div className="pf-row-title">{item.title}</div>
+                                    <div className="pf-row-desc">{desc}</div>
+                                    <div className="pf-tags" style={{ marginTop: 4 }}>
+                                      {tags.map((t) => (
+                                        <span className="pf-tag" key={t}>{t}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="pf-row-meta">
+                                    <span className="pf-row-date">{date}</span>
+                                    <ArrowRight size={15} className="pf-row-arrow" />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>

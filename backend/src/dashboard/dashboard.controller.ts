@@ -30,6 +30,12 @@ export class DashboardController {
     return this.dashboardService.getCandidateCvFiles(id);
   }
 
+  @Get('candidat/:userId/portfolio-pdf-files')
+  async getCandidatePortfolioPdfFiles(@Param('userId') userId: string) {
+    const id = Number.parseInt(userId, 10);
+    return this.dashboardService.getCandidatePortfolioPdfFiles(id);
+  }
+
   @Post('candidat/:userId/upload-cv')
   @UseInterceptors(FileInterceptor('file'))
   async uploadCandidateCv(

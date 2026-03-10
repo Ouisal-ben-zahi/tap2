@@ -41,6 +41,11 @@ export interface CandidateCvFileItem {
   size: number | null;
 }
 
+export interface CandidatePortfolioPdfFiles {
+  portfolioShort: CandidateCvFileItem[];
+  portfolioLong: CandidateCvFileItem[];
+}
+
 @Injectable()
 export class DashboardService {
   private supabase: SupabaseClient;
@@ -332,6 +337,120 @@ export class DashboardService {
     }
 
     return { cvFiles };
+  }
+
+  async getCandidatePortfolioPdfFiles(
+    userId: number,
+  ): Promise<CandidatePortfolioPdfFiles> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+
+    const {
+      data: candidate,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidate) {
+      return { portfolioShort: [], portfolioLong: [] };
+    }
+
+    const category =
+      (candidate.categorie_profil as string | null) || 'Autres';
+    const candidateId = candidate.id as number;
+
+    const basePath = `candidates/${category}/${candidateId}`;
+
+    const { data: listed, error: listError } = await this.supabase.storage
+      .from('tap_files')
+      .list(basePath, {
+        limit: 100,
+      });
+
+    if (listError) {
+      throw new BadRequestException(
+        listError.message ||
+          'Erreur lors du listing des fichiers de portfolio',
+      );
+    }
+
+    const portfolioShort: CandidateCvFileItem[] = [];
+    const portfolioLong: CandidateCvFileItem[] = [];
+
+    const files = (listed ?? []).filter((f: any) => {
+      if (typeof f.name !== 'string') return false;
+      const name = f.name.toLowerCase();
+      const isPdf = name.endsWith('.pdf');
+      const startsWithPortfolio = name.startsWith('portfolio');
+      if (!isPdf || !startsWithPortfolio) return false;
+
+      // on supporte les 2 variantes : "one-page" et "one_page"
+      const isShort =
+        name.endsWith('_one-page_fr.pdf') ||
+        name.endsWith('_one-page_en.pdf') ||
+        name.endsWith('_one_page_fr.pdf') ||
+        name.endsWith('_one_page_en.pdf');
+      const isLong =
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+
+      return isShort || isLong;
+    });
+
+    for (const file of files) {
+      const name = (file.name as string).toLowerCase();
+      const path = `${basePath}/${file.name}`;
+
+      const { data: signed, error: signedError } = await this.supabase.storage
+        .from('tap_files')
+        .createSignedUrl(path, 60 * 60);
+
+      if (signedError || !signed) {
+        // on ignore ce fichier si la signature échoue
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      const size =
+        typeof file.metadata?.size === 'number'
+          ? (file.metadata.size as number)
+          : null;
+
+      const item: CandidateCvFileItem = {
+        name: file.name as string,
+        path,
+        publicUrl: signed.signedUrl,
+        updatedAt: (file.updated_at as string) ?? null,
+        size,
+      };
+
+      const isShort =
+        name.endsWith('_one-page_fr.pdf') ||
+        name.endsWith('_one-page_en.pdf') ||
+        name.endsWith('_one_page_fr.pdf') ||
+        name.endsWith('_one_page_en.pdf');
+      const isLong =
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+
+      if (isShort) {
+        portfolioShort.push(item);
+      } else if (isLong) {
+        portfolioLong.push(item);
+      }
+    }
+
+    return { portfolioShort, portfolioLong };
   }
 
   async uploadCandidateCv(
