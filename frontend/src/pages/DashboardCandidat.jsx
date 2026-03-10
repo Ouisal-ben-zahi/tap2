@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import "../css/Dashboard.css";
 import logo from "../assets/logo-white.svg";
+import "../css/Contact.css";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -24,7 +25,7 @@ const GRADIENTS = [
 
 const MENU = [
   { id:"dashboard",  label:"Dashboard",    icon:LayoutDashboard },
-  { id:"fichiers",   label:"Mes fichiers", icon:FolderOpen      },
+  { id:"fichiers",   label:"Bienvenue",    icon:FolderOpen      },
   { id:"talentcard", label:"Talent Card",  icon:CreditCard      },
   { id:"cv",         label:"Curriculum Vitae", icon:FileText    },
   { id:"projets",    label:"Projets",      icon:Briefcase       },
@@ -65,6 +66,30 @@ export default function DashboardCandidat() {
   const [applications,setApplications] = useState([]);
   const [cvFiles,     setCvFiles]      = useState([]);
   const [talentcardFiles, setTalentcardFiles] = useState([]);
+  // état du wizard Talent Card (section Bienvenue)
+  const [currentWizardStep, setCurrentWizardStep] = useState(1);
+  const [cvFile, setCvFile] = useState(null);
+  const [imgFile, setImgFile] = useState(null);
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [otherLinks, setOtherLinks] = useState([]);
+  const [targetPosition, setTargetPosition] = useState("");
+  const [targetCountry, setTargetCountry] = useState("");
+  const [pretARelocater, setPretARelocater] = useState("");
+  const [constraints, setConstraints] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [locationCountry, setLocationCountry] = useState("");
+  const [seniorityLevel, setSeniorityLevel] = useState("");
+  const [disponibilite, setDisponibilite] = useState("");
+  const [typeContrat, setTypeContrat] = useState([]);
+  const [salaireMinimum, setSalaireMinimum] = useState("");
+  const [domaineActivite, setDomaineActivite] = useState("");
+  const [talentCardLang, setTalentCardLang] = useState(
+    () => localStorage.getItem("talentcard-lang") || "fr",
+  );
+  const [wizardLoading, setWizardLoading] = useState(false);
+  const [wizardError, setWizardError] = useState(null);
   const [uploadingCv, setUploadingCv]  = useState(false);
   const [uploadErrorCv, setUploadErrorCv] = useState("");
 
@@ -323,6 +348,144 @@ export default function DashboardCandidat() {
     } finally {
       setUploadingCv(false);
       event.target.value = "";
+    }
+  };
+
+  // ── Logique simplifiée du wizard Talent Card (section Bienvenue) ──
+  const wizardSteps = [
+    {
+      id: 1,
+      title: "Comprendre ton profil",
+      subtitle: "Qui tu es",
+      aiMessage:
+        " Salut ! Avant de commencer, je vais analyser ton profil pour comprendre ton contexte et adapter les opportunités qui te correspondent vraiment.",
+      aiExplanation:
+        "Ces informations m’aident à filtrer les opportunités qui matchent vraiment avec ta situation.",
+      whatAiDoes:
+        " Une fois ces informations remplies, je crée une carte d’identité professionnelle personnalisée.",
+    },
+    {
+      id: 2,
+      title: "Ton objectif professionnel",
+      subtitle: "Ce que tu veux",
+      aiMessage:
+        " Je vais structurer tes aspirations pour créer une Talent Card qui met en avant ce que tu recherches.",
+      aiExplanation:
+        " Plus je comprends ce que tu veux, mieux je peux structurer ta candidature.",
+      whatAiDoes:
+        " Je transforme tes objectifs en un profil ciblé qui parle aux recruteurs.",
+    },
+    {
+      id: 3,
+      title: "Tes compétences",
+      subtitle: "Ce que tu sais faire",
+      aiMessage:
+        " Je vais analyser ton CV ou ton LinkedIn pour extraire automatiquement tes compétences et expériences.",
+      aiExplanation:
+        " Au lieu de te faire remplir un long formulaire, je lis directement ton CV.",
+      whatAiDoes:
+        " J’utilise l’IA pour extraire et structurer tes expériences et réalisations.",
+    },
+    {
+      id: 4,
+      title: "Validation & génération",
+      subtitle: "Ton profil est prêt",
+      aiMessage:
+        " Ton profil est complet, je peux générer une Talent Card PDF professionnelle.",
+      aiExplanation:
+        " Tu obtiendras une Talent Card PDF et un CV optimisé.",
+      whatAiDoes:
+        " Je génère la Talent Card, la sauvegarde et prépare ton CV optimisé.",
+    },
+  ];
+
+  const isWizardStepComplete = (stepId) => {
+    switch (stepId) {
+      case 1:
+        return (
+          nationality &&
+          locationCountry &&
+          seniorityLevel &&
+          disponibilite &&
+          imgFile
+        );
+      case 2:
+        return (
+          targetPosition &&
+          targetCountry &&
+          constraints &&
+          searchCriteria &&
+          typeContrat.length > 0 &&
+          domaineActivite
+        );
+      case 3:
+        return cvFile || linkedinUrl.trim();
+      case 4:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleWizardFileChange = (e) => {
+    const selectedFile = e.target.files && e.target.files[0];
+    setCvFile(selectedFile || null);
+  };
+
+  const handleWizardRemoveCv = () => {
+    setCvFile(null);
+  };
+
+  const handleWizardImageChange = (e) => {
+    const selectedFile = e.target.files && e.target.files[0];
+    setImgFile(selectedFile || null);
+  };
+
+  const handleWizardRemoveImage = () => {
+    setImgFile(null);
+  };
+
+  const setTalentCardLangAndSave = (lang) => {
+    setTalentCardLang(lang);
+    localStorage.setItem("talentcard-lang", lang);
+  };
+
+  const currentStepData =
+    wizardSteps.find((s) => s.id === currentWizardStep) || wizardSteps[0];
+
+  const handleWizardNext = () => {
+    if (currentWizardStep < 4 && isWizardStepComplete(currentWizardStep)) {
+      setCurrentWizardStep((s) => s + 1);
+    }
+  };
+
+  const handleWizardPrevious = () => {
+    if (currentWizardStep > 1) {
+      setCurrentWizardStep((s) => s - 1);
+    }
+  };
+
+  const handleWizardSubmit = async (e) => {
+    e.preventDefault();
+    if (
+      !isWizardStepComplete(1) ||
+      !isWizardStepComplete(2) ||
+      !isWizardStepComplete(3)
+    ) {
+      setWizardError(
+        "Merci de compléter les étapes 1, 2 et 3 avant de générer la Talent Card.",
+      );
+      return;
+    }
+    setWizardLoading(true);
+    setWizardError(null);
+    try {
+      // Ici tu pourras brancher ton appel API `${API_URL}/process`
+      // pour l’instant on simule simplement la génération.
+      // eslint-disable-next-line no-alert
+      alert("Génération de la Talent Card (simulation côté front).");
+    } finally {
+      setWizardLoading(false);
     }
   };
 
@@ -748,20 +911,565 @@ export default function DashboardCandidat() {
             </div>
           )}
 
-          {/* ── MES FICHIERS (CV) ── */}
+          {/* ── BIENVENUE + MES FICHIERS (CV) ── */}
           {(active === "fichiers" || active === "cv") && (
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">
-                  {active === "cv" ? "Mes CV" : "Mes fichiers"}
+                  {active === "cv" ? "Mes CV" : "Bienvenue"}
                 </h1>
                 <p className="dash-page-sub">
                   {active === "cv"
                     ? "Gérez plusieurs versions de CV, activez celle de votre choix et consultez les statistiques en temps réel."
-                    : <>Tous vos CV enregistrés dans TAP (fichiers commençant par <em>cv_</em>).</>}
+                    : <>Bienvenue dans votre espace TAP. Retrouvez ici tous vos CV enregistrés (fichiers commençant par <em>cv_</em>), et laissez l’IA vous aider à préparer votre Talent Card.</>}
                 </p>
               </div>
               <div className="dash-section-page">
+                {active === "fichiers" && (
+                  <div className="dash-section-card" style={{ marginBottom: 24 }}>
+                    {/* Header wizard */}
+                    <div className="dash-page-header" style={{ marginBottom: 16 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "1rem",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <img src={logo} alt="logo" style={{ width: "3rem" }} />
+                        <h2
+                          className="dash-page-title"
+                          style={{ fontSize: 22, textTransform: "uppercase" }}
+                        >
+                          Talent Acceleration Platform
+                        </h2>
+                      </div>
+                      <p className="dash-page-sub">
+                        Je t&apos;accompagne pour créer ton profil professionnel étape par étape.
+                      </p>
+                    </div>
+
+                    {/* Wizard progress */}
+                    <div
+                      className="welcome-wizard-steps"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        marginBottom: 16,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {wizardSteps.map((step, index) => (
+                        <React.Fragment key={step.id}>
+                          <div
+                            style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: "999px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              background:
+                                currentWizardStep === step.id
+                                  ? "#CA1B28"
+                                  : currentWizardStep > step.id
+                                  ? "#16a34a"
+                                  : "#e5e7eb",
+                              color:
+                                currentWizardStep >= step.id ? "#fff" : "#374151",
+                            }}
+                          >
+                            {currentWizardStep > step.id ? "✓" : step.id}
+                          </div>
+                          {index < wizardSteps.length - 1 && (
+                            <div
+                              style={{
+                                width: 40,
+                                height: 2,
+                                background:
+                                  currentWizardStep > step.id ? "#16a34a" : "#e5e7eb",
+                              }}
+                            />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+
+                    {/* AI message */}
+                    <div
+                      style={{
+                        marginBottom: 16,
+                        borderLeft: "4px solid #CA1B28",
+                        padding: 12,
+                        background: "rgba(0,0,0,0.03)",
+                        borderRadius: 8,
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                        <div
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "999px",
+                            background: "#fef2f2",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <img src={logo} alt="logo" style={{ width: "1.8rem" }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <h3
+                            style={{
+                              fontSize: 16,
+                              fontWeight: 600,
+                              marginBottom: 4,
+                            }}
+                          >
+                            {currentStepData.title}
+                          </h3>
+                          <p style={{ marginBottom: 6 }}>{currentStepData.aiMessage}</p>
+                          <div
+                            style={{
+                              background: "#fef2f2",
+                              borderRadius: 8,
+                              padding: 8,
+                              border: "1px solid #fecaca",
+                              fontSize: 13,
+                            }}
+                          >
+                            <p style={{ marginBottom: 4 }}>
+                              {currentStepData.aiExplanation}
+                            </p>
+                            <p>{currentStepData.whatAiDoes}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Wizard form (simplifié) */}
+                    {wizardError && (
+                      <div
+                        style={{
+                          marginBottom: 12,
+                          padding: 8,
+                          borderRadius: 6,
+                          background: "#fef2f2",
+                          border: "1px solid #fecaca",
+                          color: "#b91c1c",
+                          fontSize: 14,
+                        }}
+                      >
+                        {wizardError}
+                      </div>
+                    )}
+
+                    <form
+                      onSubmit={handleWizardSubmit}
+                      className="contact-form"
+                      style={{ background: "transparent", boxShadow: "none", border: "none" }}
+                    >
+                      {currentWizardStep === 1 && (
+                        <>
+                          <div className="form-row">
+                            <div className="form-field">
+                              <label>
+                                Nationalité <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={nationality}
+                                onChange={(e) => setNationality(e.target.value)}
+                                placeholder="Ex: Marocaine, Française, Canadienne..."
+                                required
+                              />
+                            </div>
+                            <div className="form-field">
+                              <label>
+                                Pays de résidence actuel{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={locationCountry}
+                                onChange={(e) => setLocationCountry(e.target.value)}
+                                placeholder="Ex: Maroc, France, Canada..."
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="form-row">
+                            <div className="form-field">
+                              <label>
+                                Niveau de séniorité{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <select
+                                value={seniorityLevel}
+                                onChange={(e) => setSeniorityLevel(e.target.value)}
+                                required
+                              >
+                                <option value="">Sélectionner...</option>
+                                <option value="Entry Level">
+                                  Entry Level / Débutant
+                                </option>
+                                <option value="Junior">Junior</option>
+                                <option value="Intermediate">Intermédiaire</option>
+                                <option value="Mid-Level">
+                                  Mid-Level / Confirmé
+                                </option>
+                                <option value="Senior">Senior</option>
+                                <option value="Expert">Expert / Lead</option>
+                              </select>
+                            </div>
+                            <div className="form-field">
+                              <label>
+                                Disponibilité{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <select
+                                value={disponibilite}
+                                onChange={(e) => setDisponibilite(e.target.value)}
+                                required
+                              >
+                                <option value="">Sélectionner...</option>
+                                <option value="Immediat">Immédiate</option>
+                                <option value="1 semaine">1 semaine</option>
+                                <option value="2 semaines">2 semaines</option>
+                                <option value="3 semaines">3 semaines</option>
+                                <option value="4 semaines">4 semaines</option>
+                                <option value="5 semaines">5 semaines</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>
+                              Photo professionnelle{" "}
+                              <span style={{ color: "#dc2626" }}>*</span>
+                            </label>
+                            <input
+                              type="file"
+                              accept=".jpg,.jpeg,.png"
+                              onChange={handleWizardImageChange}
+                            />
+                            {imgFile && (
+                              <div className="login-error" style={{ marginTop: 8 }}>
+                                <span>✅</span>
+                                <span style={{ marginLeft: 8 }}>{imgFile.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={handleWizardRemoveImage}
+                                  style={{
+                                    marginLeft: 12,
+                                    color: "#dc2626",
+                                    textDecoration: "underline",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Supprimer
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+
+                      {currentWizardStep === 2 && (
+                        <>
+                          <div className="form-row">
+                            <div className="form-field">
+                              <label>
+                                Poste cible{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={targetPosition}
+                                onChange={(e) => setTargetPosition(e.target.value)}
+                                placeholder="Ex: Data Scientist, Software Engineer..."
+                                required
+                              />
+                            </div>
+                            <div className="form-field">
+                              <label>
+                                Pays cible{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={targetCountry}
+                                onChange={(e) => setTargetCountry(e.target.value)}
+                                placeholder="Ex: France, Canada, USA..."
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="form-row">
+                            <div className="form-field">
+                              <label>Prêt à relocaliser</label>
+                              <select
+                                value={pretARelocater}
+                                onChange={(e) => setPretARelocater(e.target.value)}
+                              >
+                                <option value="">Non spécifié</option>
+                                <option value="Oui">Oui</option>
+                                <option value="Non">Non</option>
+                              </select>
+                            </div>
+                            <div className="form-field">
+                              <label>
+                                Salaire minimum{" "}
+                                <span style={{ color: "#dc2626" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={salaireMinimum}
+                                onChange={(e) => setSalaireMinimum(e.target.value)}
+                                placeholder="Ex: 50000"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>
+                              Exigences / Pré-requis{" "}
+                              <span style={{ color: "#dc2626" }}>*</span>
+                            </label>
+                            <textarea
+                              value={constraints}
+                              onChange={(e) => setConstraints(e.target.value)}
+                              rows={3}
+                              required
+                            />
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>
+                              Ce que tu recherches{" "}
+                              <span style={{ color: "#dc2626" }}>*</span>
+                            </label>
+                            <textarea
+                              value={searchCriteria}
+                              onChange={(e) => setSearchCriteria(e.target.value)}
+                              rows={3}
+                              required
+                            />
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>
+                              Types de contrat recherchés{" "}
+                              <span style={{ color: "#dc2626" }}>*</span>
+                            </label>
+                            <div className="form-row">
+                              {["CDI", "CDD", "Freelance", "Mission", "Stage"].map(
+                                (type) => (
+                                  <label
+                                    key={type}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 4,
+                                      cursor: "pointer",
+                                      fontSize: 13,
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      value={type}
+                                      checked={typeContrat.includes(type)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setTypeContrat((prev) => [...prev, type]);
+                                        } else {
+                                          setTypeContrat((prev) =>
+                                            prev.filter((t) => t !== type),
+                                          );
+                                        }
+                                      }}
+                                    />
+                                    <span>{type}</span>
+                                  </label>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>
+                              Domaine d&apos;activité{" "}
+                              <span style={{ color: "#dc2626" }}>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={domaineActivite}
+                              onChange={(e) => setDomaineActivite(e.target.value)}
+                              placeholder="Ex: Intelligence artificielle & Data"
+                              required
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {currentWizardStep === 3 && (
+                        <>
+                          <div className="form-row">
+                            <div className="form-field">
+                              <label>CV (PDF ou DOCX)</label>
+                              <input
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                onChange={handleWizardFileChange}
+                              />
+                              {cvFile && (
+                                <div className="login-error" style={{ marginTop: 8 }}>
+                                  <span>✅</span>
+                                  <span style={{ marginLeft: 8 }}>{cvFile.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={handleWizardRemoveCv}
+                                    style={{
+                                      marginLeft: 12,
+                                      color: "#dc2626",
+                                      textDecoration: "underline",
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    Supprimer
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            <div className="form-field">
+                              <label>OU URL LinkedIn</label>
+                              <input
+                                type="url"
+                                value={linkedinUrl}
+                                onChange={(e) => setLinkedinUrl(e.target.value)}
+                                placeholder="https://www.linkedin.com/in/..."
+                              />
+                            </div>
+                          </div>
+                          <div className="form-field form-field-full">
+                            <label>URL GitHub</label>
+                            <input
+                              type="url"
+                              value={githubUrl}
+                              onChange={(e) => setGithubUrl(e.target.value)}
+                              placeholder="https://github.com/..."
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {currentWizardStep === 4 && (
+                        <div style={{ textAlign: "center" }}>
+                          <p style={{ marginBottom: 8 }}>
+                            ✅ Ton profil est complet !
+                          </p>
+                          <p style={{ marginBottom: 8, fontSize: 14 }}>
+                            Choisis la langue de ta Talent Card :
+                          </p>
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              background: "rgba(0,0,0,0.06)",
+                              borderRadius: 999,
+                              padding: 4,
+                              marginBottom: 12,
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setTalentCardLangAndSave("fr")}
+                              style={{
+                                padding: "6px 14px",
+                                borderRadius: 999,
+                                border: "none",
+                                cursor: "pointer",
+                                background:
+                                  talentCardLang === "fr" ? "#C1121F" : "transparent",
+                                color:
+                                  talentCardLang === "fr" ? "#fff" : "inherit",
+                              }}
+                            >
+                              FR
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTalentCardLangAndSave("en")}
+                              style={{
+                                padding: "6px 14px",
+                                borderRadius: 999,
+                                border: "none",
+                                cursor: "pointer",
+                                background:
+                                  talentCardLang === "en" ? "#C1121F" : "transparent",
+                                color:
+                                  talentCardLang === "en" ? "#fff" : "inherit",
+                              }}
+                            >
+                              EN
+                            </button>
+                          </div>
+                          <p style={{ fontSize: 14 }}>
+                            En cliquant sur &quot;Générer ma Talent Card&quot;, nous
+                            lancerons le traitement IA (à connecter à l&apos;API).
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Navigation */}
+                      <div className="contact-submit-wrapper" style={{ marginTop: 16 }}>
+                        {currentWizardStep > 1 ? (
+                          <button
+                            type="button"
+                            onClick={handleWizardPrevious}
+                            className="contact-submit"
+                          >
+                            ← Précédent
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+                        {currentWizardStep < 4 ? (
+                          <button
+                            type="button"
+                            onClick={handleWizardNext}
+                            className="contact-submit"
+                            disabled={!isWizardStepComplete(currentWizardStep)}
+                          >
+                            Suivant →
+                          </button>
+                        ) : (
+                          <button
+                            type="submit"
+                            className="contact-submit"
+                            disabled={
+                              wizardLoading ||
+                              !isWizardStepComplete(1) ||
+                              !isWizardStepComplete(2) ||
+                              !isWizardStepComplete(3)
+                            }
+                          >
+                            {wizardLoading
+                              ? "Génération en cours..."
+                              : "🚀 Générer ma Talent Card"}
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+                )}
+                {active === "cv" && (
                 <div className="dash-section-card">
                   <div className="files-upload-bar">
                     <label className="files-upload-btn">
@@ -829,6 +1537,7 @@ export default function DashboardCandidat() {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             </div>
           )}
