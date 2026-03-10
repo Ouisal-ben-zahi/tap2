@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+venv1/
+env/
+ENV/
+.venv
+
+# Fichiers générés
+generated/
+uploads/
+*.wav
+*.pdf
+*.docx
+*.json
+!B1/attachments/*.docx
+!database/*.sql
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+test_*.py
+*_test.py

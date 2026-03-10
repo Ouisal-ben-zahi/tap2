@@ -1,0 +1,17 @@
+{
+    "recommandations": [
+      "Raccourcir le résumé (max 280 caractères) et le rendre orienté résultats.",
+      "Limiter les compétences à 10 max et éviter les doublons.",
+      "Pour chaque expérience: description courte (max 220 caractères) avec impact mesurable."
+    ],
+    "corrections": {
+      "linkedin": "Retirer https:// et www si présents, garder un format simple linkedin.com/in/xxx.",
+      "telephone": "Utiliser un format international cohérent, ex: +33 6 00 00 00 00."
+    },
+    "points_forts": [
+      "API REST (FastAPI)",
+      "Docker/CI-CD",
+      "SQL/PostgreSQL"
+    ],
+    "mots_cles": ["Python", "FastAPI", "PostgreSQL", "Docker", "CI/CD", "REST"]
+  }

@@ -5,7 +5,7 @@ import {
   Image, CalendarCheck, LogOut, Search,
   TrendingUp, TrendingDown, Users, Bookmark, Bell,
   BriefcaseBusiness, ArrowRight, ChevronLeft, ChevronRight,
-  Settings, Menu, Award, Zap, BarChart2, AlertTriangle,
+  Settings, Menu, Award, Zap, BarChart2, AlertTriangle, Home,
 } from "lucide-react";
 import "../css/Dashboard.css";
 import logo from "../assets/logo-white.svg";
@@ -24,14 +24,22 @@ const GRADIENTS = [
 
 /* ─── menu ─── */
 const MENU = [
-  { id: "dashboard",    label: "Dashboard",         icon: LayoutDashboard   },
-  { id: "fichiers",     label: "Bienvenue",          icon: FolderOpen        },
-  { id: "talentcard",   label: "Talent Card",        icon: CreditCard        },
-  { id: "cv",           label: "Curriculum Vitae",   icon: FileText          },
-  { id: "portfolio",    label: "Portfolio Court",    icon: Image             },
-  { id: "portfolio-long","label": "Portfolio Long",  icon: BarChart2         },
-  { id: "candidatures", label: "Mes candidatures",   icon: BriefcaseBusiness },
-  { id: "entretiens",   label: "Entretiens",         icon: CalendarCheck     },
+  // 1. Bienvenue
+  { id: "fichiers",      label: "Bienvenue",         icon: Home              },
+  // 2. Dashboard
+  { id: "dashboard",     label: "Dashboard",         icon: LayoutDashboard   },
+  // 3. CV
+  { id: "cv",            label: "Curriculum Vitae",  icon: FileText          },
+  // 4. Portfolio court
+  { id: "portfolio",     label: "Portfolio court",   icon: Image             },
+  // 5. Portfolio long
+  { id: "portfolio-long",label: "Portfolio long",    icon: BarChart2         },
+  // 6. Entretiens
+  { id: "entretiens",    label: "Entretiens",        icon: CalendarCheck     },
+  // 7. Mes candidatures
+  { id: "candidatures",  label: "Mes candidatures",  icon: BriefcaseBusiness },
+  // sections supplémentaires
+  { id: "talentcard",    label: "Talent Card",       icon: CreditCard        },
 ];
 
 /* ─── bar chart data ─── */

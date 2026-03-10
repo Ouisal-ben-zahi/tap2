@@ -1,0 +1,52 @@
+{
+  "Name": "Jean Dupont",
+  "Titre": "Développeur Python Fullstack",
+  "Tele": "+33 6 00 00 00 00",
+  "Email": "jean.dupont@email.com",
+  "Linkedin": "linkedin.com/in/jeandupont",
+  "Ville": "Paris",
+  "resume": "Développeur Python passionné avec 5 ans d'expérience dans la conception d'applications web et d'APIs performantes. Expertise en microservices, conteneurisation Docker et CI/CD.",
+  "Skill": "Python\nFastAPI\nSQL\nPostgreSQL\nDocker\nGit\nReact",
+  "Experiences": [
+    {
+      "title": "Développeur Python Fullstack",
+      "company": "TechCorp",
+      "period": "2021–2024",
+      "description": "Développement d’APIs REST et intégration front React. Mise en place de CI/CD et conteneurisation Docker pour les déploiements."
+    },
+    {
+      "title": "Développeur Backend Python",
+      "company": "DataSolutions",
+      "period": "2020–2021",
+      "description": "Conception de microservices backend. Optimisation des requêtes SQL et mise en place de pipelines ETL."
+    }
+  ],
+  "Educations": [
+    {
+      "degree": "Master Informatique",
+      "school": "Université de Paris",
+      "period": "2020"
+    }
+  ],
+  "Realisations": [
+    {
+      "nom": "Plateforme E-commerce",
+      "detail": "Développement d'une architecture microservices avec FastAPI et Docker."
+    },
+    {
+      "nom": "Outil d'Automatisation",
+      "detail": "Création d'un script de déploiement continu réduisant le temps de mise en production de 40%."
+    }
+  ],
+  "Certificats": [],
+  "Langues": [
+    {
+      "langue": "Français",
+      "niveau": "Courant"
+    },
+    {
+      "langue": "Anglais",
+      "niveau": "Intermédiaire"
+    }
+  ]
+}
