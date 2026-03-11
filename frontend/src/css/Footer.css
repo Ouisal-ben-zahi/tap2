@@ -1,54 +1,88 @@
 
 .footer-container {
-  background-color: #E6E6E6;
-  color: #000;
+  background-color: #020202;
+  color: #f9fafb;
   width: 100%;
+  padding-top: 56px;
 }
 
 .footer-inner {
-  max-width: 1200px;
+  max-width: 1160px;
   width: 90%;
-  margin: 0 auto;
+  margin: 0 auto 32px auto;
   display: flex;
-  padding: 80px  0;
-  gap: 40px;
+  gap: 56px;
   align-items: flex-start;
-  text-align: left;
 }
 
 .footer-brand {
-  flex: 1;
+  flex: 1.4;
 }
 
 .footer-logo {
   display: block;
-  width: 100%;
-  max-width: 100%;
+  width: 120px;
   height: auto;
   margin-bottom: 12px;
   object-fit: contain;
 }
 
 .brand-description {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.4;
-  display: -webkit-box;
+  line-height: 1.5;
+  color: #e5e7eb;
+  max-width: 260px;
+  margin-bottom: 20px;
 }
 
-/* LA LIGNE SÉPARATRICE CENTRÉE VERTICALEMENT */
-.footer-divider {
-  width: 1px;
-  background-color: #999;
-  height: 160px; /* Taille fixe */
-  align-self: center; /* Force le centrage vertical uniquement pour cet élément */
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.footer-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-contact-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(148,163,184,0.6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.footer-contact-link {
+  color: #e5e7eb;
+  text-decoration: none;
+}
+
+.footer-contact-link:hover {
+  color: #f97373;
+}
+
+.footer-contact-text {
+  color: #9ca3af;
 }
 
 .footer-grid {
-  flex: 3.5;
+  flex: 2;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
 }
 
 /* En-tête de colonne : titre + flèche (style select) */
@@ -67,10 +101,11 @@
 }
 
 .footer-column-header h3 {
-  font-size: 20px;
+  font-size: 13px;
   font-weight: bold;
   margin: 0;
   text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 /* Flèche visible uniquement en mobile */
@@ -92,57 +127,61 @@
 }
 
 .footer-column li {
-  font-size: 16px;
+  font-size: 13px;
   margin-bottom: 8px;
   font-weight: 400;
   text-align: left;
+  color: #e5e7eb;
 }
 
-/* SECTION CONTACT SANS MARGIN ENTRE LABEL ET VALEUR */
-.contact-block {
-  margin-bottom: 15px;
+.footer-bottom {
+  border-top: 1px solid rgba(31,41,55,0.7);
+  max-width: 1160px;
+  width: 90%;
+  margin: 0 auto 12px auto;
+  padding-top: 14px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; /* pour placer la flèche dans le coin bas droit */
+  font-size: 11px;
+  color: #6b7280;
 }
 
-.contact-block strong {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0; /* Pas de marge */
-  padding: 0;
-}
-
-.contact-block span,
-.contact-block .contact-link {
-  font-size: 16px;
-  font-weight: 400;
+.footer-bottom-left {
   margin: 0;
-  padding: 0;
 }
 
-.contact-block .contact-link {
-  color: #000;
-  text-decoration: none;
+.footer-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-bottom-location {
+  color: #9ca3af;
+}
+
+.footer-scroll-top {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px; /* full rounded */
+  border: 1px solid rgba(148,163,184,0.8);
+  background: #020617;
+  color: #e5e7eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   cursor: pointer;
-  transition: color 0.2s, text-decoration 0.2s;
+  position: absolute;
+  right: 0;
+  bottom: 0; /* collée en bas à droite de la barre footer-bottom */
 }
 
-.contact-block .contact-link:hover {
+.footer-scroll-top:hover {
+  border-color: #e01f26;
   color: #e01f26;
-  text-decoration: underline;
-}
-
-.footer-copyright {
-  background-color: #000;
-  color: #fff;
-  text-align: center;
-  padding: 20px 0;
-}
-
-.footer-copyright p {
-  font-size: 14px;
-  margin: 0;
-  letter-spacing: 1px;
 }
 
 /* Responsive : accordéon + tout aligné à gauche */
@@ -151,9 +190,8 @@
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    padding: 40px 0 10px 0;
+    padding: 32px 0 10px 0;
   }
-  .footer-divider { display: none; }
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 0;
@@ -163,11 +201,11 @@
     width: 100%;
   }
   .footer-logo {
-    margin: 0 0 20px 0;
-    max-width: 140px;
+    margin: 0 0 16px 0;
+    max-width: 120px;
   }
   .brand-description {
-    font-size: 16px;
+    font-size: 14px;
   }
   .footer-column-arrow {
     display: inline-block;

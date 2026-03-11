@@ -1,95 +1,408 @@
+/* ═══════════════════════════════════════════════
+   HERO.CSS — TAP Hero Section
+   Background image + left-to-right overlay + Africa map
+═══════════════════════════════════════════════ */
 
-.hero {
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ─── VARIABLES ─────────────────────────────── */
+:root {
+  --hero-red:       #e01f26;
+  --hero-red-dark:  #8b0000;
+  --hero-bg:        #0a0000;
+  --hero-text:      #ffffff;
+  --hero-muted:     rgba(255, 255, 255, 0.62);
+  --hero-font-title: 'Syne', sans-serif;
+  --hero-font-body:  'DM Sans', sans-serif;
+}
+
+/* ─── SECTION ───────────────────────────────── */
+.hero-section {
   position: relative;
   width: 100%;
   height: 100vh;
-  min-height: 100vh;
+  min-height: 580px;
+  max-height: 820px;
   overflow: hidden;
-  box-sizing: border-box;
-  background: transparent;
+  display: flex;
+  align-items: center;
+  font-family: var(--hero-font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
-.hero-map {
-  position: absolute;
-  right: 0%;
-  bottom: 0;
-  max-height: 95vh;
-  max-width: 85%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  object-position: right bottom;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.28;
-}
-
-.hero-content {
+/* ─── BACKGROUND IMAGE ──────────────────────── */
+.hero-bg {
   position: absolute;
   inset: 0;
+  background-image: url('../assets/hero.jpg');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  z-index: 0;
+  transform: scale(1.04);
+  animation: heroBgSettle 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ─── OVERLAY : left black → right transparent ─ */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(4, 0, 0, 1)      0%,
+    rgba(4, 0, 0, 0.97)   18%,
+    rgba(4, 0, 0, 0.88)   35%,
+    rgba(4, 0, 0, 0.55)   55%,
+    rgba(4, 0, 0, 0.15)   75%,
+    rgba(4, 0, 0, 0)      100%
+  );
+  z-index: 1;
+}
+
+/* extra red tint at top & bottom */
+.hero-overlay-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 5% 0%,   rgba(139, 0, 0, 0.28) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 0% 100%,  rgba(80, 0, 0, 0.25) 0%, transparent 60%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ─── CONTENT WRAPPER ───────────────────────── */
+.hero-inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* ─── LEFT CONTENT ──────────────────────────── */
+.hero-content {
+  flex: 0 0 auto;
+  max-width: 780px;
+}
+
+/* badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hero-red);
+  margin-bottom: 18px;
+  opacity: 0;
+  animation: heroFadeUp 0.6s ease forwards 0.1s;
+}
+
+.hero-badge::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hero-red));
+}
+
+/* title */
+.hero-title {
+  font-family: var(--hero-font-title);
+  font-size: clamp(34px, 4.5vw, 60px); /* titre un peu plus petit */
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--hero-text);
+  margin: 0 0 24px 0;
+  opacity: 0;
+  animation: heroFadeUp 0.7s ease forwards 0.22s;
+}
+
+.hero-title-line {
+  display: block;
+}
+
+.hero-title-strong {
+  font-weight: 800;
+}
+
+.hero-title-accent {
+  color: var(--hero-red);
+  font-weight: 800;
+  position: relative;
+  display: inline-block;
+}
+
+/* red underline on accent */
+.hero-title-accent::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--hero-red);
+  animation: heroLineGrow 0.6s ease forwards 0.9s;
+}
+
+/* description */
+.hero-desc {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--hero-muted);
+  line-height: 1.7;
+  max-width: 380px;
+  margin: 0 0 40px 0;
+  opacity: 0;
+  animation: heroFadeUp 0.7s ease forwards 0.38s;
+}
+
+/* buttons */
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: heroFadeUp 0.7s ease forwards 0.52s;
+}
+
+.hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  background: var(--hero-red);
+  color: white;
+  font-family: var(--hero-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: 999px; /* full rounded */
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hero-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.45s ease;
+}
+
+.hero-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(224, 31, 38, 0.55), 0 8px 24px rgba(224, 31, 38, 0.3);
+}
+
+.hero-btn-primary:hover::before {
+  transform: translateX(100%);
+}
+
+.hero-btn-primary-arrow {
+  font-size: 15px;
+  transition: transform 0.2s;
+}
+
+.hero-btn-primary:hover .hero-btn-primary-arrow {
+  transform: translateX(3px);
+}
+
+.hero-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--hero-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px; /* full rounded */
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: white;
+}
+
+/* ─── RIGHT — MAP CONTAINER ─────────────────── */
+.hero-map-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 48%; /* carte un peu plus large */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.hero-map-svg-wrap {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 140px 5% 40px;
-  box-sizing: border-box;
-  color: #f5f5f5;
-  text-align: left;
-  z-index: 2;
+  opacity: 0;
+  animation: heroMapReveal 1.2s ease forwards 0.6s;
 }
 
-.hero-content-inner {
-  max-width: 1200px;
-  width: 100%;
+/* SVG map styles */
+.hero-map-svg {
+  width: 96%;
+  max-width: 600px;
+  height: auto;
+  filter:
+    drop-shadow(0 0 32px rgba(180, 0, 0, 0.35))
+    drop-shadow(0 0 80px rgba(148, 27, 27, 0.45));
+  opacity: 0.9; /* carte plus présente visuellement */
 }
 
-.hero-content h1 {
-  font-size: 46px;
-  line-height: 1.2;
+.map-country {
+  fill: none;
+  stroke: rgba(200, 40, 40, 0.55);
+  stroke-width: 0.8;
+  transition: stroke 0.3s, fill 0.3s;
+}
+
+.map-country-morocco {
+  fill: rgba(180, 20, 20, 0.55);
+  stroke: rgba(255, 80, 80, 0.9);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 0 8px rgba(224, 31, 38, 0.6));
+  animation: moroccoGlow 3s ease-in-out infinite;
+}
+
+/* Marrakech dot */
+.map-city-dot {
+  fill: #fff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.9));
+  animation: cityPulse 2.4s ease-in-out infinite;
+}
+
+.map-city-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1;
+  animation: cityRingExpand 2.4s ease-out infinite;
+}
+
+.map-city-label {
+  font-family: var(--hero-font-body);
+  font-size: 7px;
+  font-weight: 600;
+  fill: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 24px;
-  font-weight: 400;
-  max-width: 770px;
 }
 
-.hero-content p {
-  font-size: 16px;
-  max-width: 900px;
+/* scan line animation across map */
+.map-scan-line {
+  stroke: rgba(224, 31, 38, 0.4);
+  stroke-width: 0.5;
+  animation: scanLineMove 4s linear infinite;
 }
 
-.hero-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+/* ─── KEYFRAMES ─────────────────────────────── */
+@keyframes heroBgSettle {
+  from { transform: scale(1.04); }
+  to   { transform: scale(1); }
 }
 
-.btn-primary,
-.btn-secondary {
-  padding: 12px 26px;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  border-radius: 0;
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.btn-primary {
-  background-color: #ca1b28;
-  color: #fff;
-  border: none;
+@keyframes heroLineGrow {
+  from { width: 0%; }
+  to   { width: 100%; }
 }
 
-.btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 1px solid #f5f5f5;
+@keyframes heroMapReveal {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-@media (max-width: 768px) {
-  .hero {
-    padding: 110px 16px 40px;
+@keyframes moroccoGlow {
+  0%, 100% { fill: rgba(180, 20, 20, 0.55); stroke: rgba(255, 80, 80, 0.85); }
+  50%       { fill: rgba(210, 30, 30, 0.70); stroke: rgba(255, 120, 120, 1); }
+}
+
+@keyframes cityPulse {
+  0%, 100% { r: 2.5; opacity: 1; }
+  50%       { r: 3.2; opacity: 0.85; }
+}
+
+@keyframes cityRingExpand {
+  0%   { r: 4;  opacity: 0.7; }
+  100% { r: 11; opacity: 0; }
+}
+
+@keyframes heroBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes scanLineMove {
+  0%   { y1: 10%;  y2: 10%;  opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.6; }
+  100% { y1: 90%;  y2: 90%;  opacity: 0; }
+}
+
+/* ─── RESPONSIVE ────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-inner {
+    padding: 0 32px;
   }
+  .hero-map-container {
+    width: 45%;
+    opacity: 0.5;
+  }
+  .hero-content {
+    max-width: 480px;
+  }
+}
 
-  .hero-content h1 {
-    font-size: 30px;
+@media (max-width: 640px) {
+  .hero-section {
+    max-height: none;
+    height: auto;
+    padding: 120px 0 80px;
+  }
+  .hero-inner {
+    padding: 0 24px;
+  }
+  .hero-map-container {
+    display: none;
+  }
+  .hero-title {
+    font-size: 38px;
   }
 }
