@@ -306,6 +306,11 @@
   pointer-events:none;
 }
 
+/* Focus amélioré : icône à gauche en rouge quand l’input est focus */
+.signup-input-with-icon:focus-within .signup-input-icon{
+  color:var(--red);
+}
+
 /* left header (titre + description) */
 .signup-left-header {
   display: flex;

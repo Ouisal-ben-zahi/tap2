@@ -333,6 +333,11 @@
   box-shadow: 0 0 0 2px rgba(224,31,38,0.35);
 }
 
+/* Focus amélioré : icône à gauche en rouge quand l’input est focus */
+.login-input-with-icon:focus-within .login-input-icon {
+  color: var(--red);
+}
+
 /* password wrapper */
 .password-input-wrapper {
   position: relative;
