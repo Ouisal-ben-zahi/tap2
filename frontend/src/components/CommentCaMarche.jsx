@@ -45,23 +45,52 @@ const TalentSection = () => {
           </h2>
         </header>
 
-        <div className="process-grid">
-          <div className="process-line" />
-          {steps.map((step, index) => (
-            <article
-              key={step.id}
-              className="process-item"
-              style={{ animationDelay: `${0.15 + index * 0.06}s` }}
-            >
-              <div className="process-icon-wrapper">
-                <div className="process-icon-ring">
-                  <div className="process-icon">{step.icon}</div>
+        <div className="process-grid process-grid--vertical">
+          <div className="process-vertical-line" />
+          {steps.map((step, index) => {
+            const isLeft = index % 2 === 0;
+            return (
+              <div
+                key={step.id}
+                className="process-row"
+                style={{ animationDelay: `${0.15 + index * 0.06}s` }}
+              >
+                <div
+                  className={
+                    "process-side " +
+                    (isLeft ? "process-side--content" : "process-side--empty")
+                  }
+                >
+                  {isLeft && (
+                    <article className="process-item process-item--left">
+                      <h3 className="process-item-title">{step.title}</h3>
+                      <p className="process-item-desc">{step.desc}</p>
+                    </article>
+                  )}
+                </div>
+
+                <div className="process-center">
+                  <div className="process-center-dot-outer">
+                    <div className="process-center-dot-inner" />
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    "process-side " +
+                    (!isLeft ? "process-side--content" : "process-side--empty")
+                  }
+                >
+                  {!isLeft && (
+                    <article className="process-item process-item--right">
+                      <h3 className="process-item-title">{step.title}</h3>
+                      <p className="process-item-desc">{step.desc}</p>
+                    </article>
+                  )}
                 </div>
               </div>
-              <h3 className="process-item-title">{step.title}</h3>
-              <p className="process-item-desc">{step.desc}</p>
-            </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

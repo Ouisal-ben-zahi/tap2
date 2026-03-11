@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Header from './layout/Header';
@@ -12,11 +12,9 @@ import Contact from "./pages/Contact";
 import DashboardCandidat from "./pages/DashboardCandidat";
 import DashboardRecruteur from "./pages/DashboardRecruteur";
 import Footer from './layout/Footer';
-import CountdownPopup from "./components/CountdownPopup";
 
 function AppShell() {
   const location = useLocation();
-  const [showCountdownPopup, setShowCountdownPopup] = useState(true);
 
   const isDashboard = location.pathname.startsWith("/dashboard");
 
@@ -32,9 +30,6 @@ function AppShell() {
 
   return (
     <>
-      {showCountdownPopup && (
-        <CountdownPopup onClose={() => setShowCountdownPopup(false)} />
-      )}
       <Header />
       <div className="app-content">
         <Routes>

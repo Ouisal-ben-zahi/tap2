@@ -25,14 +25,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className="footer-container">
-      {/* CTA au-dessus du footer */}
+    <>
+      {/* Section CTA au-dessus du footer (en dehors du footer) */}
       <section
         className="footer-cta"
-        style={{ backgroundImage: `url(${heroBg})` }}
+       
       >
         <div className="footer-cta-overlay" />
-        <div className="footer-cta-inner">
+        <div className="footer-cta-inner" >
           <div className="footer-cta-text">
             <p className="footer-cta-kicker">Prêts à passer à l’action ?</p>
             <h2 className="footer-cta-title">
@@ -50,139 +50,142 @@ const Footer = () => {
           </div>
         </div>
       </section>
-      <div className="footer-inner">
-        <div className="footer-brand">
-          <img src={logo} alt="TAP" className="footer-logo" />
-          <p className="brand-description">
-            La plateforme qui transforme des profils en talents
-            prêts à performer.
+
+      <footer className="footer-container">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <img src={logo} alt="TAP" className="footer-logo" />
+            <p className="brand-description">
+              La plateforme qui transforme des profils en talents
+              prêts à performer.
+            </p>
+
+            <ul className="footer-contact-list">
+              <li>
+                <span className="footer-contact-icon" aria-hidden>
+                  @
+                </span>
+                <a
+                  href="mailto:tap@entrepreneursmorocco.com"
+                  className="footer-contact-link"
+                  onClick={openMail}
+                >
+                  tap@entrepreneursmorocco.com
+                </a>
+              </li>
+              <li>
+                <span className="footer-contact-icon" aria-hidden>
+                  ☎
+                </span>
+                <a
+                  href="tel:+21277686816376"
+                  className="footer-contact-link"
+                  onClick={openPhone}
+                >
+                  +212 7 76 86 81 63
+                </a>
+              </li>
+              <li>
+                <span className="footer-contact-icon" aria-hidden>
+                  ⬤
+                </span>
+                <span className="footer-contact-text">
+                  Immeuble STAVROULA, Guéliz — Marrakech
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-grid">
+            <div
+              className={`footer-column ${
+                openColumn === "nav" ? "open" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="footer-column-header"
+                onClick={() => toggleColumn("nav")}
+              >
+                <h3>NAVIGATION</h3>
+                <span className="footer-column-arrow" aria-hidden>
+                  ▼
+                </span>
+              </button>
+              <ul className="footer-column-content">
+                <li>Accueil</li>
+                <li>À propos</li>
+                <li>Équipe</li>
+                <li>Contact</li>
+                <li>Connexion</li>
+              </ul>
+            </div>
+
+            <div
+              className={`footer-column ${
+                openColumn === "prod" ? "open" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="footer-column-header"
+                onClick={() => toggleColumn("prod")}
+              >
+                <h3>PRODUIT</h3>
+                <span className="footer-column-arrow" aria-hidden>
+                  ▼
+                </span>
+              </button>
+              <ul className="footer-column-content">
+                <li>Analyse IA du CV</li>
+                <li>Score d&apos;employabilité</li>
+                <li>Micro-learning</li>
+                <li>Matching intelligent</li>
+              </ul>
+            </div>
+
+            <div
+              className={`footer-column ${
+                openColumn === "legal" ? "open" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="footer-column-header"
+                onClick={() => toggleColumn("legal")}
+              >
+                <h3>LÉGAL</h3>
+                <span className="footer-column-arrow" aria-hidden>
+                  ▼
+                </span>
+              </button>
+              <ul className="footer-column-content">
+                <li>Mentions légales</li>
+                <li>Politique de confidentialité</li>
+                <li>Conditions d&apos;utilisation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p className="footer-bottom-left">
+            © 2026 TAP — Tous droits réservés.
           </p>
-
-          <ul className="footer-contact-list">
-            <li>
-              <span className="footer-contact-icon" aria-hidden>
-                @
-              </span>
-              <a
-                href="mailto:tap@entrepreneursmorocco.com"
-                className="footer-contact-link"
-                onClick={openMail}
-              >
-                tap@entrepreneursmorocco.com
-              </a>
-            </li>
-            <li>
-              <span className="footer-contact-icon" aria-hidden>
-                ☎
-              </span>
-              <a
-                href="tel:+21277686816376"
-                className="footer-contact-link"
-                onClick={openPhone}
-              >
-                +212 7 76 86 81 63
-              </a>
-            </li>
-            <li>
-              <span className="footer-contact-icon" aria-hidden>
-                ⬤
-              </span>
-              <span className="footer-contact-text">
-                Immeuble STAVROULA, Guéliz — Marrakech
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="footer-grid">
-          <div
-            className={`footer-column ${
-              openColumn === "nav" ? "open" : ""
-            }`}
-          >
+          <div className="footer-bottom-right">
+            <span className="footer-bottom-location">Marrakech, Maroc</span>
             <button
               type="button"
-              className="footer-column-header"
-              onClick={() => toggleColumn("nav")}
+              className="footer-scroll-top"
+              onClick={scrollTop}
+              aria-label="Revenir en haut de la page"
             >
-              <h3>NAVIGATION</h3>
-              <span className="footer-column-arrow" aria-hidden>
-                ▼
-              </span>
+              ↑
             </button>
-            <ul className="footer-column-content">
-              <li>Accueil</li>
-              <li>À propos</li>
-              <li>Équipe</li>
-              <li>Contact</li>
-              <li>Connexion</li>
-            </ul>
-          </div>
-
-          <div
-            className={`footer-column ${
-              openColumn === "prod" ? "open" : ""
-            }`}
-          >
-            <button
-              type="button"
-              className="footer-column-header"
-              onClick={() => toggleColumn("prod")}
-            >
-              <h3>PRODUIT</h3>
-              <span className="footer-column-arrow" aria-hidden>
-                ▼
-              </span>
-            </button>
-            <ul className="footer-column-content">
-              <li>Analyse IA du CV</li>
-              <li>Score d&apos;employabilité</li>
-              <li>Micro-learning</li>
-              <li>Matching intelligent</li>
-            </ul>
-          </div>
-
-          <div
-            className={`footer-column ${
-              openColumn === "legal" ? "open" : ""
-            }`}
-          >
-            <button
-              type="button"
-              className="footer-column-header"
-              onClick={() => toggleColumn("legal")}
-            >
-              <h3>LÉGAL</h3>
-              <span className="footer-column-arrow" aria-hidden>
-                ▼
-              </span>
-            </button>
-            <ul className="footer-column-content">
-              <li>Mentions légales</li>
-              <li>Politique de confidentialité</li>
-              <li>Conditions d&apos;utilisation</li>
-            </ul>
           </div>
         </div>
-      </div>
-
-      <div className="footer-bottom">
-        <p className="footer-bottom-left">
-          © 2026 TAP — Tous droits réservés.
-        </p>
-        <div className="footer-bottom-right">
-          <span className="footer-bottom-location">Marrakech, Maroc</span>
-          <button
-            type="button"
-            className="footer-scroll-top"
-            onClick={scrollTop}
-            aria-label="Revenir en haut de la page"
-          >
-            ↑
-          </button>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 };
 

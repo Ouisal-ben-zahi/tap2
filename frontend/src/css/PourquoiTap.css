@@ -217,6 +217,11 @@
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+   /* caché par défaut, visible seulement au hover de la carte */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .pourquoi-card:hover {
@@ -236,29 +241,11 @@
 
 .pourquoi-card:hover .pourquoi-card-link {
   color: #fecaca;
-}
-
-/* Comportement spécifique pour les cartes à header blanc (light) */
-.pourquoi-card--light:hover .pourquoi-card-icon {
-  /* icône reste sombre, sans glow rouge */
-  border-color: rgba(31,41,55,0.65);
-  color: #111827;
-  box-shadow: none;
-}
-
-/* Bouton "En savoir plus" masqué par défaut sur les cartes blanches */
-.pourquoi-card--light .pourquoi-card-link {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.pourquoi-card--light:hover .pourquoi-card-link {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
+
 
 /* Responsive */
 @media (max-width: 1100px) {

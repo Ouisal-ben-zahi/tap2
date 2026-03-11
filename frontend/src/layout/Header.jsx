@@ -5,92 +5,109 @@ import logo from "../assets/logo.svg";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const navRef = useRef(null);
   const burgerRef = useRef(null);
 
   useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
     if (!menuOpen) return;
 
-    const handleClick = (event) => {
-      const nav = navRef.current;
-      const burger = burgerRef.current;
-      if (!nav || !burger) return;
-      if (nav.contains(event.target) || burger.contains(event.target)) {
-        return;
-      }
-      setMenuOpen(false);
-    };
-
-    const handleScroll = () => {
+    const handleClick = (e) => {
+      if (
+        navRef.current?.contains(e.target) ||
+        burgerRef.current?.contains(e.target)
+      ) return;
       setMenuOpen(false);
     };
 
     document.addEventListener("click", handleClick);
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", () => setMenuOpen(false));
 
     return () => {
       document.removeEventListener("click", handleClick);
-      window.removeEventListener("scroll", handleScroll);
     };
   }, [menuOpen]);
 
   return (
-    <header className="header">
+    <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
       <div className="header-container">
-        
+
         {/* Logo */}
         <div className="logo" onClick={() => navigate("/")}>
-          <img src={logo} alt="Logo" />
+          <img src={logo} alt="TAP – Talent Acceleration Platform" />
         </div>
 
         {/* Hamburger (mobile) */}
         <div
           className="hamburger"
           ref={burgerRef}
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen((o) => !o)}
         >
           ☰
         </div>
 
         {/* Navigation */}
         <nav className={`nav ${menuOpen ? "open" : ""}`} ref={navRef}>
-         <ul>
-  <li>
-    <NavLink to="/" end onClick={() => setMenuOpen(false)}>
-      Accueil
-    </NavLink>
-  </li>
+          <ul>
+            <li>
+              <NavLink to="/" end onClick={() => setMenuOpen(false)}>
+                Accueil
+              </NavLink>
+            </li>
 
-  <li>
-    <NavLink to="/a-propos" onClick={() => setMenuOpen(false)}>
-      À propos
-    </NavLink>
-  </li>
+            <li>
+              <NavLink to="/a-propos" onClick={() => setMenuOpen(false)}>
+                À propos
+              </NavLink>
+            </li>
 
-  <li>
-    <NavLink to="https://demo.tap-hr.com/" onClick={() => setMenuOpen(false)}>
-      Démo
-    </NavLink>
-  </li>
+            {/* Produit — hover déclenche le menu */}
+            <li className="nav-item-product">
+              <button type="button" className="nav-product-select">
+                <span>Produit</span>
+                <span className="nav-product-caret">▾</span>
+              </button>
+              <ul className="nav-product-menu">
+                <li onClick={() => { navigate("/produit/analyse-cv"); setMenuOpen(false); }}>
+                  Analyse IA du CV
+                </li>
+                <li onClick={() => { navigate("/produit/score"); setMenuOpen(false); }}>
+                  Score d&apos;employabilité
+                </li>
+                <li onClick={() => { navigate("/produit/micro-learning"); setMenuOpen(false); }}>
+                  Micro-learning
+                </li>
+                <li onClick={() => { navigate("/produit/matching"); setMenuOpen(false); }}>
+                  Matching intelligent
+                </li>
+              </ul>
+            </li>
 
-  <li>
-    <NavLink to="/team" onClick={() => setMenuOpen(false)}>
-      Team
-    </NavLink>
-  </li>
+            <li>
+              <NavLink to="/team" onClick={() => setMenuOpen(false)}>
+                Équipe
+              </NavLink>
+            </li>
 
-  <li>
-    <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
-      Contact
-    </NavLink>
-  </li>
-</ul>
+            <li>
+              <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
+                Contact
+              </NavLink>
+            </li>
+          </ul>
 
-          {/* Boutons visibles en mobile dans le menu */}
+          {/* Boutons visibles uniquement en mobile */}
           <div className="nav-buttons-mobile">
             <button
-              className="login-btn"
+              className="signup-btn"
               onClick={() => {
                 setMenuOpen(false);
                 navigate("/connexion");
@@ -98,26 +115,16 @@ const Header = () => {
             >
               Se connecter
             </button>
-            <button
-              className="signup-btn"
-              onClick={() => { setMenuOpen(false); navigate("/creer-compte"); }}
-            >
-              Créer mon profil
-            </button>
           </div>
         </nav>
 
-        {/* Buttons (desktop) */}
+        {/* Boutons desktop */}
         <div className="header-buttons">
-          <button className="login-btn" onClick={() => navigate("/connexion")}>
-            Se connecter
-          </button>
-
-          <button 
+          <button
             className="signup-btn"
-            onClick={() => navigate("/creer-compte")}
+            onClick={() => navigate("/connexion")}
           >
-            Créer mon profil
+            Se connecter
           </button>
         </div>
 

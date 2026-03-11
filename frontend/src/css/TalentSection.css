@@ -172,69 +172,98 @@ button {
 
 .process-grid {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 34px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.process-line {
+/* Nouvelle timeline verticale inspirée du design de l'image */
+.process-grid--vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.process-vertical-line {
   position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 80px;
-  height: 1px;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
   background: linear-gradient(
-    90deg,
+    180deg,
     transparent,
     rgba(248,113,113,0.2),
-    rgba(248,113,113,0.6),
+    rgba(248,113,113,0.7),
     rgba(248,113,113,0.2),
     transparent
   );
-  background-size: 200% 100%;
-  transform-origin: left center;
-  transform: scaleX(0);
+  background-size: 100% 200%;
   animation:
     process-line-grow 0.7s ease-out forwards 0.15s,
-    process-line-flow 4s linear infinite 0.9s;
+    process-line-flow 5s linear infinite 1s;
 }
 
-.process-item {
-  text-align: center;
+.process-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1.2fr);
+  align-items: center;
+  gap: 30px;
   opacity: 0;
-  transform: translateY(18px) scale(0.97);
+  transform: translateY(18px);
   animation: process-item-fade 0.7s ease-out forwards;
-  transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-.process-icon-wrapper {
-  position: relative;
-  margin-bottom: 12px;
+.process-side {
+  min-height: 40px;
 }
 
-.process-icon-ring {
-  width: 80px;
-  height: 80px;
-  border-radius: 999px;
-  border: 1px solid rgba(248,113,113,0.6);
+.process-side--empty {
+  opacity: 0;
+}
+
+.process-side--content .process-item {
+  text-align: right;
+}
+
+.process-item--right {
+  text-align: left;
+}
+
+.process-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.9);
-  background: transparent;
-  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
-.process-icon {
-  font-size: 24px;
-  color: #e5e7eb;
+.process-center-dot-outer {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(248,113,113,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15,23,42,0.9);
+}
+
+.process-center-dot-inner {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #e01f26;
+  box-shadow: 0 0 12px rgba(224,31,38,0.9);
+}
+
+.process-item {
+  max-width: 360px;
 }
 
 .process-item-title {
-  margin: 4px 0 4px 0;
+  margin: 0 0 4px 0;
   font-size: 15px;
   font-weight: 600;
+  color: #e01f26; /* titres en rouge */
 }
 
 .process-item-desc {
@@ -244,21 +273,14 @@ button {
   line-height: 1.5;
 }
 
-.process-item:hover {
-  transform: translateY(-4px) scale(1.01);
-  filter: drop-shadow(0 14px 30px rgba(0,0,0,0.8));
+.process-item--left {
+  text-align: right;
+  padding-right: 18px; /* rapproche le texte de la ligne centrale */
 }
 
-.process-item:hover .process-icon-ring {
-  border-color: rgba(248,113,113,0.9);
-  box-shadow:
-    0 22px 50px rgba(0,0,0,0.95),
-    0 0 26px rgba(248,113,113,0.7);
-  transform: translateY(-2px);
-}
-
-.process-item:hover .process-icon {
-  color: #ffffff;
+.process-item--right {
+  text-align: left;
+  padding-left: 18px; /* rapproche le texte de la ligne centrale */
 }
 
 @keyframes process-item-fade {
