@@ -492,7 +492,7 @@
 .contact-section .form-field textarea:focus,
 .contact-section .form-field select:focus {
   border-color: #e01f26;
-  box-shadow: 0 0 0 2px rgba(224,31,38,0.45);
+  box-shadow: 0 0 0 2px rgba(224,31,38,0.35); /* même halo que la page Connexion */
 }
 
 .contact-section .contact-input-with-icon:focus-within .contact-input-icon {

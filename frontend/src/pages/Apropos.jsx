@@ -21,35 +21,47 @@ function About() {
       style={{ backgroundImage: `url(${heroImage})` }}
     >
       <div className="about-inner">
-        {/* HERO */}
-        <header className="about-hero">
+        {/* HERO - Texte à gauche + 4 cartes (2x2) à droite */}
+        <header className="about-hero about-hero--grid">
           <div className="about-hero-main">
             <span className="about-hero-tag">À propos</span>
             <h1 className="about-hero-title">
               À propos de <span className="about-hero-title-accent">TAP</span>
             </h1>
             <p className="about-hero-subtitle">
-              Elever chaque talent au niveau d’exigence des meilleures entreprises.
+              Elever chaque talent au niveau d&apos;exigence des meilleures entreprises.
             </p>
             <p className="about-hero-desc">
-              TAP orchestre l&apos;analyse de CV, le scoring d&apos;employabilité et le micro‑learning pour transformer des
-              profils prometteurs en candidats immédiatement opérationnels.
+              TAP orchestre l&apos;analyse de CV, le scoring d&apos;employabilité et le micro‑learning pour
+              transformer des profils prometteurs en candidats immédiatement opérationnels.
             </p>
           </div>
 
-          <div className="about-hero-metrics">
-            <div className="about-metric-card">
-              <span className="about-metric-value">4</span>
-              <span className="about-metric-label">axes clés</span>
-            </div>
-            <div className="about-metric-card">
-              <span className="about-metric-value">IA</span>
-              <span className="about-metric-label">au cœur du scoring</span>
-            </div>
-            <div className="about-metric-card">
-              <span className="about-metric-value">100%</span>
-              <span className="about-metric-label">focus employabilité</span>
-            </div>
+          <div className="about-hero-grid">
+            <article className="about-hero-card">
+              <h3 className="about-hero-card-title">4 axes clés</h3>
+              <p className="about-hero-card-body">
+                Diagnostic, micro‑learning, portfolio vivant et score d&apos;employabilité alignés sur le marché.
+              </p>
+            </article>
+            <article className="about-hero-card">
+              <h3 className="about-hero-card-title">IA au cœur du scoring</h3>
+              <p className="about-hero-card-body">
+                Une analyse fine des CV et des parcours, portée par l&apos;IA pour objectiver les décisions.
+              </p>
+            </article>
+            <article className="about-hero-card">
+              <h3 className="about-hero-card-title">100 % focus employabilité</h3>
+              <p className="about-hero-card-body">
+                Chaque fonctionnalité est conçue pour rapprocher concrètement talents et exigences des recruteurs.
+              </p>
+            </article>
+            <article className="about-hero-card">
+              <h3 className="about-hero-card-title">Expérience premium</h3>
+              <p className="about-hero-card-body">
+                Une expérience soignée, côté talents comme côté entreprises, pour valoriser chaque interaction.
+              </p>
+            </article>
           </div>
         </header>
 
@@ -71,8 +83,8 @@ function About() {
                 <span>Notre mission</span>
               </h3>
               <p>
-                Réduire l’écart entre ce que les talents savent faire et ce que les entreprises attendent vraiment, en rendant
-                l’employabilité lisible et actionnable.
+                Réduire l’écart entre ce que les talents savent faire et ce que les entreprises attendent vraiment,
+                en rendant l’employabilité lisible et actionnable.
               </p>
             </article>
             <article className="about-value-card">
@@ -83,8 +95,8 @@ function About() {
                 <span>Notre approche</span>
               </h3>
               <p>
-                Une plateforme unique qui combine scoring fin, micro‑learning ciblé et portfolio vivant pour documenter et faire
-                progresser chaque parcours.
+                Une plateforme unique qui combine scoring fin, micro‑learning ciblé et portfolio vivant pour documenter
+                et faire progresser chaque parcours.
               </p>
             </article>
           </div>

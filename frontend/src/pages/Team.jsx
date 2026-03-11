@@ -77,6 +77,25 @@ const teamMembers = [
   },
 ];
 
+const teamFocusCards = [
+  {
+    title: "Produit guidé par l'IA",
+    body: "Chaque brique TAP est pensée avec une couche IA concrète : scoring, matching, recommandations et analyse continue des parcours.",
+  },
+  {
+    title: "Expériences candidates premium",
+    body: "Nous dessinons des parcours fluides, clairs et exigeants pour valoriser les talents au-delà du CV classique.",
+  },
+  {
+    title: "Confiance des recruteurs",
+    body: "Des décisions appuyées par la donnée, des interfaces lisibles et un accompagnement humain pour les équipes RH.",
+  },
+  {
+    title: "Architecture prête à scaler",
+    body: "Une plateforme pensée pour grandir : sécurité, performance et intégration dans les écosystèmes existants.",
+  },
+];
+
 const IconLinkedIn = () => (
   <svg
     width="14"
@@ -99,46 +118,32 @@ function Team() {
     >
       <div className="team-overlay" />
       <div className="team-inner">
-        {/* HERO + MÉTRIQUES */}
-        <header className="team-hero">
-          <div className="team-hero-top">
-            <span className="team-hero-tag">L&apos;ÉQUIPE</span>
-
-            <div className="team-hero-title-block">
-              <h1 className="team-hero-title">
-                L&apos;équipe <span className="team-hero-title-accent">TAP</span>
-              </h1>
-              <p className="team-hero-subtitle">
-                Tech, stratégie et design réunis pour transformer l&apos;employabilité au Maroc.
+        {/* SECTION ADN PRODUIT / 4 CARTES */}
+        <section className="team-section-block team-focus-block">
+          <div className="team-focus-layout">
+            <div className="team-focus-text">
+              <span className="team-section-kicker">L&apos;ÉQUIPE</span>
+              <h2 className="team-section-title">
+                Une équipe construite pour
+                {" "}
+                <span className="team-section-title-accent">livrer du concret</span>
+              </h2>
+              <p className="team-focus-subtitle">
+                Tech, produit, design et opérationnel travaillent ensemble sur un objectif unique :
+                faire de TAP une plateforme utile, fiable et désirable pour les talents comme pour les entreprises.
               </p>
-              <p className="team-hero-desc">
-                Une cellule resserrée d&apos;experts produit, IA et expérience utilisateur qui conçoivent
-                chaque parcours comme une expérience premium – pour les talents comme pour les recruteurs.
-              </p>
+            </div>
 
-              <div className="team-hero-pills">
-                <span className="team-hero-pill">Produit &amp; IA appliquée</span>
-                <span className="team-hero-pill">Design d&apos;expérience</span>
-                <span className="team-hero-pill">Infrastructure scalable</span>
-              </div>
+            <div className="team-focus-grid">
+              {teamFocusCards.map((item) => (
+                <article key={item.title} className="team-focus-card">
+                  <h3 className="team-focus-card-title">{item.title}</h3>
+                  <p className="team-focus-card-body">{item.body}</p>
+                </article>
+              ))}
             </div>
           </div>
-
-          <div className="team-hero-metrics">
-            <div className="team-metric-card team-metric-card--1">
-              <span className="team-metric-value">2</span>
-              <span className="team-metric-label">Fondateurs</span>
-            </div>
-            <div className="team-metric-card team-metric-card--2">
-              <span className="team-metric-value">{founders.length + teamMembers.length}</span>
-              <span className="team-metric-label">Membres</span>
-            </div>
-            <div className="team-metric-card team-metric-card--3">
-              <span className="team-metric-value">100%</span>
-              <span className="team-metric-label">Maroc</span>
-            </div>
-          </div>
-        </header>
+        </section>
 
         {/* SECTION FONDATEURS */}
         <section className="team-section-block">

@@ -245,6 +245,22 @@
   color: #e5e7eb;
 }
 
+/* Navigation du footer : liens cliquables avec hover + état actif */
+.footer-nav-item a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.footer-nav-item a:hover {
+  color: #f97373; /* rouge clair au survol */
+}
+
+.footer-nav-item.active a {
+  color: #e01f26;      /* rouge fort pour la page active */
+  font-weight: 700;    /* texte en gras */
+}
+
 .footer-bottom {
   border-top: 1px solid rgba(31,41,55,0.7);
   max-width: 1160px;

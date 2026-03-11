@@ -1,10 +1,20 @@
 import React, { useState } from "react";
+import { useLocation, Link } from "react-router-dom";
 import "../css/Footer.css";
 import logo from "../assets/logo-white.svg";
 import heroBg from "../assets/hero.jpg";
 
 const Footer = () => {
   const [openColumn, setOpenColumn] = useState(null);
+  const location = useLocation();
+
+  const navItems = [
+    { label: "Accueil", path: "/" },
+    { label: "À propos", path: "/a-propos" },
+    { label: "Équipe", path: "/team" },
+    { label: "Contact", path: "/contact" },
+    { label: "Connexion", path: "/connexion" },
+  ];
 
   const toggleColumn = (id) => {
     setOpenColumn((prev) => (prev === id ? null : id));
@@ -113,11 +123,17 @@ const Footer = () => {
                 </span>
               </button>
               <ul className="footer-column-content">
-                <li>Accueil</li>
-                <li>À propos</li>
-                <li>Équipe</li>
-                <li>Contact</li>
-                <li>Connexion</li>
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <li
+                      key={item.path}
+                      className={isActive ? "footer-nav-item active" : "footer-nav-item"}
+                    >
+                      <Link to={item.path}>{item.label}</Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -160,9 +176,37 @@ const Footer = () => {
                 </span>
               </button>
               <ul className="footer-column-content">
-                <li>Mentions légales</li>
-                <li>Politique de confidentialité</li>
-                <li>Conditions d&apos;utilisation</li>
+                <li
+                  className={
+                    location.pathname === "/mentions-legales"
+                      ? "footer-nav-item active"
+                      : "footer-nav-item"
+                  }
+                >
+                  <Link to="/mentions-legales">Mentions légales</Link>
+                </li>
+                <li
+                  className={
+                    location.pathname === "/politique-confidentialite"
+                      ? "footer-nav-item active"
+                      : "footer-nav-item"
+                  }
+                >
+                  <Link to="/politique-confidentialite">
+                    Politique de confidentialité
+                  </Link>
+                </li>
+                <li
+                  className={
+                    location.pathname === "/conditions-utilisation"
+                      ? "footer-nav-item active"
+                      : "footer-nav-item"
+                  }
+                >
+                  <Link to="/conditions-utilisation">
+                    Conditions d&apos;utilisation
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
