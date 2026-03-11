@@ -65,12 +65,16 @@ function Hero() {
           <span className="hero-map-pulse" />
           <span className="hero-map-dot" />
 
-          {/* Trainée de cercles qui descendent depuis Marrakech */}
+          {/* Couronne de lignes lumineuses qui rayonnent comme un soleil */}
           <div className="hero-circle-stream">
             <span className="hero-circle hero-circle--1" />
             <span className="hero-circle hero-circle--2" />
             <span className="hero-circle hero-circle--3" />
             <span className="hero-circle hero-circle--4" />
+            <span className="hero-circle hero-circle--5" />
+            <span className="hero-circle hero-circle--6" />
+            <span className="hero-circle hero-circle--7" />
+            <span className="hero-circle hero-circle--8" />
           </div>
         </div>
       </div>
