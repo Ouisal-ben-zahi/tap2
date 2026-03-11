@@ -9,6 +9,18 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 const IconStar    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
 const IconBolt    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>;
 const IconShield  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const IconMail    = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+  </svg>
+);
+const IconLock    = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <rect x="4" y="10" width="16" height="10" rx="2" />
+    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+  </svg>
+);
 const IconEye     = ({ open }) => open
   ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
   : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
@@ -160,16 +172,16 @@ function Connexion() {
     >
       <div className="login-inner">
 
-        {/* ── LEFT: brand + features ── */}
+        {/* ── LEFT: titre + features ── */}
         <div className="login-left">
-          <div className="login-brand">
-            <span className="login-brand-tag">Plateforme de talents</span>
-            <h1 className="login-brand-name">
-              Talent<span>.</span>
+          <div className="login-left-header">
+            <span className="login-left-tag">Espace sécurisé</span>
+            <h1 className="login-left-title">
+              Connectez-vous à <span className="login-left-title-tap">TAP</span>
             </h1>
-            <p className="login-brand-desc">
-              La plateforme de référence pour connecter les talents d'exception
-              avec les opportunités qui les méritent.
+            <p className="login-left-desc">
+              Accédez à votre espace candidat ou recruteur, suivez vos candidatures
+              et retrouvez vos offres en un seul endroit.
             </p>
           </div>
 
@@ -179,8 +191,8 @@ function Connexion() {
                 <IconStar />
               </div>
               <div className="login-feature-text">
-                <strong>Profil Premium</strong>
-                <span>Valorisez vos compétences avec votre Talent Card personnalisée</span>
+                <strong>Accès instantané</strong>
+                <span>Retrouvez vos tableaux de bord candidats et recruteurs en un clic.</span>
               </div>
             </div>
             <div className="login-feature">
@@ -188,8 +200,8 @@ function Connexion() {
                 <IconBolt />
               </div>
               <div className="login-feature-text">
-                <strong>Matching Intelligent</strong>
-                <span>Soyez mis en relation avec les offres qui correspondent à votre profil</span>
+                <strong>Connexion fluide</strong>
+                <span>Une interface pensée pour aller droit à l’essentiel, sans friction.</span>
               </div>
             </div>
             <div className="login-feature">
@@ -197,8 +209,8 @@ function Connexion() {
                 <IconShield />
               </div>
               <div className="login-feature-text">
-                <strong>Données Sécurisées</strong>
-                <span>Vos informations sont chiffrées et protégées en permanence</span>
+                <strong>Données protégées</strong>
+                <span>Vos informations sont chiffrées et sécurisées en permanence.</span>
               </div>
             </div>
           </div>
@@ -224,24 +236,33 @@ function Connexion() {
             {/* email */}
             <div className="login-field">
               <label htmlFor="login-email">Adresse e-mail</label>
-              <input
-                id="login-email"
-                type="email"
-                placeholder="vous@exemple.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-              />
+              <div className="login-input-with-icon">
+                <span className="login-input-icon">
+                  <IconMail />
+                </span>
+                <input
+                  id="login-email"
+                  type="email"
+                  className="login-input-leading"
+                  placeholder="vous@exemple.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
             </div>
 
             {/* password */}
             <div className="login-field">
               <label htmlFor="login-password">Mot de passe</label>
               <div className="password-input-wrapper">
+                <span className="login-input-icon">
+                  <IconLock />
+                </span>
                 <input
                   id="login-password"
-                  className="password-input"
+                  className="password-input login-input-leading"
                   type={showPwd ? "text" : "password"}
                   placeholder="Votre mot de passe"
                   value={password}
