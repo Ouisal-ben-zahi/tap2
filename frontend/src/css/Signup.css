@@ -217,20 +217,129 @@
 .signup-left-header {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+.signup-left-header::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 0 0,rgba(248,113,113,0.14),transparent 60%);
+  opacity:0.6;
+  pointer-events:none;
+}
+.signup-left-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:9px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  font-family:var(--font-h);
+  color:var(--red);
+}
+.signup-left-tag::before{
+  content:'';
+  width:12px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--red));
+}
+.signup-left-title {
+  font-family: var(--font-h);
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  position: relative;
+  padding-bottom: 6px;
+  animation: signupTitleGlow 1.4s var(--ease) 0.2s both;
+}
+.signup-left-title-tap{
+  color: var(--red);
+}
+.signup-left-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.6;
+  max-width: 260px;
+}
+
+@keyframes signupTitleGlow {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    text-shadow: none;
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 10px rgba(248,113,113,0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 4px rgba(248,113,113,0.35);
+  }
+}
+
+/* inputs avec icône à gauche */
+.signup-input-with-icon{
+  position:relative;
+}
+.signup-input-leading{
+  padding-left:40px !important;
+}
+.signup-input-icon{
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text-3);
+  pointer-events:none;
+}
+
+/* left header (titre + description) */
+.signup-left-header {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 .signup-left-title {
   font-family: var(--font-h);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.02em;
+  position: relative;
+  padding-bottom: 6px;
+  animation: signupTitleGlow 1.4s var(--ease) 0.2s both;
 }
 .signup-left-desc {
-  font-size: 12px;
-  color: #fca5a5; /* rouge clair */
+  font-size: 13px;
+  color: #94a3b8;
   line-height: 1.6;
   max-width: 260px;
+}
+
+@keyframes signupTitleGlow {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    text-shadow: none;
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 10px rgba(248,113,113,0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 4px rgba(248,113,113,0.35);
+  }
 }
 
 /* ── RIGHT (form) ────────────────────────────── */
@@ -299,75 +408,57 @@
   font-weight: 600;
 }
 
-.signup-type-radios {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.signup-type-inputs{
+  display:flex;
+  flex-direction:row;
+  gap:10px;
 }
-
-.signup-type-radio {
-  position: relative;
-  cursor: pointer;
+.signup-type-input{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#161616;
+  cursor:pointer;
+  text-align:left;
+  transition:all 0.18s var(--ease);
 }
-
-.signup-type-radio input {
-  position: absolute;
-  opacity: 0;
-  width: 0; height: 0;
+.signup-type-input-icon{
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text-3);
+  flex-shrink:0;
 }
-
-.signup-type-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #161616;
-  transition: all 0.2s var(--ease);
-  text-align: center;
+.signup-type-input-text{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
 }
-
-.signup-type-radio input:checked + .signup-type-card {
-  border-color: var(--red-border);
-  background: var(--red-dim);
-  box-shadow: 0 0 0 3px rgba(224,31,38,0.08);
+.signup-type-input-main{
+  font-family:var(--font-h);
+  font-size:12px;
+  font-weight:600;
+  color:var(--text-1);
 }
-
-.signup-type-card-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-3);
-  transition: color 0.2s, background 0.2s;
+.signup-type-input-sub{
+  font-size:11px;
+  color:var(--text-3);
 }
-
-.signup-type-radio input:checked + .signup-type-card .signup-type-card-icon {
-  background: rgba(224,31,38,0.15);
-  color: var(--red);
+.signup-type-input--active{
+  border-color:var(--red-border);
+  box-shadow:0 0 0 2px rgba(224,31,38,0.25);
+  background:var(--red-dim);
 }
-
-.signup-type-card-name {
-  font-family: var(--font-h);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-2);
-  letter-spacing: 0.04em;
-  transition: color 0.2s;
-}
-
-.signup-type-radio input:checked + .signup-type-card .signup-type-card-name {
-  color: var(--text-1);
-}
-
-.signup-type-card-desc {
-  font-size: 10px;
-  color: var(--text-3);
-  line-height: 1.4;
+.signup-type-input--active .signup-type-input-icon{
+  color:var(--red);
 }
 
 /* ── FORM ────────────────────────────────────── */
@@ -443,52 +534,7 @@
 .password-eye-btn:hover,
 .password-eye-btn--active { color: var(--red); }
 
-/* password suggestion */
-.signup-pwd-suggest {
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: rgba(224,31,38,0.06);
-  border: 1px solid var(--red-border);
-  border-radius: 2px;
-  animation: fadeUp 0.25s var(--ease) both;
-}
-
-.signup-pwd-suggest-label {
-  font-size: 10px;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-family: var(--font-h);
-  flex-shrink: 0;
-}
-
-.signup-pwd-suggest-val {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: #f87171;
-  flex: 1;
-  letter-spacing: 0.06em;
-}
-
-.signup-pwd-use-btn {
-  background: var(--red);
-  border: none;
-  color: #fff;
-  font-family: var(--font-h);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 5px 10px;
-  border-radius: 2px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-
-.signup-pwd-use-btn:hover { background: var(--red-dark); }
+/* (ancienne suggestion de mot de passe supprimée) */
 
 /* verification step */
 .signup-verify-info {

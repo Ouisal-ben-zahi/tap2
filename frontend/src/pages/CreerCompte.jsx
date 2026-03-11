@@ -45,12 +45,6 @@ const IconLock = () => (
   </svg>
 );
 
-/* ── password generator ───────────────────────── */
-function generateSecurePassword() {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-  return Array.from({ length: 14 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
 /* ── steps config ─────────────────────────────── */
 const STEPS = [
   { n: "01", title: "Choisir un profil",    desc: "Candidat à la recherche d'opportunités ou recruteur en quête de talents." },
@@ -67,8 +61,6 @@ function CreerCompte() {
   const [password,          setPassword]          = useState("");
   const [confirmPassword,   setConfirmPassword]   = useState("");
   const [showPwd,           setShowPwd]           = useState(false);
-  const [showSuggest,       setShowSuggest]       = useState(false);
-  const [suggested,         setSuggested]         = useState("");
   const [loading,           setLoading]           = useState(false);
   const [error,             setError]             = useState("");
   const [verificationSent,  setVerificationSent]  = useState(false);
@@ -77,11 +69,6 @@ function CreerCompte() {
 
   /* current step for left panel highlight */
   const currentStep = verificationSent ? 2 : 1;
-
-  const handlePwdFocus = () => {
-    if (!suggested) setSuggested(generateSecurePassword());
-    setShowSuggest(true);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,10 +131,13 @@ function CreerCompte() {
     >
       <div className="signup-inner">
 
-        {/* ══ LEFT: titre + steps ══ */}
+        {/* ══ LEFT: titre + tag + steps ══ */}
         <div className="signup-left">
           <div className="signup-left-header">
-            <h2 className="signup-left-title">Créez votre profil TAP</h2>
+            <span className="signup-left-tag">Expérience premium</span>
+            <h2 className="signup-left-title">
+              Créez votre profil <span className="signup-left-title-tap">TAP</span>
+            </h2>
             <p className="signup-left-desc">
               Une seule inscription pour accéder à votre espace candidat ou recruteur,
               gérer vos dossiers et suivre vos opportunités.
@@ -194,29 +184,36 @@ function CreerCompte() {
             {/* ── STEP 1 ── */}
             {!verificationSent && (
               <>
-                {/* account type */}
+                {/* account type – sous forme de champs avec icône */}
                 <div className="signup-type-group">
                   <span className="signup-type-label">Vous êtes</span>
-                  <div className="signup-type-radios">
-                    {[
-                      { val: "candidat",  label: "Candidat",  desc: "Je cherche des opportunités", Icon: IconSearch },
-                      { val: "recruteur", label: "Recruteur", desc: "Je recrute des talents",       Icon: IconBriefcase },
-                    ].map(({ val, label, desc, Icon }) => (
-                      <label className="signup-type-radio" key={val}>
-                        <input
-                          type="radio"
-                          name="accountType"
-                          value={val}
-                          checked={accountType === val}
-                          onChange={() => setAccountType(val)}
-                        />
-                        <div className="signup-type-card">
-                          <div className="signup-type-card-icon"><Icon /></div>
-                          <span className="signup-type-card-name">{label}</span>
-                          <span className="signup-type-card-desc">{desc}</span>
-                        </div>
-                      </label>
-                    ))}
+                  <div className="signup-type-inputs">
+                    <button
+                      type="button"
+                      className={`signup-type-input${accountType === "candidat" ? " signup-type-input--active" : ""}`}
+                      onClick={() => setAccountType("candidat")}
+                    >
+                      <span className="signup-type-input-icon">
+                        <IconSearch />
+                      </span>
+                      <div className="signup-type-input-text">
+                        <span className="signup-type-input-main">Je suis candidat</span>
+                        <span className="signup-type-input-sub">Je cherche des opportunités</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className={`signup-type-input${accountType === "recruteur" ? " signup-type-input--active" : ""}`}
+                      onClick={() => setAccountType("recruteur")}
+                    >
+                      <span className="signup-type-input-icon">
+                        <IconBriefcase />
+                      </span>
+                      <div className="signup-type-input-text">
+                        <span className="signup-type-input-main">Je suis recruteur</span>
+                        <span className="signup-type-input-sub">Je recrute des talents</span>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -254,7 +251,6 @@ function CreerCompte() {
                       placeholder="Minimum 8 caractères"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      onFocus={handlePwdFocus}
                       autoComplete="new-password"
                       required
                       minLength={8}
@@ -268,21 +264,6 @@ function CreerCompte() {
                       <IconEye open={showPwd} />
                     </button>
                   </div>
-
-                  {/* suggestion */}
-                  {showSuggest && suggested && (
-                    <div className="signup-pwd-suggest">
-                      <span className="signup-pwd-suggest-label">Suggestion</span>
-                      <span className="signup-pwd-suggest-val">{suggested}</span>
-                      <button
-                        type="button"
-                        className="signup-pwd-use-btn"
-                        onClick={() => { setPassword(suggested); setShowSuggest(false); }}
-                      >
-                        Utiliser
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 {/* confirm password */}
