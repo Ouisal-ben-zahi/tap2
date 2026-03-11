@@ -2,6 +2,39 @@ import React from "react";
 import "../css/Contact.css";
 import heroImage from "../assets/new-bgpages.jpg";
 
+const IconUser = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M6 19c0-2.5 2.3-4.5 6-4.5s6 2 6 4.5" />
+  </svg>
+);
+
+const IconMail = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <polyline points="3,7 12,13 21,7" />
+  </svg>
+);
+
+const IconBuilding = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <rect x="4" y="3" width="16" height="18" rx="2" />
+    <path d="M9 7h2M9 11h2M9 15h2M15 7h2M15 11h2M15 15h2" />
+  </svg>
+);
+
+const IconTopic = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <path d="M4 6h16M4 12h10M4 18h7" />
+  </svg>
+);
+
+const IconMessage = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <path d="M4 5h16a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H9l-5 3v-5H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+  </svg>
+);
+
 function Contact() {
   return (
     <section
@@ -77,57 +110,87 @@ function Contact() {
             <div className="form-row">
               <div className="form-field">
                 <label htmlFor="name">Nom et prénom</label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  placeholder="Votre nom complet"
-                  required
-                />
+                <div className="contact-input-with-icon">
+                  <span className="contact-input-icon">
+                    <IconUser />
+                  </span>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    className="contact-input-leading"
+                    placeholder="Votre nom complet"
+                    required
+                  />
+                </div>
               </div>
               <div className="form-field">
                 <label htmlFor="email">E-mail</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="vous@gmail.com"
-                  required
-                />
+                <div className="contact-input-with-icon">
+                  <span className="contact-input-icon">
+                    <IconMail />
+                  </span>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="contact-input-leading"
+                    placeholder="vous@gmail.com"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-field">
                 <label htmlFor="company">Entreprise (facultatif)</label>
-                <input
-                  id="company"
-                  name="company"
-                  type="text"
-                  placeholder="Nom de votre entreprise"
-                />
+                <div className="contact-input-with-icon">
+                  <span className="contact-input-icon">
+                    <IconBuilding />
+                  </span>
+                  <input
+                    id="company"
+                    name="company"
+                    type="text"
+                    className="contact-input-leading"
+                    placeholder="Nom de votre entreprise"
+                  />
+                </div>
               </div>
               <div className="form-field">
                 <label htmlFor="topic">Sujet</label>
-                <input
-                  id="topic"
-                  name="subject"
-                  type="text"
-                  placeholder="Recrutement, partenariat..."
-                  required
-                />
+                <div className="contact-input-with-icon">
+                  <span className="contact-input-icon">
+                    <IconTopic />
+                  </span>
+                  <input
+                    id="topic"
+                    name="subject"
+                    type="text"
+                    className="contact-input-leading"
+                    placeholder="Recrutement, partenariat..."
+                    required
+                  />
+                </div>
               </div>
             </div>
 
             <div className="form-field form-field-full">
               <label htmlFor="message">Message</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="6"
-                placeholder="Expliquez-nous votre besoin ou votre projet."
-                required
-              />
+              <div className="contact-input-with-icon contact-input-with-icon--textarea">
+                <span className="contact-input-icon">
+                  <IconMessage />
+                </span>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="6"
+                  className="contact-input-leading"
+                  placeholder="Expliquez-nous votre besoin ou votre projet."
+                  required
+                />
+              </div>
             </div>
 
             <div className="contact-submit-wrapper">
