@@ -135,7 +135,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px;
-  background: radial-gradient(circle at 0 0, rgba(248,113,113,0.18), transparent 70%);
+  background: transparent;
 }
 
 .pourquoi-card-icon {
@@ -160,6 +160,30 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: #9ca3af;
+}
+
+/* Variantes de header comme les cartes "Pour qui ?" */
+.pourquoi-card--red .pourquoi-card-header {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #ffffff;
+}
+
+.pourquoi-card--light .pourquoi-card-header {
+  background: linear-gradient(135deg, #e5e7eb, #9ca3af);
+  color: #111827;
+}
+
+.pourquoi-card--red .pourquoi-card-metric {
+  color: #fecaca;
+}
+
+.pourquoi-card--light .pourquoi-card-metric {
+  color: #111827;
+}
+
+.pourquoi-card--light .pourquoi-card-icon {
+  border-color: rgba(31,41,55,0.65);
+  color: #111827;
 }
 
 .pourquoi-card-body {

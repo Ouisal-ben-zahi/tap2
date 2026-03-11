@@ -13,6 +13,7 @@ const cards = [
     title: "Analyse IA",
     metric: "<30s d’analyse",
     icon: HiOutlineChip,
+    tone: "red",
     body:
       "Chaque CV est scanné et évalué par notre moteur d’intelligence artificielle en moins de 30 secondes.",
   },
@@ -20,6 +21,7 @@ const cards = [
     title: "Score d’employabilité",
     metric: "0–100 score",
     icon: HiOutlineBadgeCheck,
+    tone: "light",
     body:
       "Un score objectif de 0 à 100 basé sur les compétences réelles, pas les diplômes.",
   },
@@ -27,6 +29,7 @@ const cards = [
     title: "Micro‑learning",
     metric: "37+ modules",
     icon: HiOutlineBookOpen,
+    tone: "red",
     body:
       "Des formations courtes et ciblées pour combler les lacunes identifiées par l’IA.",
   },
@@ -34,6 +37,7 @@ const cards = [
     title: "Matching intelligent",
     metric: "87% précision",
     icon: HiOutlineSwitchHorizontal,
+    tone: "light",
     body:
       "Les profils validés sont connectés aux recruteurs qui embauchent, en temps réel.",
   },
@@ -61,7 +65,12 @@ const PourquoiTap = () => {
             {cards.map((card, index) => (
               <article
                 key={card.title}
-                className="pourquoi-card"
+                className={
+                  "pourquoi-card " +
+                  (card.tone === "red"
+                    ? "pourquoi-card--red"
+                    : "pourquoi-card--light")
+                }
                 style={{ animationDelay: `${0.15 + index * 0.06}s` }}
               >
                 <header className="pourquoi-card-header">
