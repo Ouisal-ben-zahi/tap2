@@ -1,107 +1,190 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import "../css/Apropos.css";
 import "../css/PourquoiTap.css";
 import heroImage from "../assets/new-bgpages.jpg";
+import {
+  HiOutlineChartBar,
+  HiOutlineBookOpen,
+  HiOutlineFolderOpen,
+  HiOutlineTrendingUp,
+  HiOutlineBadgeCheck,
+  HiOutlineSparkles,
+  HiOutlineOfficeBuilding,
+  HiOutlineUserGroup,
+  HiOutlineArrowNarrowRight,
+} from "react-icons/hi";
 
 function About() {
-  const headerRef = useRef(null);
-  const blocksRef = useRef(null);
-  const [headerVisible, setHeaderVisible] = useState(false);
-  const [blocksVisible, setBlocksVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setHeaderVisible(entry.isIntersecting),
-      { threshold: 0.2, rootMargin: "0px 0px -80px 0px" }
-    );
-    if (headerRef.current) observer.observe(headerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setBlocksVisible(entry.isIntersecting),
-      { threshold: 0.08, rootMargin: "0px 0px -60px 0px" }
-    );
-    if (blocksRef.current) observer.observe(blocksRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section
       className="about-section"
       style={{ backgroundImage: `url(${heroImage})` }}
     >
       <div className="about-inner">
-        <header
-          ref={headerRef}
-          className={`about-header ${headerVisible ? "about-header--visible" : ""}`}
-        >
-          <div className="about-heading">
-            <div className="about-heading-main">À PROPOS DE TAP</div>
-            <div className="about-heading-sub">
-              La plateforme d&apos;employabilité qui élève chaque talent au niveau d&apos;exigence des meilleures entreprises.
+        {/* HERO */}
+        <header className="about-hero">
+          <div className="about-hero-main">
+            <span className="about-hero-tag">À propos</span>
+            <h1 className="about-hero-title">
+              À propos de <span className="about-hero-title-accent">TAP</span>
+            </h1>
+            <p className="about-hero-subtitle">
+              Elever chaque talent au niveau d’exigence des meilleures entreprises.
+            </p>
+            <p className="about-hero-desc">
+              TAP orchestre l&apos;analyse de CV, le scoring d&apos;employabilité et le micro‑learning pour transformer des
+              profils prometteurs en candidats immédiatement opérationnels.
+            </p>
+          </div>
+
+          <div className="about-hero-metrics">
+            <div className="about-metric-card">
+              <span className="about-metric-value">4</span>
+              <span className="about-metric-label">axes clés</span>
+            </div>
+            <div className="about-metric-card">
+              <span className="about-metric-value">IA</span>
+              <span className="about-metric-label">au cœur du scoring</span>
+            </div>
+            <div className="about-metric-card">
+              <span className="about-metric-value">100%</span>
+              <span className="about-metric-label">focus employabilité</span>
             </div>
           </div>
-          <p className="about-intro">
-            TAP orchestre l&apos;analyse de CV, le scoring d&apos;employabilité et le micro‑learning pour transformer des profils
-            prometteurs en candidats immédiatement opérationnels, évalués selon des standards dignes des environnements les plus
-            exigeants.
-          </p>
         </header>
 
-        <div
-          ref={blocksRef}
-          className={`about-blocks ${blocksVisible ? "about-blocks--visible" : ""}`}
-        >
-          <section className="about-block about-block--1">
-            <div className="about-block-title">NOTRE VISION ET NOTRE MISSION</div>
-            <div className="about-block-body">
-              <p>
-                Réconcilier le potentiel des talents avec le niveau d&apos;exigence du marché, en installant une nouvelle norme
-                d&apos;employabilité pilotée par la donnée et l&apos;expérience.
-              </p>
-              <ul className="about-list">
-                <li>Diagnostic précis et actionnable de l&apos;employabilité, au‑delà du CV.</li>
-                <li>Parcours de micro‑learning ciblés sur les vrais écarts terrain.</li>
-                <li>Portfolio vivant qui documente l&apos;évolution des compétences.</li>
-              </ul>
-            </div>
-          </section>
+        {/* SECTION VALEUR AJOUTÉE */}
+        <section className="about-section-block">
+          <header className="about-section-header">
+            <span className="about-section-kicker">Notre valeur ajoutée</span>
+            <h2 className="about-section-title">
+              Réconcilier le <span className="about-section-title-accent">potentiel</span> avec le marché.
+            </h2>
+          </header>
 
-          <section className="about-block about-block--2">
-            <div className="about-block-title">POUR LES ACTEURS EXIGEANTS</div>
-            <div className="about-block-body">
+          <div className="about-value-grid">
+            <article className="about-value-card">
+              <h3>
+                <span className="about-value-icon">
+                  <HiOutlineBadgeCheck />
+                </span>
+                <span>Notre mission</span>
+              </h3>
               <p>
-                TAP s&apos;adresse aux talents et aux organisations qui visent un recrutement raisonné, durable et aligné avec
-                des enjeux stratégiques forts.
+                Réduire l’écart entre ce que les talents savent faire et ce que les entreprises attendent vraiment, en rendant
+                l’employabilité lisible et actionnable.
               </p>
-              <ul className="about-list">
-                <li>Jeunes diplômés à haut potentiel</li>
-                <li>Profils en reconversion ambitieuse</li>
-                <li>Talents tech et métiers d&apos;avenir</li>
-                <li>Écoles et institutions académiques</li>
-                <li>Entreprises en quête de précision</li>
-              </ul>
-            </div>
-          </section>
+            </article>
+            <article className="about-value-card">
+              <h3>
+                <span className="about-value-icon">
+                  <HiOutlineSparkles />
+                </span>
+                <span>Notre approche</span>
+              </h3>
+              <p>
+                Une plateforme unique qui combine scoring fin, micro‑learning ciblé et portfolio vivant pour documenter et faire
+                progresser chaque parcours.
+              </p>
+            </article>
+          </div>
+        </section>
 
-          <section className="about-block about-block--3">
-            <div className="about-block-title">RECRUTEMENT HAUT DE GAMME</div>
-            <div className="about-block-body">
-              <p>
-                TAP transforme un flux de candidatures en un portefeuille restreint de talents sélectionnés, préparés et alignés
-                avec votre niveau d&apos;exigence.
-              </p>
-              <ul className="about-list">
-                <li>Moins de temps sur des CV peu qualifiés.</li>
-                <li>Candidats acculturés aux fondamentaux du poste.</li>
-                <li>Score d&apos;employabilité lisible et transparent.</li>
-                <li>Meilleure rétention grâce à l&apos;accompagnement en amont.</li>
+        {/* SECTION FONDATIONS */}
+        <section className="about-section-block about-foundations">
+          <header className="about-section-header">
+            <span className="about-section-kicker">Notre promesse</span>
+            <h2 className="about-section-title">
+              Les fondations de <span className="about-section-title-accent">TAP</span>
+            </h2>
+          </header>
+
+          <div className="about-foundations-grid">
+            <article className="about-foundation">
+              <div className="about-foundation-icon">
+                <span className="about-foundation-icon-glyph">
+                  <HiOutlineChartBar />
+                </span>
+              </div>
+              <h3>Diagnostic précis</h3>
+              <p>Une lecture fine du profil au‑delà du CV, portée par la donnée et l’IA.</p>
+            </article>
+            <article className="about-foundation">
+              <div className="about-foundation-icon">
+                <span className="about-foundation-icon-glyph">
+                  <HiOutlineBookOpen />
+                </span>
+              </div>
+              <h3>Micro‑learning</h3>
+              <p>Des capsules ciblées sur les écarts concrets observés sur le terrain.</p>
+            </article>
+            <article className="about-foundation">
+              <div className="about-foundation-icon">
+                <span className="about-foundation-icon-glyph">
+                  <HiOutlineFolderOpen />
+                </span>
+              </div>
+              <h3>Portfolio vivant</h3>
+              <p>Un dossier dynamique qui suit et prouve la progression de chaque talent.</p>
+            </article>
+            <article className="about-foundation">
+              <div className="about-foundation-icon">
+                <span className="about-foundation-icon-glyph">
+                  <HiOutlineTrendingUp />
+                </span>
+              </div>
+              <h3>Score transparent</h3>
+              <p>Un score d’employabilité clair, partagé entre talents et recruteurs.</p>
+            </article>
+          </div>
+        </section>
+
+        {/* SECTION AUDIENCES */}
+        <section className="about-section-block about-audiences">
+          <header className="about-section-header">
+            <span className="about-section-kicker">Audiences</span>
+            <h2 className="about-section-title">
+              Pour <span className="about-section-title-accent">qui&nbsp;?</span>
+            </h2>
+          </header>
+
+          <div className="about-audience-grid">
+            <article className="about-audience-card about-audience-card--left">
+              <header className="about-audience-header">
+                <span className="about-audience-chip">
+                  <HiOutlineOfficeBuilding />
+                  <span>Entreprises</span>
+                </span>
+                <span className="about-audience-arrow">
+                  <HiOutlineArrowNarrowRight />
+                </span>
+              </header>
+              <ul className="about-audience-list">
+                <li>Recrutement précis, guidé par les données et l’IA.</li>
+                <li>Candidats acculturés, opérationnels dès le jour 1.</li>
+                <li>Meilleure rétention grâce à l’accompagnement en amont.</li>
               </ul>
-            </div>
-          </section>
-        </div>
+            </article>
+
+            <article className="about-audience-card about-audience-card--right">
+              <header className="about-audience-header">
+                <span className="about-audience-chip">
+                  <HiOutlineUserGroup />
+                  <span>Talents</span>
+                </span>
+                <span className="about-audience-arrow">
+                  <HiOutlineArrowNarrowRight />
+                </span>
+              </header>
+              <ul className="about-audience-list">
+                <li>Jeunes diplômés à haut potentiel.</li>
+                <li>Profils en reconversion ambitieuse.</li>
+                <li>Talents tech et métiers d’avenir.</li>
+              </ul>
+              <p className="about-audience-note">100&nbsp;% gratuit pour les candidats.</p>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
   );
