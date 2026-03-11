@@ -4,6 +4,7 @@
   color: #f9fafb;
   width: 100%;
   padding-top: 56px;
+  position: relative; /* pour positionner le bouton scroll-top par rapport à tout le footer */
 }
 
 .footer-inner {
@@ -143,7 +144,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative; /* pour placer la flèche dans le coin bas droit */
   font-size: 11px;
   color: #6b7280;
 }
@@ -166,9 +166,9 @@
   width: 26px;
   height: 26px;
   border-radius: 999px; /* full rounded */
-  border: 1px solid rgba(148,163,184,0.8);
-  background: #020617;
-  color: #e5e7eb;
+  border: none;
+  background: #e01f26; /* fond rouge */
+  color: #ffffff; /* icône blanche */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -176,12 +176,18 @@
   cursor: pointer;
   position: absolute;
   right: 0;
-  bottom: 0; /* collée en bas à droite de la barre footer-bottom */
+  top: 0; /* affichée en haut du footer, à droite */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
 }
 
 .footer-scroll-top:hover {
-  border-color: #e01f26;
-  color: #e01f26;
+  background-color: #ff3040; /* rouge un peu plus clair au hover */
+  transform: translateY(-2px) scale(1.07); /* petite animation de “pop” */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 /* Responsive : accordéon + tout aligné à gauche */

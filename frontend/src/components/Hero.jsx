@@ -1,6 +1,6 @@
 import React from "react";
 import "../css/Hero.css";
-import africaMapImg from "../assets/Africa-Map.png";
+import africaMapImg from "../assets/carte map transparent.png";
 
 /* ─────────────────────────────────────────────
    MAIN COMPONENT — Hero
@@ -8,13 +8,6 @@ import africaMapImg from "../assets/Africa-Map.png";
 function Hero() {
   return (
     <section className="hero-section">
-      {/* Background image */}
-      <div className="hero-bg" />
-
-      {/* Overlay : black left → transparent right */}
-      <div className="hero-overlay" />
-      <div className="hero-overlay-vignette" />
-
       {/* Inner layout */}
       <div className="hero-inner">
         {/* ── LEFT : text content ── */}
@@ -58,9 +51,13 @@ function Hero() {
         {/* ── RIGHT : Africa map ── (positioned absolute) */}
       </div>
 
-      {/* Map image placée à droite */}
+      {/* Map image placée à droite + point Marrakech animé */}
       <div className="hero-map-container">
         <img src={africaMapImg} alt="" className="hero-map-svg" aria-hidden="true" />
+        <div className="hero-map-marker">
+          <span className="hero-map-pulse" />
+          <span className="hero-map-dot" />
+        </div>
       </div>
     </section>
   );

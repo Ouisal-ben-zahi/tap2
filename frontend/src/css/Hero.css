@@ -28,47 +28,13 @@
   align-items: center;
   font-family: var(--hero-font-body);
   -webkit-font-smoothing: antialiased;
-}
-
-/* ─── BACKGROUND IMAGE ──────────────────────── */
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background-image: url('../assets/hero.jpg');
+  background-image: url("../assets/bgsections.jpg");
   background-size: cover;
-  background-position: center right;
+  background-position: center;
   background-repeat: no-repeat;
-  z-index: 0;
-  transform: scale(1.04);
-  animation: heroBgSettle 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* ─── OVERLAY : left black → right transparent ─ */
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(4, 0, 0, 1)      0%,
-    rgba(4, 0, 0, 0.97)   18%,
-    rgba(4, 0, 0, 0.88)   35%,
-    rgba(4, 0, 0, 0.55)   55%,
-    rgba(4, 0, 0, 0.15)   75%,
-    rgba(4, 0, 0, 0)      100%
-  );
-  z-index: 1;
-}
-
-/* extra red tint at top & bottom */
-.hero-overlay-vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 40% at 5% 0%,   rgba(139, 0, 0, 0.28) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 30% at 0% 100%,  rgba(80, 0, 0, 0.25) 0%, transparent 60%);
-  z-index: 2;
-  pointer-events: none;
-}
+/* Ancienne image/overlays supprimés : on utilise directement bgsections.jpg */
 
 /* ─── CONTENT WRAPPER ───────────────────────── */
 .hero-inner {
@@ -252,35 +218,64 @@
 .hero-map-container {
   position: absolute;
   right: 0;
-  top: 0;
   bottom: 0;
-  width: 48%; /* carte un peu plus large */
+  width: 35%; /* taille moyenne */
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
   z-index: 5;
   pointer-events: none;
 }
 
-.hero-map-svg-wrap {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  animation: heroMapReveal 1.2s ease forwards 0.6s;
+.hero-map-svg {
+  width: 110%;          /* un peu plus large que le conteneur */
+  max-width: 720px;
+  height: auto;
+  opacity: 0.75;        /* lignes bien visibles, fond transparent géré par l'image */
 }
 
-/* SVG map styles */
-.hero-map-svg {
-  width: 96%;
-  max-width: 600px;
-  height: auto;
-  filter:
-    drop-shadow(0 0 32px rgba(180, 0, 0, 0.35))
-    drop-shadow(0 0 80px rgba(148, 27, 27, 0.45));
-  opacity: 0.9; /* carte plus présente visuellement */
+/* Marqueur Marrakech (positionné par rapport à la carte) */
+.hero-map-marker {
+  position: absolute;
+  right: 89%;   /* décale le point vers la gauche (zone Maroc) */
+  bottom: 91%;  /* remonte le point vers le nord de l’Afrique */
+  transform: translate(50%, 50%);
+  pointer-events: none;
+}
+
+.hero-map-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #e01f26;
+  box-shadow: 0 0 10px rgba(224, 31, 38, 0.9);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hero-map-pulse {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.8);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: heroMapPulse 2.4s ease-out infinite;
+}
+
+@keyframes heroMapPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
 }
 
 .map-country {
