@@ -42,6 +42,32 @@ export class DashboardController {
     return this.dashboardService.getCandidatePortfolioPdfFiles(id);
   }
 
+  // === Versions basées sur candidateId directement ===
+
+  @Get('candidat-id/:candidateId/cv-files')
+  async getCandidateCvFilesByCandidateId(
+    @Param('candidateId') candidateId: string,
+  ) {
+    const id = Number.parseInt(candidateId, 10);
+    return this.dashboardService.getCandidateCvFilesByCandidateId(id);
+  }
+
+  @Get('candidat-id/:candidateId/talentcard-files')
+  async getCandidateTalentcardFilesByCandidateId(
+    @Param('candidateId') candidateId: string,
+  ) {
+    const id = Number.parseInt(candidateId, 10);
+    return this.dashboardService.getCandidateTalentcardFilesByCandidateId(id);
+  }
+
+  @Get('candidat-id/:candidateId/portfolio-pdf-files')
+  async getCandidatePortfolioPdfFilesByCandidateId(
+    @Param('candidateId') candidateId: string,
+  ) {
+    const id = Number.parseInt(candidateId, 10);
+    return this.dashboardService.getCandidatePortfolioPdfFilesByCandidateId(id);
+  }
+
   @Post('candidat/:userId/upload-cv')
   @UseInterceptors(FileInterceptor('file'))
   async uploadCandidateCv(

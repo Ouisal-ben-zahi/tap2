@@ -158,6 +158,7 @@ export default function DashboardCandidat() {
     savedOffers: null,  notifications: null,
     statusPending: null, statusAccepted: null, statusRefused: null,
   });
+  const [candidateId, setCandidateId] = useState(null);
   const [scoreData,      setScoreData]      = useState(null);   // from /score endpoint
   const [llmData,        setLlmData]        = useState(null);   // from /llm-evaluation endpoint
   const [skillsList,     setSkillsList]     = useState([]);     // from /skills endpoint
@@ -215,7 +216,8 @@ export default function DashboardCandidat() {
     if (!userId) return;
     const c = new AbortController();
     fetch(`${API_BASE}/dashboard/candidat/${userId}`, { signal: c.signal })
-      .then(r => r.json()).then(data => {
+      .then(r => r.json())
+      .then(data => {
         if (!data) return;
         setStats({
           applications:  data.applications  ?? 0,
@@ -226,7 +228,11 @@ export default function DashboardCandidat() {
           statusAccepted: data.statusAccepted ?? 0,
           statusRefused:  data.statusRefused  ?? 0,
         });
-      }).catch(() => {});
+        if (typeof data.candidateId === "number") {
+          setCandidateId(data.candidateId);
+        }
+      })
+      .catch(() => {});
     return () => c.abort();
   }, [userId]);
 
@@ -261,21 +267,21 @@ export default function DashboardCandidat() {
 
   /* ── fetch cv-files ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!candidateId) return;
     const c = new AbortController();
-    fetch(`${API_BASE}/dashboard/candidat/${userId}/cv-files`, { signal: c.signal })
+    fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/cv-files`, { signal: c.signal })
       .then(r => r.json()).then(data => { if (data) setCvFiles(Array.isArray(data.cvFiles) ? data.cvFiles : []); }).catch(() => {});
     return () => c.abort();
-  }, [userId]);
+  }, [candidateId]);
 
   /* ── fetch talentcard-files ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!candidateId) return;
     const c = new AbortController();
-    fetch(`${API_BASE}/dashboard/candidat/${userId}/talentcard-files`, { signal: c.signal })
+    fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/talentcard-files`, { signal: c.signal })
       .then(r => r.json()).then(data => { if (data) setTalentcardFiles(Array.isArray(data.talentcardFiles) ? data.talentcardFiles : []); }).catch(() => {});
     return () => c.abort();
-  }, [userId]);
+  }, [candidateId]);
 
   /* ── fetch applications ── */
   useEffect(() => {
@@ -297,9 +303,9 @@ export default function DashboardCandidat() {
 
   /* ── fetch portfolio PDFs ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!candidateId) return;
     const c = new AbortController();
-    fetch(`${API_BASE}/dashboard/candidat/${userId}/portfolio-pdf-files`, { signal: c.signal })
+    fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/portfolio-pdf-files`, { signal: c.signal })
       .then(r => r.json()).then(data => {
         if (data) {
           setPortfolioShort(Array.isArray(data.portfolioShort) ? data.portfolioShort : []);
@@ -307,7 +313,7 @@ export default function DashboardCandidat() {
         }
       }).catch(() => {});
     return () => c.abort();
-  }, [userId]);
+  }, [candidateId]);
 
   /* ── derived ── */
   const currentLabel = MENU.find(m => m.id === active)?.label ?? "Dashboard";
