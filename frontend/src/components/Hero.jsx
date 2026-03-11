@@ -48,15 +48,30 @@ function Hero() {
           </div>
         </div>
 
-        {/* ── RIGHT : Africa map ── (positioned absolute) */}
+        {/* ── RIGHT : Africa map ── */}
       </div>
 
-      {/* Map image placée à droite + point Marrakech animé */}
+      {/* Map image placée à droite + effet Marrakech premium */}
       <div className="hero-map-container">
-        <img src={africaMapImg} alt="" className="hero-map-svg" aria-hidden="true" />
+        <img
+          src={africaMapImg}
+          alt=""
+          className="hero-map-svg"
+          aria-hidden="true"
+        />
+
+        {/* Point Marrakech avec pulsation concentrique */}
         <div className="hero-map-marker">
           <span className="hero-map-pulse" />
           <span className="hero-map-dot" />
+
+          {/* Trainée de cercles qui descendent depuis Marrakech */}
+          <div className="hero-circle-stream">
+            <span className="hero-circle hero-circle--1" />
+            <span className="hero-circle hero-circle--2" />
+            <span className="hero-circle hero-circle--3" />
+            <span className="hero-circle hero-circle--4" />
+          </div>
         </div>
       </div>
     </section>

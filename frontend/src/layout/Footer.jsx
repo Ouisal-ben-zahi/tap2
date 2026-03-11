@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../css/Footer.css";
-import logo from "../assets/logo.svg";
+import logo from "../assets/logo-white.svg";
+import heroBg from "../assets/hero.jpg";
 
 const Footer = () => {
   const [openColumn, setOpenColumn] = useState(null);
@@ -25,6 +26,30 @@ const Footer = () => {
 
   return (
     <footer className="footer-container">
+      {/* CTA au-dessus du footer */}
+      <section
+        className="footer-cta"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
+        <div className="footer-cta-overlay" />
+        <div className="footer-cta-inner">
+          <div className="footer-cta-text">
+            <p className="footer-cta-kicker">Prêts à passer à l’action ?</p>
+            <h2 className="footer-cta-title">
+              Transformez vos profils en{" "}
+              <span className="footer-cta-accent">talents prêts à performer.</span>
+            </h2>
+          </div>
+          <div className="footer-cta-actions">
+            <a href="/apropos" className="footer-cta-btn footer-cta-btn-primary">
+              Découvrir TAP
+            </a>
+            <a href="/contact" className="footer-cta-btn footer-cta-btn-secondary">
+              Contactez-nous
+            </a>
+          </div>
+        </div>
+      </section>
       <div className="footer-inner">
         <div className="footer-brand">
           <img src={logo} alt="TAP" className="footer-logo" />

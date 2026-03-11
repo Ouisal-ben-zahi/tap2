@@ -231,14 +231,16 @@
   width: 110%;          /* un peu plus large que le conteneur */
   max-width: 720px;
   height: auto;
-  opacity: 0.75;        /* lignes bien visibles, fond transparent géré par l'image */
+  opacity: 0.25;        /* encore plus transparente */
+  /* léger shadow noir sous la carte pour le relief */
+  filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.45));
 }
 
 /* Marqueur Marrakech (positionné par rapport à la carte) */
 .hero-map-marker {
   position: absolute;
-  right: 89%;   /* décale le point vers la gauche (zone Maroc) */
-  bottom: 91%;  /* remonte le point vers le nord de l’Afrique */
+  right: 88%;   /* zone Maroc sur la carte */
+  bottom: 92%;  /* légèrement au nord-ouest du continent */
   transform: translate(50%, 50%);
   pointer-events: none;
 }
@@ -277,6 +279,77 @@
     opacity: 0;
   }
 }
+
+/* Couronne de cercles qui "coulent" vers le bas depuis Marrakech (comme sur ta vidéo) */
+.hero-circle-stream {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 260px;
+  pointer-events: none;
+}
+
+.hero-circle {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.65);
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.45);
+  opacity: 0;
+  animation: heroCircleFall 6s linear infinite;
+}
+
+.hero-circle--1 {
+  width: 110px;
+  height: 110px;
+  top: -10px;
+  left: 40px;
+  animation-delay: 0s;
+}
+
+.hero-circle--2 {
+  width: 140px;
+  height: 140px;
+  top: -20px;
+  left: 80px;
+  animation-delay: 1.2s;
+}
+
+.hero-circle--3 {
+  width: 90px;
+  height: 90px;
+  top: 10px;
+  left: 120px;
+  animation-delay: 2.4s;
+}
+
+.hero-circle--4 {
+  width: 160px;
+  height: 160px;
+  top: -30px;
+  left: 20px;
+  animation-delay: 3.6s;
+}
+
+@keyframes heroCircleFall {
+  0% {
+    transform: translateY(0) scale(0.7);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.65;
+  }
+  70% {
+    transform: translateY(220px) scale(1.05);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(260px) scale(1.15);
+    opacity: 0;
+  }
+}
+
 
 .map-country {
   fill: none;
