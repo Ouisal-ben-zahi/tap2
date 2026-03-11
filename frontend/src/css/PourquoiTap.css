@@ -15,10 +15,36 @@
   z-index: 1;
 }
 
-.pourquoi-header h2 {
-  font-size: 28px;
-  margin-bottom: 30px;
-  font-weight: 400;
+.pourquoi-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pourquoi-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #e01f26;
+}
+
+.pourquoi-kicker::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e01f26);
+}
+
+.pourquoi-title {
+  font-size: 30px;
+  margin: 10px 0 6px 0;
+  font-weight: 600;
+}
+
+.pourquoi-title-accent {
+  color: #e01f26;
 }
 
 .pourquoi-subtitle {
@@ -46,7 +72,10 @@
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 14px;
+  border: 1px solid rgba(148,163,184,0.4);
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 /* LA BARRE ROUGE QUI DÉPASSE */
@@ -63,8 +92,12 @@
 
 .tag:hover,
 .tag:focus-within {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  transform: translateY(-4px);
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(248,113,113,0.35),
+    0 0 25px rgba(248,113,113,0.55);
+  border-color: rgba(248,113,113,0.85);
 }
 
 .pourquoi-note {
@@ -72,77 +105,113 @@
   font-size: 1rem;
   font-weight: 300;
 }
+/* --- Grille 2x2 des cartes "Pourquoi TAP ?" --- */
+.pourquoi-cards-section {
+  margin-top: 48px;
+}
 
-/* --- LE RESTE DU CODE --- */
-
-.pourquoi-columns {
+.pourquoi-cards-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 80px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
 }
 
-.pourquoi-columns > div {
+.pourquoi-card {
+  background: transparent;
+  border-radius: 18px;
+  border: 1px solid rgba(148,163,184,0.35);
+  box-shadow: 0 32px 60px rgba(0,0,0,0.9);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  animation: process-item-fade 0.7s ease-out forwards;
 }
 
-.pourquoi-block {
-  background-color: #000;
-  border: 1px solid #e01f26;
-  flex: 1;
+.pourquoi-card-header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: radial-gradient(circle at 0 0, rgba(248,113,113,0.18), transparent 70%);
 }
 
-.block-title {
-  padding: 12px 50px;
-  font-weight: 700;
-  background-color: #e01f26;
+.pourquoi-card-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(248,113,113,0.6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e5e7eb;
+  font-size: 16px;
+}
+
+.pourquoi-card-meta {
+  text-align: right;
+}
+
+.pourquoi-card-metric {
+  margin: 0;
+  font-size: 11px;
   text-transform: uppercase;
-  color: #fff;
+  letter-spacing: 0.16em;
+  color: #9ca3af;
 }
 
-.block-body {
-  padding: 30px 50px;
-  font-size: 0.9rem;
-  flex: 1;
+.pourquoi-card-body {
+  padding: 18px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.block-body p {
-  margin-bottom: 10px;
+.pourquoi-card-title {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pourquoi-card-text {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #d1d5db;
   line-height: 1.5;
 }
 
-.block-footer {
-  padding: 12px 50px;
-  background-color: #EDEDED;
-  color: #000;
+.pourquoi-card-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: auto;
+  font-size: 11px;
+  color: #f97373;
+  text-decoration: none;
+  cursor: pointer;
   text-transform: uppercase;
-  font-weight: 700;
-  font-size: 0.85rem;
-  margin-top: 10px;
+  letter-spacing: 0.14em;
 }
 
-.pourquoi-dots {
-  margin-top: 16px;
-  display: none;
-  justify-content: center;
-  gap: 8px;
+.pourquoi-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(248,113,113,0.35),
+    0 0 25px rgba(248,113,113,0.55);
+  border-color: rgba(248,113,113,0.85);
 }
 
-.pourquoi-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background-color: rgba(237, 237, 237, 0.35);
-  animation: dotHint 1.8s ease-in-out infinite;
+.pourquoi-card:hover .pourquoi-card-icon {
+  border-color: rgba(248,113,113,0.9);
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(248,113,113,0.6);
 }
 
-.pourquoi-dot.active {
-  background-color: #e01f26;
-  transform: scale(1.25);
-  animation: none;
+.pourquoi-card:hover .pourquoi-card-link {
+  color: #fecaca;
 }
 
 /* Responsive */
@@ -163,41 +232,8 @@
     margin-top: 8px;
   }
 
-  .pourquoi-columns {
-    display: flex;
-    overflow-x: auto;
-    gap: 0;
-    margin-top: 40px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 8px;
-    scrollbar-width: none;           /* Firefox */
-    -ms-overflow-style: none;        /* IE/Edge */
-  }
-
-  .pourquoi-columns::-webkit-scrollbar {
-    display: none;                   /* Chrome/Safari */
-  }
-
-  .pourquoi-columns > div {
-    flex: 0 0 100%;
-    max-width: 100%;
-    margin: 0 5%;
-    scroll-snap-align: center;
-  }
-
-  .pourquoi-block {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .pourquoi-columns > div:active .pourquoi-block,
-  .pourquoi-columns > div:hover .pourquoi-block {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
-  }
-
-  .pourquoi-dots {
-    display: flex;
+  .pourquoi-cards-grid {
+    grid-template-columns: 1fr;
   }
 }
 

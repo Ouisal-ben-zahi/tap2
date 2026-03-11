@@ -1,87 +1,88 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import "../css/PourquoiTap.css";
 import HeroStats from "./HeroStats";
+import {
+  HiOutlineChip,
+  HiOutlineBadgeCheck,
+  HiOutlineBookOpen,
+  HiOutlineSwitchHorizontal,
+} from "react-icons/hi";
+
+const cards = [
+  {
+    title: "Analyse IA",
+    metric: "<30s d’analyse",
+    icon: HiOutlineChip,
+    body:
+      "Chaque CV est scanné et évalué par notre moteur d’intelligence artificielle en moins de 30 secondes.",
+  },
+  {
+    title: "Score d’employabilité",
+    metric: "0–100 score",
+    icon: HiOutlineBadgeCheck,
+    body:
+      "Un score objectif de 0 à 100 basé sur les compétences réelles, pas les diplômes.",
+  },
+  {
+    title: "Micro‑learning",
+    metric: "37+ modules",
+    icon: HiOutlineBookOpen,
+    body:
+      "Des formations courtes et ciblées pour combler les lacunes identifiées par l’IA.",
+  },
+  {
+    title: "Matching intelligent",
+    metric: "87% précision",
+    icon: HiOutlineSwitchHorizontal,
+    body:
+      "Les profils validés sont connectés aux recruteurs qui embauchent, en temps réel.",
+  },
+];
 
 const PourquoiTap = () => {
-  const [activeSlide, setActiveSlide] = useState(0);
-  const columnsRef = useRef(null);
-
-  const handleColumnsScroll = () => {
-    const container = columnsRef.current;
-    if (!container) return;
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    const maxScroll = scrollWidth - clientWidth || 1;
-    const progress = scrollLeft / maxScroll;
-    setActiveSlide(progress > 0.5 ? 1 : 0);
-  };
-
   return (
     <section className="pourquoi-section">
             <HeroStats />
       
       <div className="pourquoi-inner">
         <header className="pourquoi-header">
-          <h2>POURQUOI TAP ?</h2>
-          <p className="pourquoi-note">Le recrutement décalé repose sur des CV.</p>
-          <p className="pourquoi-note">TAP repose sur des talents révélés.</p>
-          <p className="pourquoi-subtitle">Chaque candidat visible sur TAP est :</p>
+          <span className="pourquoi-kicker">La solution</span>
+          <h2 className="pourquoi-title">
+            Pourquoi <span className="pourquoi-title-accent">TAP&nbsp;?</span>
+          </h2>
+          <p className="pourquoi-subtitle">
+            Chaque candidat visible sur TAP passe par une analyse, une préparation et un scoring exigeants.
+          </p>
         </header>
 
-        {/* Section des 4 cartes avec bordure qui dépasse */}
-        <div className="pourquoi-tags">
-          <div className="tag"><span className="tag-inner">ANALYSE PAR IA</span></div>
-          <div className="tag"><span className="tag-inner">STRUCTURÉ ET SCORÉ</span></div>
-          <div className="tag"><span className="tag-inner">ACCOMPAGNÉ POUR PROGRESSER</span></div>
-          <div className="tag"><span className="tag-inner">PRÊT À ÊTRE ÉVALUÉ PAR UNE ENTREPRISE</span></div>
-        </div>
-
-        <p className="pourquoi-note">Vous ne recevez pas des CV.</p>
-        <p className="pourquoi-note">Vous accédez à des profils préparés.</p>
-
-        <div
-          className="pourquoi-columns"
-          ref={columnsRef}
-          onScroll={handleColumnsScroll}
-        >
-          <div>
-            <div className="pourquoi-block">
-              <div className="block-title">POUR LES ENTREPRISES</div>
-              <div className="block-body">
-                <p>GARDEZ DU TEMPS POUR VOS VRAIS SUJETS.</p>
-                <p>DES TALENTS PRÉPARÉS, PRÊTS À CONTRIBUER.</p>
-                <p>UNE SÉLECTION SÉCURISÉE PAR LES DONNÉES.</p>
-                <p>MOINS DE RISQUE SUR LES DÉBUTS D’ESSAI.</p>
-              </div>
-            </div>
-            <div className="block-footer">RECRUTEZ MIEUX, PLUS VITE ET PLUS EN CONFIANCE.</div>
+        {/* Grille 2x2 des cartes comme sur la maquette */}
+        <section className="pourquoi-cards-section">
+          <div className="pourquoi-cards-grid">
+            {cards.map((card, index) => (
+              <article
+                key={card.title}
+                className="pourquoi-card"
+                style={{ animationDelay: `${0.15 + index * 0.06}s` }}
+              >
+                <header className="pourquoi-card-header">
+                  <span className="pourquoi-card-icon" aria-hidden="true">
+                    {card.icon ? <card.icon /> : null}
+                  </span>
+                  <div className="pourquoi-card-meta">
+                    <p className="pourquoi-card-metric">{card.metric}</p>
+                  </div>
+                </header>
+                <div className="pourquoi-card-body">
+                  <h3 className="pourquoi-card-title">{card.title}</h3>
+                  <p className="pourquoi-card-text">{card.body}</p>
+                  <button className="pourquoi-card-link" type="button">
+                    En savoir plus →
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
-
-          <div>
-            <div className="pourquoi-block">
-              <div className="block-title">POUR LES CANDIDATS</div>
-              <div className="block-body">
-                <p>UNE LECTURE DE VOS FORCES, PAS JUSTE DE VOTRE CV.</p>
-                <p>UN PARCOURS DE FORMATION RENFORÇANT VOS ATOUTS.</p>
-                <p>DES ENTREPRISES QUI VOUS VOIENT COMME UN TALENT.</p>
-                <p>UN ACCOMPAGNEMENT POUR RÉUSSIR VOS PREMIERS MOIS.</p>
-              </div>
-            </div>
-            <div className="block-footer">100 % gratuit.</div>
-          </div>
-        </div>
-
-        <div className="pourquoi-dots">
-          <span
-            className={
-              "pourquoi-dot" + (activeSlide === 0 ? " active" : "")
-            }
-          />
-          <span
-            className={
-              "pourquoi-dot" + (activeSlide === 1 ? " active" : "")
-            }
-          />
-        </div>
+        </section>
       </div>
     </section>
   );

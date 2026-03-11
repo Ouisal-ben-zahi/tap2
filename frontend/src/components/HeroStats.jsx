@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import "../css/HeroStats.css";
-import cardIcon from "../assets/path20.svg";
 
 const stats = [
   {
@@ -69,7 +68,12 @@ const HeroStats = () => {
   return (
     <section className="hero-stats">
       <div className="hero-stats-inner">
-        <h2 className="hero-stats-title">Rejetés avant d&apos;être compris.</h2>
+        <header className="hero-stats-header">
+          <span className="hero-stats-kicker">La situation</span>
+          <h2 className="hero-stats-title">
+            Rejetés avant d&apos;être <span className="hero-stats-title-accent">compris.</span>
+          </h2>
+        </header>
         <div
           className="hero-cards"
           ref={cardsRef}
@@ -85,7 +89,6 @@ const HeroStats = () => {
                 "hero-stat-card" + (activeCard === index ? " active" : "")
               }
             >
-              <img src={cardIcon} alt="" className="hero-stat-icon" />
               <div className="hero-stat-value">{item.value}</div>
               <p className="hero-stat-text">{item.text}</p>
             </div>

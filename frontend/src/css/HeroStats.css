@@ -9,13 +9,37 @@
   margin: 0 auto;
 }
 
-.hero-stats-title {
-  font-size: 28px;
-  font-weight: 400;
+.hero-stats-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.hero-stats-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  color: #e01f26;
+}
+
+.hero-stats-kicker::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e01f26);
+}
+
+.hero-stats-title {
+  font-size: 30px;
+  font-weight: 600;
   color: #f5f5f5;
-  margin: 0 0 24px 0;
+  margin: 10px 0 0 0;
+}
+
+.hero-stats-title-accent {
+  color: #e01f26;
 }
 
 .hero-cards {
@@ -24,26 +48,20 @@
   margin-bottom: 36px;
   margin-top: 36px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .hero-stat-card {
   position: relative;
-  background: rgba(0, 0, 0, 0.9);
+  background: transparent;
   color: #fff;
   padding: 30px 26px 26px 26px;
   min-width: 240px;
   max-width: 320px;
-  border: 1px solid #ca1b28;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid rgba(148,163,184,0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   text-align: center;
-}
-
-.hero-stat-icon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
+  border-radius: 18px;
 }
 
 .hero-stat-value {
@@ -60,13 +78,11 @@
 
 .hero-stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
-  background-image: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.95),
-    rgba(202, 27, 40, 0.9),
-    rgba(0, 0, 0, 0.95)
-  );
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(248,113,113,0.35),
+    0 0 25px rgba(248,113,113,0.55);
+  border-color: rgba(248,113,113,0.85);
 }
 
 .hero-dots {

@@ -3,6 +3,7 @@ import "../css/Accueil.css";
 import Hero from "../components/Hero";
 import PourquoiTap from "../components/PourquoiTap";
 import TalentSection from "../components/CommentCaMarche";
+import Faq from "../components/Faq";
 
 const Accueil = () => {
   return (
@@ -10,6 +11,7 @@ const Accueil = () => {
       <Hero />
       <PourquoiTap />
       <TalentSection />
+      <Faq />
     </div>
   );
 };
