@@ -280,6 +280,59 @@
   }
 }
 
+.hero-map-label-text {
+  position: absolute;
+  left: 140%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f9fafb;
+}
+
+/* Indicateur de scroll */
+.hero-scroll-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0;
+}
+
+.hero-scroll-indicator:hover {
+  opacity: 1;
+}
+
+.scroll-mouse {
+  width: 22px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.scroll-wheel {
+  width: 2px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(249,250,251,0.9);
+  animation: scrollWheel 1.6s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+  0%   { transform: translateY(0);   opacity: 1; }
+  70%  { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0);   opacity: 0; }
+}
+
 /* Couronne de cercles qui "coulent" vers le bas depuis Marrakech (comme sur ta vidéo) */
 .hero-circle-stream {
   position: absolute;

@@ -76,8 +76,27 @@ function Hero() {
             <span className="hero-circle hero-circle--7" />
             <span className="hero-circle hero-circle--8" />
           </div>
+
+          <span className="hero-map-label-text">Marrakech</span>
         </div>
       </div>
+
+      {/* Indicateur de scroll au centre bas du hero */}
+      <button
+        type="button"
+        className="hero-scroll-indicator"
+        onClick={() => {
+          const next = document.querySelector(".pourquoi-section");
+          if (next) {
+            next.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+        aria-label="Faire défiler la page"
+      >
+        <span className="scroll-mouse">
+          <span className="scroll-wheel" />
+        </span>
+      </button>
     </section>
   );
 }
