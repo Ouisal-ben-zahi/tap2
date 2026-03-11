@@ -38,6 +38,13 @@ const IconMail = () => (
   </svg>
 );
 
+const IconLock = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <rect x="4" y="10" width="16" height="10" rx="2" />
+    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+  </svg>
+);
+
 /* ── password generator ───────────────────────── */
 function generateSecurePassword() {
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
@@ -58,6 +65,7 @@ function CreerCompte() {
   const [accountType,       setAccountType]       = useState("candidat");
   const [email,             setEmail]             = useState("");
   const [password,          setPassword]          = useState("");
+  const [confirmPassword,   setConfirmPassword]   = useState("");
   const [showPwd,           setShowPwd]           = useState(false);
   const [showSuggest,       setShowSuggest]       = useState(false);
   const [suggested,         setSuggested]         = useState("");
@@ -103,7 +111,14 @@ function CreerCompte() {
     }
 
     /* ── STEP 1: send code ── */
-    if (!email.trim() || !password.trim()) return;
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError("Merci de remplir tous les champs.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Les deux mots de passe ne correspondent pas.");
+      return;
+    }
     setLoading(true);
     try {
       const res  = await fetch(`${API_BASE}/auth/send-verification`, {
@@ -129,14 +144,13 @@ function CreerCompte() {
     >
       <div className="signup-inner">
 
-        {/* ══ LEFT: brand + steps ══ */}
+        {/* ══ LEFT: titre + steps ══ */}
         <div className="signup-left">
-          <div>
-            <p className="signup-brand-tag">Rejoignez la plateforme</p>
-            <h1 className="signup-brand-name">Talent<span>.</span></h1>
-            <p className="signup-brand-desc">
-              Créez votre profil en quelques minutes et accédez à un écosystème
-              conçu pour faire briller les meilleurs talents.
+          <div className="signup-left-header">
+            <h2 className="signup-left-title">Créez votre profil TAP</h2>
+            <p className="signup-left-desc">
+              Une seule inscription pour accéder à votre espace candidat ou recruteur,
+              gérer vos dossiers et suivre vos opportunités.
             </p>
           </div>
 
@@ -209,24 +223,33 @@ function CreerCompte() {
                 {/* email */}
                 <div className="signup-field">
                   <label htmlFor="signup-email">Adresse e-mail</label>
-                  <input
-                    id="signup-email"
-                    type="email"
-                    placeholder="vous@exemple.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    autoComplete="email"
-                    required
-                  />
+                  <div className="signup-input-with-icon">
+                    <span className="signup-input-icon">
+                      <IconMail />
+                    </span>
+                    <input
+                      id="signup-email"
+                      type="email"
+                      className="signup-input-leading"
+                      placeholder="vous@exemple.com"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* password */}
                 <div className="signup-field">
                   <label htmlFor="signup-password">Mot de passe</label>
                   <div className="password-input-wrapper">
+                    <span className="signup-input-icon">
+                      <IconLock />
+                    </span>
                     <input
                       id="signup-password"
-                      className="password-input"
+                      className="password-input signup-input-leading"
                       type={showPwd ? "text" : "password"}
                       placeholder="Minimum 8 caractères"
                       value={password}
@@ -260,6 +283,35 @@ function CreerCompte() {
                       </button>
                     </div>
                   )}
+                </div>
+
+                {/* confirm password */}
+                <div className="signup-field">
+                  <label htmlFor="signup-password-confirm">Confirmer le mot de passe</label>
+                  <div className="password-input-wrapper">
+                    <span className="signup-input-icon">
+                      <IconLock />
+                    </span>
+                    <input
+                      id="signup-password-confirm"
+                      className="password-input signup-input-leading"
+                      type={showPwd ? "text" : "password"}
+                      placeholder="Retapez votre mot de passe"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      autoComplete="new-password"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      className={`password-eye-btn${showPwd ? " password-eye-btn--active" : ""}`}
+                      onClick={() => setShowPwd(p => !p)}
+                      aria-label={showPwd ? "Masquer" : "Afficher"}
+                    >
+                      <IconEye open={showPwd} />
+                    </button>
+                  </div>
                 </div>
               </>
             )}
