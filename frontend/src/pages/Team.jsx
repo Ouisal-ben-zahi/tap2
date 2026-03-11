@@ -77,6 +77,20 @@ const teamMembers = [
   },
 ];
 
+const IconLinkedIn = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      fill="currentColor"
+      d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.23 8.32h4.55V24H.23V8.32zM8.54 8.32h4.36v2.13h.06c.61-1.15 2.1-2.36 4.32-2.36 4.62 0 5.47 3.04 5.47 6.99V24h-4.74v-7.6c0-1.81-.03-4.14-2.52-4.14-2.52 0-2.91 1.97-2.91 4v7.74H8.54V8.32z"
+    />
+  </svg>
+);
+
 function Team() {
   return (
     <section
@@ -97,6 +111,16 @@ function Team() {
               <p className="team-hero-subtitle">
                 Tech, stratégie et design réunis pour transformer l&apos;employabilité au Maroc.
               </p>
+              <p className="team-hero-desc">
+                Une cellule resserrée d&apos;experts produit, IA et expérience utilisateur qui conçoivent
+                chaque parcours comme une expérience premium – pour les talents comme pour les recruteurs.
+              </p>
+
+              <div className="team-hero-pills">
+                <span className="team-hero-pill">Produit &amp; IA appliquée</span>
+                <span className="team-hero-pill">Design d&apos;expérience</span>
+                <span className="team-hero-pill">Infrastructure scalable</span>
+              </div>
             </div>
           </div>
 
@@ -159,7 +183,11 @@ function Team() {
                         className="team-founder-linkedin"
                         aria-label={`Profil LinkedIn de ${member.name}`}
                       >
-                        LinkedIn ↗
+                        <span className="team-link-icon">
+                          <IconLinkedIn />
+                        </span>
+                        <span className="team-link-text">LinkedIn</span>
+                        <span className="team-link-arrow">↗</span>
                       </a>
                     )}
                   </div>
@@ -209,7 +237,11 @@ function Team() {
                         className="team-member-linkedin"
                         aria-label={`Profil LinkedIn de ${member.name}`}
                       >
-                        LinkedIn ↗
+                        <span className="team-link-icon">
+                          <IconLinkedIn />
+                        </span>
+                        <span className="team-link-text">LinkedIn</span>
+                        <span className="team-link-arrow">↗</span>
                       </a>
                     )}
                   </div>
