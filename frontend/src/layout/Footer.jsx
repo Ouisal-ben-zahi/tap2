@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import "../css/Footer.css";
 import logo from "../assets/logo-white.svg";
-import heroBg from "../assets/hero.jpg";
+
 
 const Footer = () => {
   const [openColumn, setOpenColumn] = useState(null);
