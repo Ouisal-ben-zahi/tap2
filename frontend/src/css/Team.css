@@ -171,7 +171,7 @@
 
 .team-section-header {
   margin-bottom: 26px;
-  text-align: left;
+  text-align: center;
 }
 
 .team-section-kicker {
@@ -219,6 +219,8 @@
   opacity: 0;
   transform: translateY(18px);
   animation: team-fade-up 0.7s ease-out forwards;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 
 .team-founder-media {
@@ -360,6 +362,15 @@
 }
 
 .team-member-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(248,113,113,0.35),
+    0 0 25px rgba(248,113,113,0.55);
+  border-color: rgba(248,113,113,0.85);
+}
+
+.team-founder-card:hover {
   transform: translateY(-4px);
   box-shadow:
     0 40px 80px rgba(0,0,0,0.95),

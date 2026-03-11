@@ -222,14 +222,6 @@ button {
   opacity: 0;
 }
 
-.process-side--content .process-item {
-  text-align: right;
-}
-
-.process-item--right {
-  text-align: left;
-}
-
 .process-center {
   display: flex;
   align-items: center;

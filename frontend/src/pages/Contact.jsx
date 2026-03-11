@@ -201,23 +201,6 @@ function Contact() {
           </form>
         </div>
 
-        <section className="contact-cta">
-          <div className="contact-cta-label">COMMENCEZ MAINTENANT</div>
-          <h2 className="contact-cta-title">
-            Prêt à recruter <span className="contact-cta-title-accent">autrement&nbsp;?</span>
-          </h2>
-          <p className="contact-cta-subtitle">
-            Rejoignez les entreprises qui recrutent des talents préparés par l&apos;IA.
-          </p>
-          <div className="contact-cta-actions">
-            <a
-              href="https://demo.tap-hr.com/login"
-              className="contact-cta-btn contact-cta-btn-primary"
-            >
-              ACCÉDER À LA PLATEFORME &rarr;
-            </a>
-          </div>
-        </section>
       </div>
     </section>
   );
