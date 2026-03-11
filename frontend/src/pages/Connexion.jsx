@@ -272,13 +272,9 @@ function Connexion() {
                 />
                 <button
                   type="button"
-                  className={`password-eye${showPwd ? " password-eye--active" : ""}`}
+                  className={`password-eye-btn${showPwd ? " password-eye-btn--active" : ""}`}
                   onClick={() => setShowPwd(p => !p)}
                   aria-label={showPwd ? "Masquer" : "Afficher"}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: showPwd ? "#ef4444" : "#475569",
-                  }}
                 >
                   <IconEye open={showPwd} />
                 </button>

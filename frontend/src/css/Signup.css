@@ -503,7 +503,7 @@
   background: #161616;
   border: 1px solid rgba(148,163,184,0.45);
   color: var(--text-1);
-  border-radius: 10px;
+  border-radius: 10px; /* tous les inputs du formulaire ont des bords arrondis */
   outline: none;
   transition: border-color 0.2s var(--ease), background 0.2s, box-shadow 0.2s;
 }
@@ -560,7 +560,7 @@
   padding: 14px 16px;
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: 10px; /* carte de vérification avec coins arrondis */
 }
 
 .signup-verify-msg strong { color: var(--red); }
@@ -576,6 +576,7 @@
   color: var(--text-1) !important;
   border-color: var(--red-border) !important;
   background: rgba(224,31,38,0.04) !important;
+  border-radius: 10px !important; /* code OTP arrondi aussi */
 }
 
 /* error */
@@ -604,7 +605,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: 999px; /* full rounded comme les autres CTA */
   transition: all 0.2s var(--ease);
   position: relative;
   overflow: hidden;
@@ -637,7 +638,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 999px; /* bouton secondaire full rounded aussi */
   transition: all 0.15s var(--ease);
   margin-top: 8px;
 }
