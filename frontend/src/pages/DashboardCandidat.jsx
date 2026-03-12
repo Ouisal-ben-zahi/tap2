@@ -142,6 +142,7 @@ export default function DashboardCandidat() {
     applications: null, interviews: null,
     savedOffers: null,  notifications: null,
     statusPending: null, statusAccepted: null, statusRefused: null,
+    avatarUrl: null,
   });
   const [candidateId, setCandidateId] = useState(null);
   const [llmData,        setLlmData]        = useState(null);   // from /llm-evaluation endpoint
@@ -216,6 +217,7 @@ export default function DashboardCandidat() {
           statusPending:  data.statusPending  ?? 0,
           statusAccepted: data.statusAccepted ?? 0,
           statusRefused:  data.statusRefused  ?? 0,
+          avatarUrl:      data.avatarUrl ?? null,
         });
         if (typeof data.candidateId === "number") {
           setCandidateId(data.candidateId);

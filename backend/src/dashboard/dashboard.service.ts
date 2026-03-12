@@ -229,8 +229,32 @@ export class DashboardService {
         .createSignedUrl(rawImagePath, 60 * 60);
 
       if (!signedError && signed) {
+        // debug backend: image trouvée
+        // eslint-disable-next-line no-console
+        console.log(
+          '[avatar] image trouvée pour candidat',
+          candidateId,
+          'path =',
+          rawImagePath,
+        );
         avatarUrl = signed.signedUrl;
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(
+          '[avatar] image introuvable ou erreur pour candidat',
+          candidateId,
+          'path =',
+          rawImagePath,
+          'error =',
+          signedError?.message ?? null,
+        );
       }
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(
+        '[avatar] aucune image_minio_url pour candidat',
+        candidateId,
+      );
     }
 
     return {

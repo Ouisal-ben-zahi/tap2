@@ -367,22 +367,24 @@
 /* Avatar */
 .dash-profile-wrap{position:relative}
 .dash-topbar-avatar{
-  width:34px;height:34px;border-radius:10px;
-  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);
-  border:1px solid rgba(255,255,255,0.15);
+  width:34px;height:34px;border-radius:50%;
+  background:transparent;
+  border:none;
+  overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-size:16px;font-weight:700;color:var(--void);
+  font-family:var(--display);font-size:16px;font-weight:700;color:var(--t0);
   cursor:pointer;transition:all .25s var(--ease);user-select:none;
 }
 .dash-topbar-avatar:hover,.dash-topbar-avatar--active{
-  box-shadow:0 0 0 3px var(--gold-dim),0 0 20px var(--gold-glow);
+  box-shadow:0 0 0 0 transparent;
 }
 .dash-profile-header{display:flex;align-items:center;gap:12px;padding:16px 18px}
 .dash-profile-avatar-lg{
-  width:42px;height:42px;border-radius:12px;
-  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);
+  width:42px;height:42px;border-radius:50%;
+  background:transparent;
+  overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-size:20px;color:var(--void);flex-shrink:0;
+  font-family:var(--display);font-size:20px;color:var(--t0);flex-shrink:0;
 }
 .dash-profile-info{display:flex;flex-direction:column;gap:2px;overflow:hidden}
 .dash-profile-name{font-size:13px;font-weight:600;color:var(--t0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--display);letter-spacing:.04em}
