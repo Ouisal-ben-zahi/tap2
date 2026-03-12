@@ -82,6 +82,29 @@ export interface RecruiterOverviewStats {
   alerts: { type: string; message: string }[];
 }
 
+export interface PublicJobItem {
+  id: number;
+  title: string | null;
+  categorie_profil: string | null;
+  created_at: string | null;
+  urgent: boolean;
+  location_type: any | null;
+}
+
+export interface CandidateScoreFromJson {
+  candidateId: number | null;
+  scoreGlobal: number | null;
+  decision: string | null;
+  familleDominante: string | null;
+  metadataTimestamp: string | null;
+  metadataSector: string | null;
+  metadataModule: string | null;
+  commentaire: string | null;
+  dimensions: { id: string; label: string; score: number }[];
+  skills: { name: string; score: number; status: string; scope: string }[];
+  softSkills: { nom: string; niveau: string }[];
+}
+
 @Injectable()
 export class DashboardService {
   private supabase: SupabaseClient;
@@ -1237,6 +1260,227 @@ export class DashboardService {
       applicationsPerJob,
       recentApplications,
       alerts,
+    };
+  }
+
+  async getAllJobsForCandidates(): Promise<{ jobs: PublicJobItem[] }> {
+    const { data, error } = await this.supabase
+      .from('jobs')
+      .select(
+        'id, title, categorie_profil, created_at, urgent, location_type',
+      )
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new BadRequestException(
+        error.message || 'Erreur lors du chargement des offres',
+      );
+    }
+
+    const jobs: PublicJobItem[] = (data ?? []).map((row: any) => ({
+      id: row.id as number,
+      title: (row.title as string) ?? null,
+      categorie_profil: (row.categorie_profil as string) ?? null,
+      created_at: (row.created_at as string) ?? null,
+      urgent: Boolean(row.urgent),
+      location_type: row.location_type ?? null,
+    }));
+
+    return { jobs };
+  }
+
+  async getCandidateScoreFromJson(
+    candidateId: number,
+  ): Promise<CandidateScoreFromJson> {
+    if (!candidateId || Number.isNaN(candidateId)) {
+      throw new BadRequestException('candidateId invalide');
+    }
+
+    const {
+      data: candidate,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('id', candidateId)
+      .maybeSingle();
+
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidate) {
+      return {
+        candidateId: null,
+        scoreGlobal: null,
+        decision: null,
+        familleDominante: null,
+        metadataTimestamp: null,
+        metadataSector: null,
+        metadataModule: null,
+        commentaire: null,
+        dimensions: [],
+        skills: [],
+        softSkills: [],
+      };
+    }
+
+    const category =
+      (candidate.categorie_profil as string | null) || 'Autres';
+    const basePath = `candidates/${category}/${candidateId}`;
+
+    const { data: listed, error: listError } = await this.supabase.storage
+      .from('tap_files')
+      .list(basePath, {
+        limit: 100,
+      });
+
+    if (listError) {
+      throw new BadRequestException(
+        listError.message ||
+          'Erreur lors du listing des fichiers de scoring',
+      );
+    }
+
+    const analysisFiles =
+      (listed ?? []).filter((f: any) => {
+        if (typeof f.name !== 'string') return false;
+        const name = f.name.toLowerCase();
+        return name.endsWith('_analyse.json') || name.endsWith('a2_analyse.json');
+      }) ?? [];
+
+    if (analysisFiles.length === 0) {
+      return {
+        candidateId,
+        scoreGlobal: null,
+        decision: null,
+        familleDominante: null,
+        metadataTimestamp: null,
+        metadataSector: null,
+        metadataModule: null,
+        commentaire: null,
+        dimensions: [],
+        skills: [],
+        softSkills: [],
+      };
+    }
+
+    const latestFile = analysisFiles
+      .slice()
+      .sort((a: any, b: any) => {
+        const da = a.updated_at ? new Date(a.updated_at as string).getTime() : 0;
+        const db = b.updated_at ? new Date(b.updated_at as string).getTime() : 0;
+        return db - da;
+      })[0];
+
+    const path = `${basePath}/${latestFile.name as string}`;
+
+    const { data: fileData, error: downloadError } = await this.supabase
+      .storage
+      .from('tap_files')
+      .download(path);
+
+    if (downloadError || !fileData) {
+      throw new BadRequestException(
+        downloadError?.message ||
+          'Erreur lors du téléchargement du fichier de scoring',
+      );
+    }
+
+    const text = await (fileData as any).text();
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw new BadRequestException('Fichier de scoring JSON invalide');
+    }
+
+    const scoreGlobal =
+      typeof parsed?.scores?.score_global === 'number'
+        ? (parsed.scores.score_global as number)
+        : null;
+    const decision =
+      typeof parsed?.decision === 'string' ? (parsed.decision as string) : null;
+    const familleDominante =
+      typeof parsed?.metadata?.famille_dominante === 'string'
+        ? (parsed.metadata.famille_dominante as string)
+        : null;
+
+    const metadataTimestamp =
+      typeof parsed?.metadata?.timestamp === 'string'
+        ? (parsed.metadata.timestamp as string)
+        : null;
+    const metadataSector =
+      typeof parsed?.metadata?.sector_detected === 'string'
+        ? (parsed.metadata.sector_detected as string)
+        : null;
+    const metadataModule =
+      typeof parsed?.metadata?.module_used === 'string'
+        ? (parsed.metadata.module_used as string)
+        : null;
+
+    const commentaire =
+      typeof parsed?.commentaire_recruteur === 'string'
+        ? (parsed.commentaire_recruteur as string)
+        : null;
+
+    const dims: { id: string; label: string; score: number }[] = [];
+    const dimSrc = parsed?.scores?.dimensions ?? {};
+
+    const pushDim = (id: string, label: string) => {
+      const d = dimSrc[id];
+      if (!d || typeof d.score !== 'number') return;
+      dims.push({
+        id,
+        label,
+        score: d.score as number,
+      });
+    };
+
+    pushDim('hard_skills_fit', 'Hard skills fit');
+    pushDim('preuves_impact', 'Preuves d’impact');
+    pushDim('rarete_marche', 'Rareté marché');
+    pushDim('coherence_parcours', 'Cohérence parcours');
+    pushDim('stabilite_risque', 'Stabilité / risque');
+    pushDim('communication_clarte', 'Clarté de communication');
+
+    const skills: {
+      name: string;
+      score: number;
+      status: string;
+      scope: string;
+    }[] = Array.isArray(parsed?.skills)
+      ? parsed.skills.map((s: any) => ({
+          name: (s?.name as string) ?? '',
+          score:
+            typeof s?.score === 'number' ? (s.score as number) : 0,
+          status: (s?.status as string) ?? '',
+          scope: (s?.scope as string) ?? '',
+        }))
+      : [];
+
+    const softSkills: { nom: string; niveau: string }[] =
+      Array.isArray(parsed?.evaluation_soft_skills_declares)
+        ? parsed.evaluation_soft_skills_declares.map((s: any) => ({
+            nom: (s?.nom as string) ?? '',
+            niveau: (s?.niveau as string) ?? '',
+          }))
+        : [];
+
+    return {
+      candidateId,
+      scoreGlobal,
+      decision,
+      familleDominante,
+      metadataTimestamp,
+      metadataSector,
+      metadataModule,
+      commentaire,
+      dimensions: dims,
+      skills,
+      softSkills,
     };
   }
 }

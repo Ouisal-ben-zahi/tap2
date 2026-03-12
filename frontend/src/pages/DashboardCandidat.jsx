@@ -5,7 +5,7 @@ import {
   Image, CalendarCheck, LogOut, Search,
   TrendingUp, TrendingDown, Users, Bookmark, Bell,
   BriefcaseBusiness, ArrowRight, ChevronLeft, ChevronRight,
-  Settings, Menu, Award, Zap, BarChart2, AlertTriangle, Home,
+  Settings, Menu, Award, Zap, BarChart2, AlertTriangle,
 } from "lucide-react";
 import "../css/Dashboard.css";
 import logo from "../assets/logo-white.svg";
@@ -13,33 +13,19 @@ import logo from "../assets/logo-white.svg";
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 /* ─── gradients portfolio ─── */
-const GRADIENTS = [
-  "linear-gradient(145deg,#2a0a0a 0%,#4a1010 100%)",
-  "linear-gradient(145deg,#0a0a1a 0%,#1a1a3a 100%)",
-  "linear-gradient(145deg,#0a1a0a 0%,#1a3a1a 100%)",
-  "linear-gradient(145deg,#1a0a1a 0%,#3a1a3a 100%)",
-  "linear-gradient(145deg,#1a1a0a 0%,#3a3a1a 100%)",
-  "linear-gradient(145deg,#0a1a1a 0%,#1a3a3a 100%)",
-];
 
 /* ─── menu ─── */
 const MENU = [
-  // 1. Bienvenue
-  { id: "fichiers",      label: "Bienvenue",         icon: Home              },
-  // 2. Dashboard
-  { id: "dashboard",     label: "Dashboard",         icon: LayoutDashboard   },
-  // 3. CV
-  { id: "cv",            label: "Curriculum Vitae",  icon: FileText          },
-  // 4. Portfolio court
-  { id: "portfolio",     label: "Portfolio court",   icon: Image             },
-  // 5. Portfolio long
-  { id: "portfolio-long",label: "Portfolio long",    icon: BarChart2         },
-  // 6. Entretiens
-  { id: "entretiens",    label: "Entretiens",        icon: CalendarCheck     },
-  // 7. Mes candidatures
-  { id: "candidatures",  label: "Mes candidatures",  icon: BriefcaseBusiness },
-  // sections supplémentaires
-  { id: "talentcard",    label: "Talent Card",       icon: CreditCard        },
+  { id: "dashboard",    label: "Dashboard",    icon: LayoutDashboard   },
+  { id: "analyse-cv",   label: "Analyse CV",   icon: FileText          },
+  { id: "scoring",      label: "Scoring",      icon: LayoutDashboard   },
+  { id: "matching",     label: "Matching",     icon: BriefcaseBusiness },
+  { id: "formation",    label: "Formation",    icon: Award             },
+  { id: "entretien-ia",    label: "Entretien IA",    icon: CalendarCheck     },
+  { id: "mes-offres",      label: "Toutes les offres", icon: BriefcaseBusiness },
+  { id: "mes-candidatures",label: "Mes candidatures", icon: BriefcaseBusiness },
+  { id: "mes-fichiers",    label: "Mes fichiers",    icon: FolderOpen        },
+  { id: "statistique",     label: "Statistique",     icon: BarChart2         },
 ];
 
 /* ─── bar chart data ─── */
@@ -146,7 +132,6 @@ export default function DashboardCandidat() {
   const navigate = useNavigate();
 
   const [active,             setActive]             = useState("dashboard");
-  const [pfTab,              setPfTab]              = useState("grid");
   const [collapsed,          setCollapsed]          = useState(false);
   const [mobileSidebarOpen,  setMobileSidebarOpen]  = useState(false);
   const [showNotif,          setShowNotif]          = useState(false);
@@ -159,17 +144,21 @@ export default function DashboardCandidat() {
     statusPending: null, statusAccepted: null, statusRefused: null,
   });
   const [candidateId, setCandidateId] = useState(null);
-  const [scoreData,      setScoreData]      = useState(null);   // from /score endpoint
   const [llmData,        setLlmData]        = useState(null);   // from /llm-evaluation endpoint
-  const [skillsList,     setSkillsList]     = useState([]);     // from /skills endpoint
-  const [portfolio,      setPortfolio]      = useState([]);
-  const [portfolioShort, setPortfolioShort] = useState([]);
-  const [portfolioLong,  setPortfolioLong]  = useState([]);
   const [applications,   setApplications]   = useState([]);
+  const [offers,         setOffers]         = useState([]);
+  const [scoreJson,      setScoreJson]      = useState(null);
   const [cvFiles,        setCvFiles]        = useState([]);
   const [talentcardFiles,setTalentcardFiles]= useState([]);
   const [uploadingCv,    setUploadingCv]    = useState(false);
   const [uploadErrorCv,  setUploadErrorCv]  = useState("");
+  const [offerSearch,        setOfferSearch]        = useState("");
+  const [offerUrgentOnly,    setOfferUrgentOnly]    = useState(false);
+  const [offerSortDirection, setOfferSortDirection] = useState("recent");
+  const [appSearch,          setAppSearch]          = useState("");
+  const [appStatusFilter,    setAppStatusFilter]    = useState("all");
+  const [appSortDirection,   setAppSortDirection]   = useState("recent");
+  const [appStatusOpen,      setAppStatusOpen]      = useState(false);
 
   /* ── wizard ── */
   const [currentWizardStep, setCurrentWizardStep] = useState(1);
@@ -236,15 +225,6 @@ export default function DashboardCandidat() {
     return () => c.abort();
   }, [userId]);
 
-  /* ── fetch score (table: score + llm_evaluation_v2) ── */
-  useEffect(() => {
-    if (!userId) return;
-    const c = new AbortController();
-    fetch(`${API_BASE}/dashboard/candidat/${userId}/score`, { signal: c.signal })
-      .then(r => r.json()).then(data => { if (data) setScoreData(data); }).catch(() => {});
-    return () => c.abort();
-  }, [userId]);
-
   /* ── fetch LLM evaluation ── */
   useEffect(() => {
     if (!userId) return;
@@ -259,9 +239,7 @@ export default function DashboardCandidat() {
     if (!userId) return;
     const c = new AbortController();
     fetch(`${API_BASE}/dashboard/candidat/${userId}/skills`, { signal: c.signal })
-      .then(r => r.json()).then(data => {
-        if (data && Array.isArray(data.skills)) setSkillsList(data.skills);
-      }).catch(() => {});
+      .catch(() => {});
     return () => c.abort();
   }, [userId]);
 
@@ -292,12 +270,24 @@ export default function DashboardCandidat() {
     return () => c.abort();
   }, [userId]);
 
+  /* ── fetch public offers ── */
+  useEffect(() => {
+    const c = new AbortController();
+    fetch(`${API_BASE}/dashboard/jobs`, { signal: c.signal })
+      .then(r => r.json())
+      .then(data => {
+        if (data && Array.isArray(data.jobs)) setOffers(data.jobs);
+      })
+      .catch(() => {});
+    return () => c.abort();
+  }, []);
+
   /* ── fetch portfolio ── */
   useEffect(() => {
     if (!userId) return;
     const c = new AbortController();
     fetch(`${API_BASE}/dashboard/candidat/${userId}/portfolio`, { signal: c.signal })
-      .then(r => r.json()).then(data => { if (data) setPortfolio(Array.isArray(data.projects) ? data.projects : []); }).catch(() => {});
+      .catch(() => {});
     return () => c.abort();
   }, [userId]);
 
@@ -306,17 +296,37 @@ export default function DashboardCandidat() {
     if (!candidateId) return;
     const c = new AbortController();
     fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/portfolio-pdf-files`, { signal: c.signal })
-      .then(r => r.json()).then(data => {
-        if (data) {
-          setPortfolioShort(Array.isArray(data.portfolioShort) ? data.portfolioShort : []);
-          setPortfolioLong(Array.isArray(data.portfolioLong)   ? data.portfolioLong  : []);
-        }
-      }).catch(() => {});
+      .catch(() => {});
+    return () => c.abort();
+  }, [candidateId]);
+
+  /* ── fetch scoring JSON (a2_analyse) ── */
+  useEffect(() => {
+    if (!candidateId) return;
+    const c = new AbortController();
+    fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/score-json`, { signal: c.signal })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.candidateId) setScoreJson(data);
+      })
+      .catch(() => {});
     return () => c.abort();
   }, [candidateId]);
 
   /* ── derived ── */
-  const currentLabel = MENU.find(m => m.id === active)?.label ?? "Dashboard";
+  const extraLabels = {
+    cv: "Mes CV",
+    portfolio: "Portfolio court",
+    "portfolio-long": "Portfolio long",
+    talentcard: "Talent Card",
+    statistique: "Statistique",
+    "mes-offres": "Toutes les offres",
+    "mes-candidatures": "Mes candidatures",
+  };
+  const currentLabel =
+    MENU.find(m => m.id === active)?.label ||
+    extraLabels[active] ||
+    "Dashboard";
   const unreadCount  = stats.notifications ?? 0;
 
   const totalStatus = (stats.statusPending??0) + (stats.statusAccepted??0) + (stats.statusRefused??0);
@@ -328,6 +338,88 @@ export default function DashboardCandidat() {
     { key:"refused",  label:"Refusées",  colorClass:"mute",  count:stats.statusRefused??0,  p:pct(stats.statusRefused)  },
   ];
 
+  const totalApplications = stats.applications ?? 0;
+  const pendingCount      = stats.statusPending  ?? 0;
+  const acceptedCount     = stats.statusAccepted ?? 0;
+  const refusedCount      = stats.statusRefused  ?? 0;
+  const acceptanceRate    = totalApplications > 0
+    ? Math.round((acceptedCount / totalApplications) * 100)
+    : 0;
+
+  // agrégation des candidatures par mois (pour un petit graphe)
+  const applicationsByMonth = React.useMemo(() => {
+    const map = new Map();
+    (applications || []).forEach(app => {
+      if (!app.validatedAt) return;
+      const d = new Date(app.validatedAt);
+      if (Number.isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      map.set(key, (map.get(key) ?? 0) + 1);
+    });
+    const entries = Array.from(map.entries()).sort(([a],[b]) => a.localeCompare(b));
+    const lastSix = entries.slice(-6);
+    return lastSix.map(([key, value]) => {
+      const [year, month] = key.split("-");
+      return {
+        label: `${month}/${year.slice(2)}`,
+        count: value,
+      };
+    });
+  }, [applications]);
+
+  const filteredOffers = React.useMemo(() => {
+    let list = Array.isArray(offers) ? [...offers] : [];
+
+    const q = offerSearch.trim().toLowerCase();
+    if (q) {
+      list = list.filter(job => {
+        const title = (job.title || "").toLowerCase();
+        const cat   = (job.categorie_profil || "").toLowerCase();
+        return title.includes(q) || cat.includes(q);
+      });
+    }
+
+    if (offerUrgentOnly) {
+      list = list.filter(job => job.urgent);
+    }
+
+    list.sort((a, b) => {
+      const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return offerSortDirection === "oldest" ? da - db : db - da;
+    });
+
+    return list;
+  }, [offers, offerSearch, offerUrgentOnly, offerSortDirection]);
+
+  const filteredApplications = React.useMemo(() => {
+    let list = Array.isArray(applications) ? [...applications] : [];
+
+    const q = appSearch.trim().toLowerCase();
+    if (q) {
+      list = list.filter(app => {
+        const title = (app.jobTitle || "").toLowerCase();
+        const cat   = (app.categorie_profil || "").toLowerCase();
+        return title.includes(q) || cat.includes(q);
+      });
+    }
+
+    if (appStatusFilter !== "all") {
+      list = list.filter(app => {
+        const st = (app.status || "").toUpperCase();
+        return st === appStatusFilter;
+      });
+    }
+
+    list.sort((a, b) => {
+      const da = a.validatedAt ? new Date(a.validatedAt).getTime() : 0;
+      const db = b.validatedAt ? new Date(b.validatedAt).getTime() : 0;
+      return appSortDirection === "oldest" ? da - db : db - da;
+    });
+
+    return list;
+  }, [applications, appSearch, appStatusFilter, appSortDirection]);
+
   const statCards = [
     { label:"Candidatures",        value:stats.applications,  icon:BriefcaseBusiness, trend:"+3 ce mois",       dir:"up",   delay:60  },
     { label:"Entretiens",          value:stats.interviews,    icon:CalendarCheck,     trend:"+1 cette semaine", dir:"up",   delay:120 },
@@ -335,15 +427,13 @@ export default function DashboardCandidat() {
     { label:"Notifications",       value:stats.notifications, icon:Bell,              trend:"Non lues",         dir:"flat", delay:240, danger:true },
   ];
 
-  /* score dimensions (from table: score) */
-  const scoreDims = scoreData ? [
-    { label:"Impact",       val: scoreData.dim_impact            ?? 0 },
-    { label:"Hard Skills",  val: scoreData.dim_hard_skills_depth ?? 0 },
-    { label:"Cohérence",    val: scoreData.dim_coherence         ?? 0 },
-    { label:"Rareté",       val: scoreData.dim_rarete_marche     ?? 0 },
-    { label:"Stabilité",    val: scoreData.dim_stabilite         ?? 0 },
-    { label:"Communication",val: scoreData.dim_communication     ?? 0 },
-  ] : [];
+  /* score dimensions (JSON a2_analyse) */
+  const scoreDims = scoreJson && Array.isArray(scoreJson.dimensions)
+    ? scoreJson.dimensions.map(d => ({
+        label: d.label,
+        raw: typeof d.score === "number" ? d.score : 0,
+      }))
+    : [];
 
   /* anomalies from llm_evaluation_v2 */
   const anomalies = llmData ? [
@@ -354,8 +444,9 @@ export default function DashboardCandidat() {
     { key:"Keyword stuffing probable",    val: llmData.anomalie_keyword_stuffing_probable },
   ] : [];
 
-  const decisionClass = scoreData?.decision
-    ? `dash-score-ring-decision--${scoreData.decision.toLowerCase()}`
+  const decisionLabel = scoreJson?.decision || null;
+  const decisionClass = decisionLabel
+    ? `dash-score-ring-decision--${decisionLabel.toLowerCase()}`
     : "";
 
   /* ── handlers ── */
@@ -550,136 +641,452 @@ export default function DashboardCandidat() {
           </div>
 
           {/* ═══════════════════════════════════
-              DASHBOARD
+              DASHBOARD (hub de cartes)
           ═══════════════════════════════════ */}
           {active === "dashboard" && (
             <div className="dash-content">
               <div className="dash-page-header">
-                <h1 className="dash-page-title">Bonjour, <em>{userName}</em></h1>
+                <h1 className="dash-page-title">Vos outils</h1>
                 <p className="dash-page-sub">
-                  Aperçu complet de votre profil TAP · {new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}
+                  Accédez rapidement à chaque module de votre espace candidat.
                 </p>
               </div>
+              <div className="files-hub-grid">
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("analyse-cv")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--cv">
+                    <FileText size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Analyse CV</h3>
+                    <p className="files-hub-sub">
+                      Notre IA analyse votre CV pour extraire compétences et potentiel.
+                    </p>
+                  </div>
+                </button>
 
-              {/* stat cards */}
-              <div className="dash-cards-row">
-                {statCards.map(card => <StatCard key={card.label} {...card}/>)}
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("scoring")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--short">
+                    <BarChart2 size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Score d'employabilité</h3>
+                    <p className="files-hub-sub">
+                      Évaluez votre profil avec un score détaillé basé sur le marché marocain.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("matching")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--long">
+                    <BriefcaseBusiness size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Matching intelligent</h3>
+                    <p className="files-hub-sub">
+                      Connectez-vous aux offres qui correspondent parfaitement à votre profil.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("formation")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--talent">
+                    <Award size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Micro-learning</h3>
+                    <p className="files-hub-sub">
+                      Des formations ciblées pour combler vos lacunes et booster votre profil.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("entretien-ia")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--cv">
+                    <CalendarCheck size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Entretien IA</h3>
+                    <p className="files-hub-sub">
+                      Préparez-vous avec notre simulateur d’entretien propulsé par l’IA.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("mes-fichiers")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--short">
+                    <FolderOpen size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Mes fichiers</h3>
+                    <p className="files-hub-sub">
+                      Retrouvez tous vos documents : CV, Talent Card, portfolio, et plus.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              ANALYSE CV  (reprend la section CV)
+          ═══════════════════════════════════ */}
+          {active === "analyse-cv" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Analyse CV</h1>
+                <p className="dash-page-sub">Importez vos CV et laissez TAP les analyser.</p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  <div className="files-upload-bar">
+                    <label className="files-upload-btn">
+                      {uploadingCv ? "Import en cours…" : "+ Importer un nouveau CV"}
+                      <input type="file" accept="application/pdf" onChange={handleUploadCv} disabled={uploadingCv}/>
+                    </label>
+                    <p className="files-upload-hint">Formats acceptés : PDF. Stockage sécurisé TAP.</p>
+                  </div>
+                  {uploadErrorCv && <div className="login-error" style={{marginBottom:12}}>⚠ {uploadErrorCv}</div>}
+                  {cvFiles.length === 0
+                    ? <p>Aucun CV enregistré pour l'instant.</p>
+                    : renderFiles(cvFiles, "")
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              STATISTIQUE (graphiques candidatures)
+          ═══════════════════════════════════ */}
+          {active === "statistique" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Statistiques candidatures</h1>
+                <p className="dash-page-sub">Vue d’ensemble de vos candidatures envoyées, refusées et en cours.</p>
               </div>
 
-              {/* row 1 : bar chart + candidature status */}
-              <div className="dash-grid-2">
-                <div className="dash-panel dash-panel-1">
+              {/* cartes de synthèse candidatures */}
+              <div className="dash-cards-row" style={{marginBottom:18}}>
+                <StatCard
+                  label="Candidatures envoyées"
+                  value={totalApplications}
+                  icon={BriefcaseBusiness}
+                  trend={`${acceptedCount} acceptée(s)`}
+                  dir="up"
+                  delay={40}
+                />
+                <StatCard
+                  label="Candidatures refusées"
+                  value={refusedCount}
+                  icon={AlertTriangle}
+                  trend={`${refusedCount} sur ${totalApplications || 0}`}
+                  dir={refusedCount > 0 ? "down" : "flat"}
+                  danger
+                  delay={80}
+                />
+                <StatCard
+                  label="Candidatures en cours"
+                  value={pendingCount}
+                  icon={Users}
+                  trend={`${pendingCount} en traitement`}
+                  dir="flat"
+                  delay={120}
+                />
+                <StatCard
+                  label="Taux d'acceptation"
+                  value={acceptanceRate}
+                  icon={BarChart2}
+                  trend={totalApplications > 0 ? `sur ${totalApplications} candidatures` : "Pas encore de candidatures"}
+                  dir={acceptanceRate >= 50 ? "up" : acceptanceRate > 0 ? "flat" : "flat"}
+                  delay={160}
+                />
+              </div>
+
+              {/* graph répartition des statuts + évolution par mois */}
+              <div className="dash-grid-2" style={{marginBottom:18}}>
+                <div className="dash-panel">
                   <div className="dash-panel-head">
-                    <span className="dash-panel-title">Activité mensuelle</span>
-                    <span className="dash-panel-chip">Live</span>
-                  </div>
-                  <BarChart/>
-                </div>
-                <div className="dash-panel dash-panel-2">
-                  <div className="dash-panel-head">
-                    <span className="dash-panel-title">Candidatures par statut</span>
+                    <span className="dash-panel-title">Répartition des candidatures</span>
                     <Users size={14} color="var(--t3)"/>
                   </div>
                   <div className="dash-status-list">
                     {statusChart.map(({key,label,colorClass,count,p}) => (
-                      <ProgressBar key={key} label={`${label} · ${count}`} pct={p} colorClass={colorClass} delay={80}/>
+                      <ProgressBar
+                        key={key}
+                        label={`${label} · ${count}`}
+                        pct={p}
+                        colorClass={colorClass}
+                        delay={60}
+                      />
                     ))}
                   </div>
                 </div>
+
+                <div className="dash-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Candidatures par mois</span>
+                    <LayoutDashboard size={14} color="var(--t3)"/>
+                  </div>
+                  {applicationsByMonth.length === 0 ? (
+                    <p style={{color:"var(--t3)",fontSize:13}}>
+                      Aucune candidature enregistrée pour le moment.
+                    </p>
+                  ) : (
+                    <div className="dash-chart">
+                      {applicationsByMonth.map((d, i) => (
+                        <div key={d.label} className="dash-chart-bar-wrap">
+                          <div
+                            className="dash-bar"
+                            style={{
+                              height: `${Math.min(d.count * 20, 100)}%`,
+                              transitionDelay: `${i * 0.06}s`,
+                              position: "relative",
+                            }}
+                          >
+                            <div className="dash-bar-tooltip">{d.count}</div>
+                          </div>
+                          <span className="dash-bar-label">{d.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              SCORING (JSON a2_analyse uniquement)
+          ═══════════════════════════════════ */}
+          {active === "scoring" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Scoring</h1>
+                <p className="dash-page-sub">Score TAP, dimensions, compétences et profil IA issus de votre analyse JSON.</p>
               </div>
 
-              {/* row 2 : score global + score dims */}
+              {/* petites cartes récap JSON */}
+              <div className="dash-cards-row" style={{marginBottom:18}}>
+                <StatCard
+                  label="Famille dominante"
+                  value={scoreJson?.familleDominante || "—"}
+                  icon={Award}
+                  trend={scoreJson?.metadataSector || "Secteur non détecté"}
+                  dir="flat"
+                  delay={40}
+                />
+                <StatCard
+                  label="Décision IA"
+                  value={decisionLabel || "—"}
+                  icon={Zap}
+                  trend={scoreJson?.commentaire ? "Commentaire disponible" : "En attente d’analyse complète"}
+                  dir={decisionLabel === "BON" ? "up" : decisionLabel ? "flat" : "flat"}
+                  delay={80}
+                />
+                <StatCard
+                  label="Dernière analyse"
+                  value={
+                    scoreJson?.metadataTimestamp
+                      ? new Date(scoreJson.metadataTimestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})
+                      : "—"
+                  }
+                  icon={LayoutDashboard}
+                  trend={
+                    scoreJson?.metadataTimestamp
+                      ? new Date(scoreJson.metadataTimestamp).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})
+                      : "Aucune analyse réalisée"
+                  }
+                  dir="flat"
+                  delay={120}
+                />
+                <StatCard
+                  label="Nb compétences IA"
+                  value={
+                    scoreJson && Array.isArray(scoreJson.skills)
+                      ? scoreJson.skills.length
+                      : 0
+                  }
+                  icon={Users}
+                  trend={
+                    scoreJson && Array.isArray(scoreJson.skills) && scoreJson.skills.length > 0
+                      ? "Compétences détectées dans le fichier"
+                      : "Aucune compétence détectée pour l’instant"
+                  }
+                  dir={scoreJson && Array.isArray(scoreJson.skills) && scoreJson.skills.length > 0 ? "up" : "flat"}
+                  delay={160}
+                />
+              </div>
+
               <div className="dash-grid-21">
-                {/* score ring */}
                 <div className="dash-panel dash-panel-3">
                   <div className="dash-panel-head">
                     <span className="dash-panel-title">Score TAP · Dimensions</span>
                     <Award size={14} color="var(--cr)"/>
                   </div>
-                  {scoreData ? (
-                    <div style={{ display:"flex", gap:24, alignItems:"flex-start" }}>
-                      <div className="dash-score-ring">
-                        <svg width={110} height={110} viewBox="0 0 36 36" style={{transform:"rotate(-90deg)"}}>
-                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3.2"/>
-                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--cr)" strokeWidth="3.2"
-                            strokeDasharray={`${(scoreData.score_global/10)*100} 100`}
-                            strokeLinecap="round"
-                            style={{transition:"stroke-dasharray 1.6s cubic-bezier(0.22,1,0.36,1)"}}/>
-                        </svg>
-                        <div className="dash-score-ring-val">
-                          {scoreData.score_global?.toFixed(1)}<span>/10</span>
-                        </div>
-                        <div className="dash-score-ring-label">Score Global</div>
-                        {scoreData.decision && (
-                          <span className={`dash-score-ring-decision ${decisionClass}`}>{scoreData.decision}</span>
-                        )}
+                  <div style={{ display:"flex", gap:24, alignItems:"flex-start" }}>
+                    <div
+                      className="dash-score-ring"
+                      title={
+                        scoreJson && scoreJson.scoreGlobal != null
+                          ? `${Math.round(scoreJson.scoreGlobal)} / 100`
+                          : "Score non encore calculé"
+                      }
+                    >
+                      <svg width={110} height={110} viewBox="0 0 36 36" style={{transform:"rotate(-90deg)"}}>
+                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3.2"/>
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="15.9"
+                          fill="none"
+                          stroke="var(--cr)"
+                          strokeWidth="3.2"
+                          strokeDasharray={`${
+                            scoreJson && typeof scoreJson.scoreGlobal === "number"
+                              ? Math.min(Math.max(scoreJson.scoreGlobal,0),100)
+                              : 0
+                          } 100`}
+                          strokeLinecap="round"
+                          style={{transition:"stroke-dasharray 1.6s cubic-bezier(0.22,1,0.36,1)"}}
+                        />
+                      </svg>
+                      <div className="dash-score-ring-val">
+                        {scoreJson && typeof scoreJson.scoreGlobal === "number"
+                          ? Math.round(scoreJson.scoreGlobal)
+                          : "--"}
+                        <span>/100</span>
                       </div>
-                      <div className="dash-dim-list" style={{flex:1}}>
-                        {scoreDims.map((d,i) => <DimBar key={d.label} label={d.label} val={d.val} delay={i*80}/>)}
-                      </div>
+                      <div className="dash-score-ring-label">Score Global</div>
+                      {decisionLabel && (
+                        <span className={`dash-score-ring-decision ${decisionClass}`}>{decisionLabel}</span>
+                      )}
                     </div>
-                  ) : (
-                    <p style={{color:"var(--t3)",fontSize:13}}>Aucun score disponible — générez votre Talent Card.</p>
-                  )}
+                    <div className="dash-dim-list" style={{flex:1}}>
+                      {scoreDims.length > 0 ? (
+                        scoreDims.map((d,i) => (
+                          <DimBar
+                            key={d.label}
+                            label={d.label}
+                            val={d.raw / 10} // 0-100 → 0-10
+                            delay={i*80}
+                          />
+                        ))
+                      ) : (
+                        <p style={{color:"var(--t3)",fontSize:13}}>
+                          Les dimensions détaillées apparaîtront ici dès qu’une analyse JSON aura été générée.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* LLM badges */}
                 <div className="dash-panel dash-panel-4">
                   <div className="dash-panel-head">
-                    <span className="dash-panel-title">Profil IA</span>
+                    <span className="dash-panel-title">Profil IA (JSON)</span>
                     <Zap size={14} color="var(--cr)"/>
                   </div>
-                  {llmData ? (
+                  {scoreJson ? (
                     <div className="dash-llm-grid">
                       <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Niveau</span>
-                        <span className="dash-llm-badge-val">{llmData.niveau_profil}</span>
+                        <span className="dash-llm-badge-key">Famille dominante</span>
+                        <span className="dash-llm-badge-val">
+                          {scoreJson.familleDominante || "—"}
+                        </span>
                       </div>
                       <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Parcours</span>
-                        <span className="dash-llm-badge-val">{llmData.type_parcours}</span>
+                        <span className="dash-llm-badge-key">Module</span>
+                        <span className="dash-llm-badge-val">
+                          {scoreJson.metadataModule || "Non spécifié"}
+                        </span>
                       </div>
                       <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Mobilité</span>
-                        <span className="dash-llm-badge-val">{llmData.mobilite_geographique}</span>
+                        <span className="dash-llm-badge-key">Secteur détecté</span>
+                        <span className="dash-llm-badge-val">
+                          {scoreJson.metadataSector || "—"}
+                        </span>
                       </div>
-                      <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Autonomie</span>
-                        <span className="dash-llm-badge-val">{llmData.hs_autonomie_technique}</span>
-                      </div>
-                      <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Impact</span>
-                        <span className="dash-llm-badge-val">{llmData.impact_ampleur}</span>
-                      </div>
-                      <div className="dash-llm-badge">
-                        <span className="dash-llm-badge-key">Progression</span>
-                        <span className="dash-llm-badge-val">{llmData.progression_technique}</span>
+                      <div className="dash-llm-badge" style={{gridColumn:"1 / -1"}}>
+                        <span className="dash-llm-badge-key">Commentaire IA</span>
+                        <span className="dash-llm-badge-val">
+                          {scoreJson.commentaire || "Aucun commentaire pour le moment."}
+                        </span>
                       </div>
                     </div>
                   ) : (
-                    <p style={{color:"var(--t3)",fontSize:13}}>Évaluation IA non disponible.</p>
+                    <p style={{color:"var(--t3)",fontSize:13}}>
+                      Profil IA non disponible tant qu’aucune analyse JSON n’a été générée.
+                    </p>
                   )}
                 </div>
               </div>
 
-              {/* row 3 : skills + anomalies */}
-              <div className="dash-grid-2">
+              <div className="dash-grid-2" style={{marginTop:24}}>
                 <div className="dash-panel">
                   <div className="dash-panel-head">
                     <span className="dash-panel-title">Compétences détectées</span>
-                    <span style={{fontSize:11,color:"var(--t3)"}}>{skillsList.length} skills</span>
+                    <span style={{fontSize:11,color:"var(--t3)"}}>
+                      {scoreJson && Array.isArray(scoreJson.skills) ? scoreJson.skills.length : 0} skills
+                    </span>
                   </div>
-                  {skillsList.length > 0 ? (
-                    <div className="dash-skills-cloud">
-                      {skillsList.map((s, i) => (
-                        <span key={i} className={`dash-skill-tag${i%3===0?"":" dash-skill-tag--neutral"}`}>
-                          {s.skill_name || s}
+                  <div className="dash-skills-cloud">
+                    {scoreJson && Array.isArray(scoreJson.skills) && scoreJson.skills.length > 0 ? (
+                      scoreJson.skills.map((s, i) => (
+                        <span
+                          key={`${s.name}-${i}`}
+                          className={`dash-skill-tag${i%3===0?"":" dash-skill-tag--neutral"}`}
+                          title={s.scope || ""}
+                        >
+                          {s.name} · {Math.round(s.score)} / 100
                         </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p style={{color:"var(--t3)",fontSize:13}}>Aucune compétence enregistrée.</p>
-                  )}
+                      ))
+                    ) : (
+                      <span className="dash-skill-tag dash-skill-tag--neutral">
+                        Les compétences IA apparaîtront ici après la première analyse.
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="dash-panel">
@@ -697,132 +1104,485 @@ export default function DashboardCandidat() {
                       ))}
                     </div>
                   ) : (
-                    <p style={{color:"var(--t3)",fontSize:13}}>Évaluation IA non disponible.</p>
+                    <p style={{color:"var(--t3)",fontSize:13}}>Aucune alerte détectée.</p>
                   )}
                 </div>
               </div>
 
-              {/* recent applications */}
-              {applications.length > 0 && (
-                <div className="dash-recent-panel">
-                  <div className="dash-recent-head">
-                    <span className="dash-recent-title">Candidatures récentes</span>
-                    <button type="button" className="dash-recent-link" onClick={() => setActive("candidatures")}>Voir tout →</button>
-                  </div>
-                  {applications.slice(0,5).map(app => {
-                    const st = (app.status||"").toUpperCase();
-                    const sl = st==="ACCEPTEE"?"Acceptée":st==="REFUSEE"?"Refusée":"En cours";
-                    const sc = st==="ACCEPTEE"?"accepted":st==="REFUSEE"?"refused":"pending";
-                    const dt = app.validatedAt ? new Date(app.validatedAt).toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}) : "-";
-                    return (
-                      <div className="dash-recent-row" key={app.id}>
-                        <div>
-                          <div className="dash-recent-title-job">{app.jobTitle||"Poste non renseigné"}</div>
-                          {app.company && <div className="dash-recent-company">{app.company}</div>}
-                        </div>
-                        <span className={`dash-status-pill dash-status-pill--${sc}`}>{sl}</span>
-                        <div className="dash-recent-date">{dt}</div>
-                      </div>
-                    );
-                  })}
-                </div>
+              {!scoreJson && (
+                <p style={{color:"var(--t3)",fontSize:12,marginTop:16}}>
+                  Aucun fichier d’analyse JSON détecté pour l’instant. Dès que votre fichier <code>a2_analyse.json</code> sera généré
+                  dans votre espace, les indicateurs ci‑dessus se mettront automatiquement à jour.
+                </p>
               )}
             </div>
           )}
 
           {/* ═══════════════════════════════════
-              PORTFOLIO COURT
+              MATCHING (candidatures)
           ═══════════════════════════════════ */}
-          {active === "portfolio" && (
+          {active === "matching" && (
             <div className="dash-content">
               <div className="dash-page-header">
-                <h1 className="dash-page-title">Portfolio Court</h1>
-                <p className="dash-page-sub">Vos réalisations condensées · fichiers PDF et projets</p>
+                <h1 className="dash-page-title">Matching</h1>
+                <p className="dash-page-sub">Suivez le matching de vos candidatures avec les offres.</p>
               </div>
-              <div className="portfolio-shell">
-                {portfolioShort.length === 0 && portfolio.length === 0 ? (
-                  <div className="dash-section-card"><p>Aucun portfolio court disponible.</p></div>
-                ) : (
-                  <>
-                    {portfolioShort.length > 0 && renderFiles(portfolioShort, "")}
-                    {portfolio.length > 0 && (
-                      <div className="pf-grid">
-                        {portfolio.map((item, i) => {
-                          const tags = Array.isArray(item.tags) ? item.tags : [];
-                          const desc = item.shortDescription || (item.longDescription ? `${item.longDescription.slice(0,140)}…` : "");
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {applications.length === 0
+                    ? <p>Aucune candidature enregistrée pour le moment.</p>
+                    : <div className="cand-list">
+                        {applications.map(app => {
+                          const st = (app.status||"").toUpperCase();
+                          const sl = st==="ACCEPTEE"?"Acceptée":st==="REFUSEE"?"Refusée":"En cours";
+                          const sc = st==="ACCEPTEE"?"accepted":st==="REFUSEE"?"refused":"pending";
+                          const dt = app.validatedAt ? new Date(app.validatedAt).toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"2-digit"}) : "-";
                           return (
-                            <div className="pf-card" key={item.id}>
-                              <div className="pf-thumb">
-                                <div className="pf-thumb-bg" style={{background:GRADIENTS[i%GRADIENTS.length]}}/>
-                                <div className="pf-thumb-overlay"/>
-                                <span className="pf-thumb-num">{String(i+1).padStart(2,"0")}</span>
+                            <div className="cand-row" key={app.id}>
+                              <div className="cand-job">
+                                <div className="cand-job-title">{app.jobTitle||"Poste non renseigné"}</div>
+                                {app.company && <div className="cand-job-company">{app.company}</div>}
                               </div>
-                              <div className="pf-body">
-                                <div className="pf-title">{item.title}</div>
-                                <div className="pf-desc">{desc}</div>
-                                <div className="pf-tags">{tags.map(t=><span className="pf-tag" key={t}>{t}</span>)}</div>
-                              </div>
+                              <div className="cand-status"><span className={`cand-status-pill cand-status-pill--${sc}`}>{sl}</span></div>
+                              <div className="cand-date">{dt}</div>
                             </div>
                           );
                         })}
                       </div>
-                    )}
-                  </>
-                )}
+                  }
+                </div>
               </div>
             </div>
           )}
 
           {/* ═══════════════════════════════════
-              PORTFOLIO LONG
+              FORMATION (placeholder)
           ═══════════════════════════════════ */}
-          {active === "portfolio-long" && (
-            <div className="dash-content">
-              <div className="dash-page-header">
-                <h1 className="dash-page-title">Portfolio Long</h1>
-                <p className="dash-page-sub">Description complète de vos projets · {portfolio.length} travaux</p>
-              </div>
-              <div className="portfolio-shell">
-                {portfolioLong.length === 0 && portfolio.length === 0 ? (
-                  <div className="dash-section-card"><p>Aucun portfolio long disponible.</p></div>
-                ) : (
-                  <>
-                    {portfolioLong.length > 0 && renderFiles(portfolioLong, "")}
-                    {portfolio.length > 0 && (
-                      <div className="pf-list">
-                        {portfolio.map((item, i) => {
-                          const tags = Array.isArray(item.tags) ? item.tags : [];
-                          const date = item.createdAt ? new Date(item.createdAt).toLocaleDateString("fr-FR",{year:"numeric",month:"short"}) : "";
-                          const desc = item.longDescription || item.shortDescription || "";
-                          return (
-                            <div className="pf-row" key={item.id}>
-                              <div className="pf-row-thumb">
-                                <div className="pf-row-thumb-bg" style={{background:GRADIENTS[i%GRADIENTS.length]}}/>
-                              </div>
-                              <div className="pf-row-info">
-                                <div className="pf-row-title">{item.title}</div>
-                                <div className="pf-row-desc">{desc}</div>
-                                <div className="pf-tags">{tags.map(t=><span className="pf-tag" key={t}>{t}</span>)}</div>
-                              </div>
-                              <div className="pf-row-meta">
-                                <span className="pf-row-date">{date}</span>
-                                <ArrowRight size={13} className="pf-row-arrow"/>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )}
+          {active === "formation" && (
+            <div className="dash-content dash-content--formation">
+              <div className="formation-hero">
+                <div className="formation-icon">
+                  <Award size={24} />
+                </div>
+                <h1 className="formation-title">Micro-learning</h1>
+                <p className="formation-sub">
+                  Des formations ciblées pour combler vos lacunes et booster votre profil.
+                </p>
+                <button type="button" className="formation-pill" disabled>
+                  <span className="formation-pill-icon">i</span>
+                  <span className="formation-pill-text">Bientôt disponible</span>
+                </button>
+                <div className="formation-divider" />
+                <button
+                  type="button"
+                  className="formation-back"
+                  onClick={() => setActive("dashboard")}
+                >
+                  <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
+                  <span>Retour au dashboard</span>
+                </button>
               </div>
             </div>
           )}
 
           {/* ═══════════════════════════════════
-              BIENVENUE (wizard)
+              TOUTES LES OFFRES (liste + filtres)
           ═══════════════════════════════════ */}
-          {active === "fichiers" && (
+          {active === "mes-offres" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Toutes les offres</h1>
+                <p className="dash-page-sub">
+                  Retrouvez l’ensemble des offres publiées sur TAP et affinez la liste avec les filtres.
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card dash-section-card--flush">
+                  <div
+                    className="jobs-filters-row"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "10px",
+                      gap: "10px",
+                    }}
+                  >
+                    <div style={{ flex: "1 1 auto" }}>
+                      <input
+                        type="text"
+                        className="jobs-search-input"
+                        placeholder="Rechercher par titre ou catégorie de profil"
+                        value={offerSearch}
+                        onChange={e => setOfferSearch(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid var(--seam)",
+                          background: "rgba(10,10,10,0.75)",
+                          color: "var(--t0)",
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        flex: "0 0 auto",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-label="Filtrer par urgent"
+                        onClick={() => setOfferUrgentOnly(v => !v)}
+                        style={{
+                          borderRadius: 999,
+                          border: "1px solid var(--seam)",
+                          background: offerUrgentOnly
+                            ? "rgba(224,82,82,0.18)"
+                            : "rgba(10,10,10,0.9)",
+                          padding: "4px 10px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          fontSize: 11,
+                          color: "var(--t2)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <AlertTriangle size={14} color={offerUrgentOnly ? "var(--cr)" : "var(--t3)"} />
+                        <span>Urgent</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="jobs-table-wrap">
+                    <table className="jobs-table">
+                      <thead>
+                        <tr>
+                          <th
+                            style={{cursor:"pointer",whiteSpace:"nowrap"}}
+                            onClick={() =>
+                              setOfferSortDirection(d => (d === "recent" ? "oldest" : "recent"))
+                            }
+                          >
+                            Date{" "}
+                            <span style={{fontSize:10,opacity:0.8}}>
+                              {offerSortDirection === "recent" ? "▼" : "▲"}
+                            </span>
+                          </th>
+                          <th>Titre</th>
+                          <th>Catégorie</th>
+                          <th>Localisation</th>
+                          <th>Urgent</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOffers.length === 0 && (
+                          <tr>
+                            <td colSpan={6} style={{ textAlign: "center", padding: "14px" }}>
+                              Aucune offre ne correspond aux filtres actuels.
+                            </td>
+                          </tr>
+                        )}
+                        {filteredOffers.map(job => {
+                          const dt = job.created_at
+                            ? new Date(job.created_at).toLocaleDateString("fr-FR", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "-";
+                          let locationLabel = "—";
+                          if (job.location_type) {
+                            if (Array.isArray(job.location_type)) {
+                              locationLabel = job.location_type.join(", ");
+                            } else if (typeof job.location_type === "string") {
+                              locationLabel = job.location_type;
+                            } else if (job.location_type.mode) {
+                              locationLabel = job.location_type.mode;
+                            }
+                          }
+                          return (
+                            <tr key={job.id}>
+                              <td>{dt}</td>
+                              <td className="jobs-col-title">{job.title || "Offre"}</td>
+                              <td>{job.categorie_profil || "Non précisé"}</td>
+                              <td>{locationLabel}</td>
+                              <td>
+                                {job.urgent ? (
+                                  <span className="jobs-badge-urgent">Urgent</span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="login-submit"
+                                  style={{
+                                    padding: "6px 16px",
+                                    fontSize: 11,
+                                  }}
+                                  onClick={() =>
+                                    alert("La fonctionnalité de candidature sera bientôt disponible.")
+                                  }
+                                >
+                                  Postuler
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              MES CANDIDATURES (page dédiée)
+          ═══════════════════════════════════ */}
+          {active === "mes-candidatures" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Mes candidatures</h1>
+                <p className="dash-page-sub">
+                  Suivez l’évolution de vos candidatures et filtrez par statut ou par offre.
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card dash-section-card--flush">
+                  <div
+                    className="jobs-filters-row"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "10px",
+                      gap: "10px",
+                    }}
+                  >
+                    <div style={{ flex: "1 1 auto" }}>
+                      <input
+                        type="text"
+                        className="jobs-search-input"
+                        placeholder="Rechercher par titre ou catégorie"
+                        value={appSearch}
+                        onChange={e => setAppSearch(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid var(--seam)",
+                          background: "rgba(10,10,10,0.75)",
+                          color: "var(--t0)",
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        flex: "0 0 auto",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <select
+                        value={appStatusFilter}
+                        onChange={e => setAppStatusFilter(e.target.value)}
+                        style={{
+                          padding: "5px 9px",
+                          borderRadius: 999,
+                          border: "1px solid var(--seam)",
+                          background: "rgba(10,10,10,0.9)",
+                          color: "var(--t0)",
+                          fontSize: 11,
+                        }}
+                      >
+                        <option value="all">Tous statuts</option>
+                        <option value="EN_COURS">En cours</option>
+                        <option value="ACCEPTEE">Acceptée</option>
+                        <option value="REFUSEE">Refusée</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="jobs-table-wrap">
+                    <table className="jobs-table">
+                      <thead>
+                        <tr>
+                          <th style={{width:"45%"}}>Offre</th>
+                          <th
+                            style={{width:"25%",cursor:"pointer",whiteSpace:"nowrap"}}
+                            onClick={() =>
+                              setAppSortDirection(d => (d === "recent" ? "oldest" : "recent"))
+                            }
+                          >
+                            Date de postulation{" "}
+                            <span style={{fontSize:10,opacity:0.8}}>
+                              {appSortDirection === "recent" ? "▼" : "▲"}
+                            </span>
+                          </th>
+                          <th style={{width:"30%"}}>Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredApplications.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} style={{ textAlign: "center", padding: "14px", color:"var(--t3)", fontSize:13 }}>
+                              Aucune candidature ne correspond aux filtres actuels.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredApplications.map(app => {
+                            const dt = app.validatedAt
+                              ? new Date(app.validatedAt).toLocaleDateString("fr-FR", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "-";
+                            const st = (app.status || "").toUpperCase();
+                            const label =
+                              st === "ACCEPTEE"
+                                ? "Acceptée"
+                                : st === "REFUSEE"
+                                  ? "Refusée"
+                                  : "En cours";
+                            return (
+                              <tr key={app.id}>
+                                <td className="jobs-col-title">{app.jobTitle || "Offre"}</td>
+                                <td>{dt}</td>
+                                <td>{label}</td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              ENTRETIEN IA (reprend Entretiens)
+          ═══════════════════════════════════ */}
+          {active === "entretien-ia" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Entretien IA</h1>
+                <p className="dash-page-sub">Gérez et organisez vos entretiens assistés par l’IA.</p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  <p>Historique de vos entretiens passés, prochaines étapes et rappels automatiques pour ne rien manquer.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              MES FICHIERS (hub avec 4 cartes)
+          ═══════════════════════════════════ */}
+          {active === "mes-fichiers" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Mes fichiers</h1>
+                <p className="dash-page-sub">Tous vos documents TAP organisés par dossier.</p>
+              </div>
+              <div className="files-hub-grid">
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("cv")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--cv">
+                    <FileText size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Dossier CV</h3>
+                    <p className="files-hub-sub">
+                      Centralisez tous vos CV et versions personnalisées.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("portfolio")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--short">
+                    <Image size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Portfolio court</h3>
+                    <p className="files-hub-sub">
+                      Vos présentations synthétiques pour un aperçu rapide.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("portfolio-long")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--long">
+                    <BarChart2 size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">Portfolio long</h3>
+                    <p className="files-hub-sub">
+                      Détaillez vos projets avec un maximum de contexte.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="files-hub-card"
+                  onClick={() => setActive("talentcard")}
+                >
+                  <div className="files-hub-arrow">
+                    <ArrowRight size={14} />
+                  </div>
+                  <div className="files-hub-icon files-hub-icon--talent">
+                    <CreditCard size={18} />
+                  </div>
+                  <div className="files-hub-texts">
+                    <h3 className="files-hub-title">TalentCard</h3>
+                    <p className="files-hub-sub">
+                      Consultez vos Talent Cards générées par l’IA.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              WIZARD (garde pour l’instant mais non lié au menu)
+          ═══════════════════════════════════ */}
+          {false && (
             <div className="dash-content">
               <div className="dash-page-header">
                 <h1 className="dash-page-title">Bienvenue</h1>

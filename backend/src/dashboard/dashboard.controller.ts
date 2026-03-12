@@ -60,6 +60,12 @@ export class DashboardController {
     return this.dashboardService.getCandidateTalentcardFilesByCandidateId(id);
   }
 
+  @Get('candidat-id/:candidateId/score-json')
+  async getCandidateScoreFromJson(@Param('candidateId') candidateId: string) {
+    const id = Number.parseInt(candidateId, 10);
+    return this.dashboardService.getCandidateScoreFromJson(id);
+  }
+
   @Get('candidat-id/:candidateId/portfolio-pdf-files')
   async getCandidatePortfolioPdfFilesByCandidateId(
     @Param('candidateId') candidateId: string,
@@ -97,6 +103,12 @@ export class DashboardController {
   async getRecruiterOverview(@Param('userId') userId: string) {
     const id = Number.parseInt(userId, 10);
     return this.dashboardService.getRecruiterOverview(id);
+  }
+
+  // Offres visibles côté candidat (liste globale des jobs)
+  @Get('jobs')
+  async getAllJobsForCandidates() {
+    return this.dashboardService.getAllJobsForCandidates();
   }
 }
 
