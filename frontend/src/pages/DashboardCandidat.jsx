@@ -183,6 +183,9 @@ export default function DashboardCandidat() {
   const [wizardLoading,   setWizardLoading]   = useState(false);
   const [wizardError,     setWizardError]     = useState(null);
 
+  const [cvMenuOpenPath,  setCvMenuOpenPath]  = useState(null);
+  const [downloadingCvPath, setDownloadingCvPath] = useState(null);
+
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
 
@@ -473,6 +476,30 @@ export default function DashboardCandidat() {
     finally  { setUploadingCv(false); event.target.value=""; }
   };
 
+  const handleDownloadCv = async (file) => {
+    try {
+      setDownloadingCvPath(file.path);
+      const res = await fetch(file.publicUrl);
+      if (!res.ok) {
+        alert("Téléchargement impossible pour ce CV.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name || "cv.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Erreur pendant le téléchargement du CV.");
+    } finally {
+      setDownloadingCvPath(null);
+    }
+  };
+
   /* ── wizard ── */
   const wizardSteps = [
     { id:1, title:"Comprendre ton profil",      aiMessage:"Je vais analyser ton profil pour comprendre ton contexte.",            aiExplanation:"Ces infos m'aident à filtrer les opportunités.",  whatAiDoes:"Je crée ta carte d'identité professionnelle." },
@@ -511,7 +538,23 @@ export default function DashboardCandidat() {
                 <div className="files-meta"><span>{date}</span>{sizeKb!==null&&<span>· {sizeKb} Ko</span>}</div>
               </div>
               <div className="files-actions">
-                <a href={file.publicUrl} target="_blank" rel="noopener noreferrer" className="files-btn">Ouvrir</a>
+                <div className="files-actions-vertical">
+                  <a
+                    href={file.publicUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="files-btn"
+                  >
+                    Ouvrir
+                  </a>
+                  <a
+                    href={file.publicUrl}
+                    download={file.name}
+                    className="files-btn files-btn--secondary"
+                  >
+                    Télécharger
+                  </a>
+                </div>
               </div>
             </div>
           );
@@ -1876,26 +1919,69 @@ export default function DashboardCandidat() {
                     <p className="files-upload-hint">Formats acceptés : PDF. Stockage sécurisé TAP.</p>
                   </div>
                   {uploadErrorCv && <div className="login-error" style={{marginBottom:12}}>⚠ {uploadErrorCv}</div>}
-                  {cvFiles.length === 0
-                    ? <p>Aucun CV enregistré pour l'instant.</p>
-                    : <div className="files-list">
-                        {cvFiles.map(file => {
-                          const date   = file.updatedAt ? new Date(file.updatedAt).toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"2-digit"}) : "-";
-                          const sizeKb = typeof file.size==="number" ? Math.round(file.size/1024) : null;
-                          return (
-                            <div className="files-row" key={file.path}>
-                              <div className="files-main">
-                                <div className="files-name">{file.name}</div>
-                                <div className="files-meta"><span>{date}</span>{sizeKb!==null&&<span>· {sizeKb} Ko</span>}</div>
-                              </div>
-                              <div className="files-actions">
-                                <a href={file.publicUrl} target="_blank" rel="noopener noreferrer" className="files-btn">Télécharger</a>
+                  {cvFiles.length === 0 ? (
+                    <p>Aucun CV enregistré pour l'instant.</p>
+                  ) : (
+                    <div className="files-list">
+                      {cvFiles.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+                        const sizeKb =
+                          typeof file.size === "number" ? Math.round(file.size / 1024) : null;
+                        const isMenuOpen = cvMenuOpenPath === file.path;
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && <span>· {sizeKb} Ko</span>}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                  }
+                            <div className="files-actions files-actions--menu">
+                              <button
+                                type="button"
+                                className="files-menu-trigger"
+                                onClick={() =>
+                                  setCvMenuOpenPath(isMenuOpen ? null : file.path)
+                                }
+                                aria-label="Options du CV"
+                              >
+                                <span style={{ fontSize: 18, lineHeight: 1 }}>⋯</span>
+                              </button>
+                              {isMenuOpen && (
+                                <div className="files-menu">
+                                  <a
+                                    href={file.publicUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="files-menu-item"
+                                  >
+                                    Ouvrir le CV
+                                  </a>
+                                  <button
+                                    type="button"
+                                    className="files-menu-item"
+                                    onClick={() => handleDownloadCv(file)}
+                                    disabled={downloadingCvPath === file.path}
+                                  >
+                                    {downloadingCvPath === file.path
+                                      ? "Téléchargement…"
+                                      : "Télécharger le CV"}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -745,6 +745,16 @@
 .files-name{font-size:12px;font-weight:500;color:var(--platinum);word-break:break-all}
 .files-meta{font-size:10px;color:var(--t3);display:flex;gap:6px;align-items:center;font-family:var(--mono)}
 .files-actions{display:flex;justify-content:flex-end}
+.files-actions--menu{
+  position:relative;
+  align-items:center;
+}
+.files-actions-vertical{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:flex-end;
+}
 .files-btn{
   display:inline-flex;align-items:center;justify-content:center;
   padding:5px 12px;border-radius:999px;
@@ -754,6 +764,58 @@
   transition:all .2s var(--ease);font-family:var(--mono);
 }
 .files-btn:hover{background:var(--gold-dim);color:var(--gold2)}
+.files-btn--secondary{
+  opacity:.85;
+  border-style:dashed;
+}
+
+.files-menu-trigger{
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  border:1px solid var(--seam2);
+  background:var(--layer3);
+  color:var(--t2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.files-menu-trigger:hover{
+  border-color:var(--gold-line);
+  color:var(--gold2);
+  box-shadow:0 0 10px var(--gold-dim);
+}
+.files-menu{
+  position:absolute;
+  bottom:120%;
+  right:0;
+  min-width:180px;
+  background:var(--layer2);
+  border-radius:10px;
+  border:1px solid var(--seam);
+  box-shadow:0 14px 40px rgba(0,0,0,0.8);
+  padding:6px;
+  z-index:20;
+}
+.files-menu-item{
+  display:block;
+  width:100%;
+  padding:7px 9px;
+  border-radius:7px;
+  font-size:12px;
+  color:var(--t1);
+  text-decoration:none;
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  text-align:left;
+}
+.files-menu-item:hover{
+  background:rgba(224,82,82,0.12);
+  color:var(--t0);
+}
 
 /* Hub "Mes fichiers" */
 .files-hub-grid{
