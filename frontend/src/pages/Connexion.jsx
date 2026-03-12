@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "../assets/new-bgpages.jpg";
 import "../css/Connexion.css";
+import { setAuthSession } from "../auth";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -69,13 +70,22 @@ function Connexion() {
       const userRole  = data.role  || data.user?.role;
       const userEmail = data.email || data.user?.email || email.trim();
       const userId    = data.id    || data.user?.id;
+      const accessToken =
+        data.accessToken || data.token || data.jwt || data.access_token;
 
-      if (data.token)  sessionStorage.setItem("authToken",    data.token);
-      if (userRole)    sessionStorage.setItem("profileType",  userRole);
-      if (userEmail)   sessionStorage.setItem("userEmail",    userEmail);
-      if (userId)      sessionStorage.setItem("userId",       String(userId));
+      if (accessToken) {
+        setAuthSession(accessToken, {
+          role: userRole,
+          email: userEmail,
+          id: userId,
+        });
+      }
 
-      navigate(userRole === "recruteur" ? "/dashboard-recruteur" : "/dashboard-candidat");
+      navigate(
+        userRole === "recruteur"
+          ? "/dashboard-recruteur"
+          : "/dashboard-candidat"
+      );
     } catch {
       setError("Erreur de connexion au serveur.");
     } finally {

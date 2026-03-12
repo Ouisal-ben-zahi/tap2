@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
@@ -52,7 +53,10 @@ export class AuthService {
   private supabase: SupabaseClient;
   private mailer: nodemailer.Transporter | null = null;
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private jwtService: JwtService,
+  ) {
     const url = this.config.get<string>('SUPABASE_URL');
     const key = this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY');
     if (!url || !key) {
@@ -70,6 +74,18 @@ export class AuthService {
         auth: { user, pass },
       });
     }
+  }
+
+  private createAccessToken(payload: {
+    id: number;
+    email: string;
+    role: ProfileRole;
+  }): string {
+    return this.jwtService.sign({
+      sub: payload.id,
+      email: payload.email,
+      role: payload.role,
+    });
   }
 
   private randomCode(): string {
@@ -355,6 +371,7 @@ export class AuthService {
     id: number;
     email: string;
     role: ProfileRole;
+    accessToken: string;
   }> {
     const email = dto.email?.trim().toLowerCase();
     if (!email || !dto.password) {
@@ -396,10 +413,17 @@ export class AuthService {
       );
     }
 
+    const accessToken = this.createAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
     return {
       id: user.id,
       email: user.email,
       role: user.role,
+      accessToken,
     };
   }
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Header from './layout/Header';
 import Home from "./pages/Accueil";
 import About from "./pages/Apropos";
@@ -14,6 +14,7 @@ import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import ConditionsUtilisation from "./pages/ConditionsUtilisation";
 import DashboardCandidat from "./pages/DashboardCandidat";
 import DashboardRecruteur from "./pages/DashboardRecruteur";
+import { isAccessTokenValid, clearAuthSession } from "./auth";
 import Footer from './layout/Footer';
 
 function AppShell() {
@@ -27,6 +28,12 @@ function AppShell() {
   }, [location.pathname]);
 
   if (isDashboard) {
+    const isAuth = isAccessTokenValid();
+    if (!isAuth) {
+      clearAuthSession();
+      return <Navigate to="/connexion" replace />;
+    }
+
     // Pas de header / footer pour les pages dashboard
     return (
       <Routes>
