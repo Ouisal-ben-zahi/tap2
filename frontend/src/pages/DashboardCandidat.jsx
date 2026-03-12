@@ -151,6 +151,8 @@ export default function DashboardCandidat() {
   const [scoreJson,      setScoreJson]      = useState(null);
   const [cvFiles,        setCvFiles]        = useState([]);
   const [talentcardFiles,setTalentcardFiles]= useState([]);
+  const [portfolioShort, setPortfolioShort] = useState([]);
+  const [portfolioLong,  setPortfolioLong]  = useState([]);
   const [uploadingCv,    setUploadingCv]    = useState(false);
   const [uploadErrorCv,  setUploadErrorCv]  = useState("");
   const [offerSearch,        setOfferSearch]        = useState("");
@@ -184,6 +186,9 @@ export default function DashboardCandidat() {
   const [wizardError,     setWizardError]     = useState(null);
 
   const [cvMenuOpenPath,  setCvMenuOpenPath]  = useState(null);
+  const [talentcardMenuOpenPath, setTalentcardMenuOpenPath] = useState(null);
+  const [portfolioShortMenuOpenPath, setPortfolioShortMenuOpenPath] = useState(null);
+  const [portfolioLongMenuOpenPath,  setPortfolioLongMenuOpenPath]  = useState(null);
   const [downloadingCvPath, setDownloadingCvPath] = useState(null);
 
   const notifRef   = useRef(null);
@@ -301,6 +306,12 @@ export default function DashboardCandidat() {
     if (!candidateId) return;
     const c = new AbortController();
     fetch(`${API_BASE}/dashboard/candidat-id/${candidateId}/portfolio-pdf-files`, { signal: c.signal })
+      .then(r => r.json())
+      .then(data => {
+        if (!data) return;
+        setPortfolioShort(Array.isArray(data.portfolioShort) ? data.portfolioShort : []);
+        setPortfolioLong(Array.isArray(data.portfolioLong) ? data.portfolioLong : []);
+      })
       .catch(() => {});
     return () => c.abort();
   }, [candidateId]);
@@ -1911,14 +1922,6 @@ export default function DashboardCandidat() {
               </div>
               <div className="dash-section-page">
                 <div className="dash-section-card">
-                  <div className="files-upload-bar">
-                    <label className="files-upload-btn">
-                      {uploadingCv ? "Import en cours…" : "+ Importer un nouveau CV"}
-                      <input type="file" accept="application/pdf" onChange={handleUploadCv} disabled={uploadingCv}/>
-                    </label>
-                    <p className="files-upload-hint">Formats acceptés : PDF. Stockage sécurisé TAP.</p>
-                  </div>
-                  {uploadErrorCv && <div className="login-error" style={{marginBottom:12}}>⚠ {uploadErrorCv}</div>}
                   {cvFiles.length === 0 ? (
                     <p>Aucun CV enregistré pour l'instant.</p>
                   ) : (
@@ -1988,6 +1991,166 @@ export default function DashboardCandidat() {
           )}
 
           {/* ═══════════════════════════════════
+              PORTFOLIO COURT
+          ═══════════════════════════════════ */}
+          {active === "portfolio" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Portfolio court</h1>
+                <p className="dash-page-sub">
+                  Vos portfolios « one-page » générés pour une vue rapide de votre profil.
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {portfolioShort.length === 0 ? (
+                    <p>Aucun portfolio court enregistré pour le moment.</p>
+                  ) : (
+                    <div className="files-list">
+                      {portfolioShort.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+                        const sizeKb =
+                          typeof file.size === "number" ? Math.round(file.size / 1024) : null;
+                        const isMenuOpen = portfolioShortMenuOpenPath === file.path;
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && <span>· {sizeKb} Ko</span>}
+                              </div>
+                            </div>
+                            <div className="files-actions files-actions--menu">
+                              <button
+                                type="button"
+                                className="files-menu-trigger"
+                                onClick={() =>
+                                  setPortfolioShortMenuOpenPath(
+                                    isMenuOpen ? null : file.path
+                                  )
+                                }
+                                aria-label="Options du portfolio court"
+                              >
+                                <span style={{ fontSize: 18, lineHeight: 1 }}>⋯</span>
+                              </button>
+                              {isMenuOpen && (
+                                <div className="files-menu">
+                                  <a
+                                    href={file.publicUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="files-menu-item"
+                                  >
+                                    Ouvrir le portfolio
+                                  </a>
+                                  <button
+                                    type="button"
+                                    className="files-menu-item"
+                                    onClick={() => handleDownloadCv(file)}
+                                  >
+                                    Télécharger le portfolio
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
+              PORTFOLIO LONG
+          ═══════════════════════════════════ */}
+          {active === "portfolio-long" && (
+            <div className="dash-content">
+              <div className="dash-page-header">
+                <h1 className="dash-page-title">Portfolio long</h1>
+                <p className="dash-page-sub">
+                  Vos portfolios détaillés « long » avec un maximum de contexte sur vos projets.
+                </p>
+              </div>
+              <div className="dash-section-page">
+                <div className="dash-section-card">
+                  {portfolioLong.length === 0 ? (
+                    <p>Aucun portfolio long enregistré pour le moment.</p>
+                  ) : (
+                    <div className="files-list">
+                      {portfolioLong.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+                        const sizeKb =
+                          typeof file.size === "number" ? Math.round(file.size / 1024) : null;
+                        const isMenuOpen = portfolioLongMenuOpenPath === file.path;
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && <span>· {sizeKb} Ko</span>}
+                              </div>
+                            </div>
+                            <div className="files-actions files-actions--menu">
+                              <button
+                                type="button"
+                                className="files-menu-trigger"
+                                onClick={() =>
+                                  setPortfolioLongMenuOpenPath(
+                                    isMenuOpen ? null : file.path
+                                  )
+                                }
+                                aria-label="Options du portfolio long"
+                              >
+                                <span style={{ fontSize: 18, lineHeight: 1 }}>⋯</span>
+                              </button>
+                              {isMenuOpen && (
+                                <div className="files-menu">
+                                  <a
+                                    href={file.publicUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="files-menu-item"
+                                  >
+                                    Ouvrir le portfolio
+                                  </a>
+                                  <button
+                                    type="button"
+                                    className="files-menu-item"
+                                    onClick={() => handleDownloadCv(file)}
+                                  >
+                                    Télécharger le portfolio
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════
               TALENT CARD
           ═══════════════════════════════════ */}
           {active === "talentcard" && (
@@ -1998,10 +2161,66 @@ export default function DashboardCandidat() {
               </div>
               <div className="dash-section-page">
                 <div className="dash-section-card">
-                  {talentcardFiles.length === 0
-                    ? <p>Aucune Talent Card PDF enregistrée pour le moment.</p>
-                    : renderFiles(talentcardFiles, "")
-                  }
+                  {talentcardFiles.length === 0 ? (
+                    <p>Aucune Talent Card PDF enregistrée pour le moment.</p>
+                  ) : (
+                    <div className="files-list">
+                      {talentcardFiles.map((file) => {
+                        const date = file.updatedAt
+                          ? new Date(file.updatedAt).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                          : "-";
+                        const sizeKb =
+                          typeof file.size === "number" ? Math.round(file.size / 1024) : null;
+                        const isMenuOpen = talentcardMenuOpenPath === file.path;
+                        return (
+                          <div className="files-row" key={file.path}>
+                            <div className="files-main">
+                              <div className="files-name">{file.name}</div>
+                              <div className="files-meta">
+                                <span>{date}</span>
+                                {sizeKb !== null && <span>· {sizeKb} Ko</span>}
+                              </div>
+                            </div>
+                            <div className="files-actions files-actions--menu">
+                              <button
+                                type="button"
+                                className="files-menu-trigger"
+                                onClick={() =>
+                                  setTalentcardMenuOpenPath(isMenuOpen ? null : file.path)
+                                }
+                                aria-label="Options de la Talent Card"
+                              >
+                                <span style={{ fontSize: 18, lineHeight: 1 }}>⋯</span>
+                              </button>
+                              {isMenuOpen && (
+                                <div className="files-menu">
+                                  <a
+                                    href={file.publicUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="files-menu-item"
+                                  >
+                                    Ouvrir la Talent Card
+                                  </a>
+                                  <button
+                                    type="button"
+                                    className="files-menu-item"
+                                    onClick={() => handleDownloadCv(file)}
+                                  >
+                                    Télécharger la Talent Card
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
