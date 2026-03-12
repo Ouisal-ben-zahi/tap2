@@ -12,6 +12,7 @@ export interface CandidateDashboardStats {
   statusPending: number;
   statusAccepted: number;
   statusRefused: number;
+  avatarUrl?: string | null;
 }
 
 export interface CandidatePortfolioItem {
@@ -152,9 +153,24 @@ export class DashboardService {
       throw new BadRequestException('userId invalide');
     }
 
-    const candidate = await this.getCandidateIdForUser(userId);
+    const {
+      data: candidateRow,
+      error: candidateError,
+    } = await this.supabase
+      .from('candidates')
+      .select('id, created_at, image_minio_url')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
-    if (!candidate) {
+    if (candidateError) {
+      throw new BadRequestException(
+        candidateError.message || 'Erreur lors du chargement du candidat',
+      );
+    }
+
+    if (!candidateRow) {
       return {
         candidateId: null,
         firstProfileDate: null,
@@ -168,7 +184,7 @@ export class DashboardService {
       };
     }
 
-    const candidateId = candidate.id as number;
+    const candidateId = candidateRow.id as number;
 
     const [
       { count: applications = 0 },
@@ -203,9 +219,23 @@ export class DashboardService {
         .eq('status', 'REFUSEE'),
     ]);
 
+    let avatarUrl: string | null = null;
+    const rawImagePath =
+      (candidateRow.image_minio_url as string | null) ?? null;
+
+    if (rawImagePath) {
+      const { data: signed, error: signedError } = await this.supabase.storage
+        .from('tap_files')
+        .createSignedUrl(rawImagePath, 60 * 60);
+
+      if (!signedError && signed) {
+        avatarUrl = signed.signedUrl;
+      }
+    }
+
     return {
       candidateId,
-      firstProfileDate: candidate.created_at as string,
+      firstProfileDate: candidateRow.created_at as string,
       applications: applications ?? 0,
       interviews: interviews ?? 0,
       savedOffers: 0,
@@ -213,6 +243,7 @@ export class DashboardService {
       statusPending: statusPending ?? 0,
       statusAccepted: statusAccepted ?? 0,
       statusRefused: statusRefused ?? 0,
+      avatarUrl,
     };
   }
 

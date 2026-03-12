@@ -443,17 +443,17 @@ export class AuthService {
 
     await this.supabase
       .from('password_reset_tokens')
-      .update({ used: true })
+      .update({ is_used: true })
       .eq('user_id', user.id)
-      .eq('used', false);
+      .eq('is_used', false);
 
     const { error: tokenError } = await this.supabase
       .from('password_reset_tokens')
       .insert({
         user_id: user.id,
-        code,
+        token: code,
         expires_at: expiresAt.toISOString(),
-        used: false,
+        is_used: false,
       });
 
     if (tokenError) {
@@ -532,10 +532,10 @@ export class AuthService {
       error: tokenError,
     } = await this.supabase
       .from('password_reset_tokens')
-      .select('id, code, expires_at, used')
+      .select('id, token, expires_at, is_used')
       .eq('user_id', user.id)
-      .eq('code', code)
-      .eq('used', false)
+      .eq('token', code)
+      .eq('is_used', false)
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -551,15 +551,16 @@ export class AuthService {
 
     const token = tokens[0] as {
       id: number;
+      token: string;
       expires_at: string;
-      used: boolean;
+      is_used: boolean;
     };
 
     const expiresAt = new Date(token.expires_at);
     if (expiresAt < new Date()) {
       await this.supabase
         .from('password_reset_tokens')
-        .update({ used: true })
+        .update({ is_used: true })
         .eq('id', token.id);
       throw new BadRequestException('Code expiré. Demandez un nouveau code.');
     }
@@ -579,7 +580,7 @@ export class AuthService {
 
     await this.supabase
       .from('password_reset_tokens')
-      .update({ used: true })
+      .update({ is_used: true })
       .eq('id', token.id);
 
     return {

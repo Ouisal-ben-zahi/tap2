@@ -620,12 +620,30 @@ export default function DashboardCandidat() {
                   role="button" tabIndex={0} aria-label="Profil"
                   onClick={() => { setShowProfile(v=>!v); setShowNotif(false); }}
                   onKeyDown={e => e.key==="Enter"&&setShowProfile(v=>!v)}>
-                  {userName.charAt(0).toUpperCase()}
+                  {stats.avatarUrl ? (
+                    <img
+                      src={stats.avatarUrl}
+                      alt={userName}
+                      style={{width:26,height:26,borderRadius:"50%",objectFit:"cover"}}
+                    />
+                  ) : (
+                    userName.charAt(0).toUpperCase()
+                  )}
                 </div>
                 {showProfile && (
                   <div className="dash-profile-dropdown">
                     <div className="dash-profile-header">
-                      <div className="dash-profile-avatar-lg">{userName.charAt(0).toUpperCase()}</div>
+                      <div className="dash-profile-avatar-lg">
+                        {stats.avatarUrl ? (
+                          <img
+                            src={stats.avatarUrl}
+                            alt={userName}
+                            style={{width:46,height:46,borderRadius:"50%",objectFit:"cover"}}
+                          />
+                        ) : (
+                          userName.charAt(0).toUpperCase()
+                        )}
+                      </div>
                       <div className="dash-profile-info">
                         <span className="dash-profile-name">{userName}</span>
                         <span className="dash-profile-email">{userEmail}</span>
@@ -1394,23 +1412,58 @@ export default function DashboardCandidat() {
                         gap: 8,
                       }}
                     >
-                      <select
-                        value={appStatusFilter}
-                        onChange={e => setAppStatusFilter(e.target.value)}
-                        style={{
-                          padding: "5px 9px",
-                          borderRadius: 999,
-                          border: "1px solid var(--seam)",
-                          background: "rgba(10,10,10,0.9)",
-                          color: "var(--t0)",
-                          fontSize: 11,
-                        }}
-                      >
-                        <option value="all">Tous statuts</option>
-                        <option value="EN_COURS">En cours</option>
-                        <option value="ACCEPTEE">Acceptée</option>
-                        <option value="REFUSEE">Refusée</option>
-                      </select>
+                      <div className="status-select-wrap">
+                        <button
+                          type="button"
+                          className="status-select-trigger"
+                          onClick={() => setAppStatusOpen(o => !o)}
+                        >
+                          <span className="status-select-label">
+                            {appStatusFilter === "all"
+                              ? "Tous statuts"
+                              : appStatusFilter === "EN_COURS"
+                                ? "En cours"
+                                : appStatusFilter === "ACCEPTEE"
+                                  ? "Acceptée"
+                                  : "Refusée"}
+                          </span>
+                          <span className="status-select-chevron">
+                            {appStatusOpen ? "▲" : "▼"}
+                          </span>
+                        </button>
+                        {appStatusOpen && (
+                          <div className="status-select-panel">
+                            <button
+                              type="button"
+                              className={`status-option${appStatusFilter === "all" ? " status-option--active" : ""}`}
+                              onClick={() => { setAppStatusFilter("all"); setAppStatusOpen(false); }}
+                            >
+                              Tous statuts
+                            </button>
+                            <button
+                              type="button"
+                              className={`status-option${appStatusFilter === "EN_COURS" ? " status-option--active" : ""}`}
+                              onClick={() => { setAppStatusFilter("EN_COURS"); setAppStatusOpen(false); }}
+                            >
+                              En cours
+                            </button>
+                            <button
+                              type="button"
+                              className={`status-option${appStatusFilter === "ACCEPTEE" ? " status-option--active" : ""}`}
+                              onClick={() => { setAppStatusFilter("ACCEPTEE"); setAppStatusOpen(false); }}
+                            >
+                              Acceptée
+                            </button>
+                            <button
+                              type="button"
+                              className={`status-option${appStatusFilter === "REFUSEE" ? " status-option--active" : ""}`}
+                              onClick={() => { setAppStatusFilter("REFUSEE"); setAppStatusOpen(false); }}
+                            >
+                              Refusée
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1456,11 +1509,21 @@ export default function DashboardCandidat() {
                                 : st === "REFUSEE"
                                   ? "Refusée"
                                   : "En cours";
+                            const statusKey =
+                              st === "ACCEPTEE"
+                                ? "accepted"
+                                : st === "REFUSEE"
+                                  ? "refused"
+                                  : "pending";
                             return (
                               <tr key={app.id}>
                                 <td className="jobs-col-title">{app.jobTitle || "Offre"}</td>
                                 <td>{dt}</td>
-                                <td>{label}</td>
+                                <td>
+                                  <span className={`status-pill status-pill--${statusKey}`}>
+                                    {label}
+                                  </span>
+                                </td>
                               </tr>
                             );
                           })

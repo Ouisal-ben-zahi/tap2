@@ -1069,6 +1069,99 @@
   border-color:rgba(224,82,82,0.8);
   box-shadow:0 0 0 1px rgba(224,82,82,0.45);
 }
+
+.status-select-wrap{
+  position:relative;
+}
+.status-select-trigger{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid var(--seam);
+  background:rgba(10,10,10,0.9);
+  color:var(--t0);
+  font-size:11px;
+  cursor:pointer;
+}
+.status-select-label{
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:10px;
+}
+.status-select-trigger:hover{
+  border-color:rgba(224,82,82,0.6);
+}
+.status-select-chevron{
+  font-size:10px;
+  opacity:.8;
+}
+.status-select-panel{
+  position:absolute;
+  right:0;
+  top:calc(100% + 4px);
+  min-width:180px;
+  background:var(--layer2);
+  border-radius:10px;
+  border:1px solid var(--seam);
+  box-shadow:0 16px 40px rgba(0,0,0,0.65);
+  padding:6px;
+  z-index:10;
+}
+.status-option{
+  width:100%;
+  text-align:left;
+  padding:6px 8px;
+  border-radius:7px;
+  border:none;
+  background:transparent;
+  color:var(--t1);
+  font-size:12px;
+  cursor:pointer;
+}
+.status-option:hover{
+  background:rgba(224,82,82,0.10);
+  color:var(--t0);
+}
+.status-option--active{
+  background:rgba(224,82,82,0.18);
+  color:var(--t0);
+}
+
+.status-option--pending{
+  color:var(--sapphire);
+}
+.status-option--accepted{
+  color:var(--emerald);
+}
+.status-option--refused{
+  color:var(--ruby);
+}
+
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 10px;
+  border-radius:999px;
+  border:1px solid transparent;
+  background:transparent;
+  font-size:11px;
+  font-weight:500;
+}
+.status-pill--pending{
+  border-color:var(--sapphire);
+  color:var(--sapphire);
+}
+.status-pill--accepted{
+  border-color:var(--emerald);
+  color:var(--emerald);
+}
+.status-pill--refused{
+  border-color:var(--ruby);
+  color:var(--ruby);
+}
 .jobs-badge-urgent{
   display:inline-flex;
   align-items:center;
