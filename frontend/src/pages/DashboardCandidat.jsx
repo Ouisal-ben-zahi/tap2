@@ -16,16 +16,16 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 /* ─── menu ─── */
 const MENU = [
-  { id: "dashboard",    label: "Dashboard",    icon: LayoutDashboard   },
-  { id: "analyse-cv",   label: "Analyse CV",   icon: FileText          },
-  { id: "scoring",      label: "Scoring",      icon: LayoutDashboard   },
-  { id: "matching",     label: "Matching",     icon: BriefcaseBusiness },
-  { id: "formation",    label: "Formation",    icon: Award             },
-  { id: "entretien-ia",    label: "Entretien IA",    icon: CalendarCheck     },
-  { id: "mes-offres",      label: "Toutes les offres", icon: BriefcaseBusiness },
-  { id: "mes-candidatures",label: "Mes candidatures", icon: BriefcaseBusiness },
-  { id: "mes-fichiers",    label: "Mes fichiers",    icon: FolderOpen        },
-  { id: "statistique",     label: "Statistique",     icon: BarChart2         },
+  { id: "dashboard",        label: "Dashboard",        icon: LayoutDashboard   },
+  { id: "analyse-cv",       label: "Analyse CV",       icon: FileText          },
+  { id: "scoring",          label: "Scoring",          icon: BarChart2         },
+  { id: "matching",         label: "Matching",         icon: BriefcaseBusiness },
+  { id: "formation",        label: "Formation",        icon: Award             },
+  { id: "entretien-ia",     label: "Entretien IA",     icon: CalendarCheck     },
+  { id: "mes-offres",       label: "Toutes les offres",icon: Bookmark          },
+  { id: "mes-candidatures", label: "Mes candidatures", icon: Users             },
+  { id: "mes-fichiers",     label: "Mes fichiers",     icon: FolderOpen        },
+  { id: "statistique",      label: "Statistique",      icon: TrendingUp        },
 ];
 
 /* ─── bar chart data ─── */
@@ -53,7 +53,9 @@ function useCountUp(target, duration = 1100) {
 }
 
 function StatCard({ label, value, icon: Icon, trend, dir, danger, delay }) {
-  const count = useCountUp(value ?? 0, 1100);
+  const numericTarget =
+    typeof value === "number" && Number.isFinite(value) ? value : 0;
+  const count = useCountUp(numericTarget, 1100);
   const [vis, setVis] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVis(true), delay ?? 0); return () => clearTimeout(t); }, [delay]);
   return (
@@ -63,7 +65,13 @@ function StatCard({ label, value, icon: Icon, trend, dir, danger, delay }) {
         <span className="dash-card-label">{label}</span>
         <div className="dash-card-icon-wrap"><Icon size={14} /></div>
       </div>
-      <div className="dash-card-value">{value === null ? "—" : count}</div>
+      <div className="dash-card-value">
+        {value === null || value === undefined
+          ? "—"
+          : typeof value === "number"
+          ? count
+          : value}
+      </div>
       <div className={`dash-card-trend dash-card-trend--${dir==="up"?"up":dir==="down"?"down":"flat"}`}>
         {dir==="up"   && <TrendingUp size={11} />}
         {dir==="down" && <TrendingDown size={11} />}
@@ -844,29 +852,32 @@ export default function DashboardCandidat() {
           )}
 
           {/* ═══════════════════════════════════
-              ANALYSE CV  (reprend la section CV)
+              ANALYSE CV (hero placeholder)
           ═══════════════════════════════════ */}
           {active === "analyse-cv" && (
-            <div className="dash-content">
-              <div className="dash-page-header">
-                <h1 className="dash-page-title">Analyse CV</h1>
-                <p className="dash-page-sub">Importez vos CV et laissez TAP les analyser.</p>
-              </div>
-              <div className="dash-section-page">
-                <div className="dash-section-card">
-                  <div className="files-upload-bar">
-                    <label className="files-upload-btn">
-                      {uploadingCv ? "Import en cours…" : "+ Importer un nouveau CV"}
-                      <input type="file" accept="application/pdf" onChange={handleUploadCv} disabled={uploadingCv}/>
-                    </label>
-                    <p className="files-upload-hint">Formats acceptés : PDF. Stockage sécurisé TAP.</p>
-                  </div>
-                  {uploadErrorCv && <div className="login-error" style={{marginBottom:12}}>⚠ {uploadErrorCv}</div>}
-                  {cvFiles.length === 0
-                    ? <p>Aucun CV enregistré pour l'instant.</p>
-                    : renderFiles(cvFiles, "")
-                  }
+            <div className="dash-content dash-content--formation">
+              <div className="formation-hero">
+                <div className="formation-icon">
+                  <FileText size={24} />
                 </div>
+                <h1 className="formation-title">Analyse CV</h1>
+                <p className="formation-sub">
+                  Bientôt, TAP analysera automatiquement vos CV pour extraire compétences,
+                  scores et axes d’amélioration personnalisés.
+                </p>
+                <button type="button" className="formation-pill" disabled>
+                  <span className="formation-pill-icon">i</span>
+                  <span className="formation-pill-text">Bientôt disponible</span>
+                </button>
+                <div className="formation-divider" />
+                <button
+                  type="button"
+                  className="formation-back"
+                  onClick={() => setActive("dashboard")}
+                >
+                  <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
+                  <span>Retour au dashboard</span>
+                </button>
               </div>
             </div>
           )}
@@ -968,6 +979,130 @@ export default function DashboardCandidat() {
                   )}
                 </div>
               </div>
+
+              {/* graph donut + courbe luxe (déplacés depuis "Toutes les offres") */}
+              <div className="dash-grid-2">
+                <div className="dash-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Vue circulaire des statuts</span>
+                    <Users size={14} color="var(--t3)"/>
+                  </div>
+                  <div className="dash-ring-wrap">
+                    <svg viewBox="0 0 36 36" className="dash-ring-svg">
+                      <defs>
+                        <linearGradient id="ringGradPending" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="var(--gold)"/>
+                          <stop offset="100%" stopColor="var(--gold2)"/>
+                        </linearGradient>
+                        <linearGradient id="ringGradAccepted" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#22c55e"/>
+                          <stop offset="100%" stopColor="#4ade80"/>
+                        </linearGradient>
+                        <linearGradient id="ringGradRefused" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#4b5563"/>
+                          <stop offset="100%" stopColor="#9ca3af"/>
+                        </linearGradient>
+                      </defs>
+                      <circle
+                        className="dash-ring-bg"
+                        cx="18"
+                        cy="18"
+                        r="15.9"
+                      />
+                      {(() => {
+                        const total = totalStatus || 1;
+                        const pPending = ((stats.statusPending ?? 0) / total) * 100;
+                        const pAccepted = ((stats.statusAccepted ?? 0) / total) * 100;
+                        const pRefused = 100 - pPending - pAccepted;
+                        const segments = [
+                          { pct: pPending,   offset: 0,                 grad: "url(#ringGradPending)" },
+                          { pct: pAccepted,  offset: pPending,          grad: "url(#ringGradAccepted)" },
+                          { pct: pRefused,   offset: pPending+pAccepted,grad: "url(#ringGradRefused)" },
+                        ].filter(s => s.pct > 0.5);
+                        return segments.map((seg, idx) => (
+                          <circle
+                            key={idx}
+                            className="dash-ring-seg"
+                            cx="18"
+                            cy="18"
+                            r="15.9"
+                            stroke={seg.grad}
+                            strokeDasharray={`${Math.max(0, Math.min(seg.pct, 100))} 100`}
+                            strokeDashoffset={25 - (seg.offset)}
+                          />
+                        ));
+                      })()}
+                    </svg>
+                    <div className="dash-ring-legend">
+                      <div className="dash-ring-legend-item">
+                        <span className="dot dot--pending" />
+                        <span>En cours</span>
+                        <span className="val">{pendingCount}</span>
+                      </div>
+                      <div className="dash-ring-legend-item">
+                        <span className="dot dot--accepted" />
+                        <span>Acceptées</span>
+                        <span className="val">{acceptedCount}</span>
+                      </div>
+                      <div className="dash-ring-legend-item">
+                        <span className="dot dot--refused" />
+                        <span>Refusées</span>
+                        <span className="val">{refusedCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="dash-panel">
+                  <div className="dash-panel-head">
+                    <span className="dash-panel-title">Courbe des candidatures</span>
+                    <LayoutDashboard size={14} color="var(--t3)"/>
+                  </div>
+                  {applicationsByMonth.length === 0 ? (
+                    <p style={{color:"var(--t3)",fontSize:13}}>
+                      Aucune candidature enregistrée pour le moment.
+                    </p>
+                  ) : (
+                    <div className="dash-line-chart">
+                      <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="dash-line-svg">
+                        {(() => {
+                          const max = Math.max(...applicationsByMonth.map(d => d.count || 0), 1);
+                          const pts = applicationsByMonth.map((d, i) => {
+                            const x = (i / Math.max(applicationsByMonth.length - 1, 1)) * 100;
+                            const y = 40 - ((d.count || 0) / max) * 30 - 5;
+                            return { x, y };
+                          });
+                          const dPath = pts
+                            .map((p, i) =>
+                              `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`
+                            )
+                            .join(" ");
+                          return (
+                            <>
+                              <path className="dash-line-bg" d={dPath} />
+                              <path className="dash-line-main" d={dPath} />
+                              {pts.map((p, i) => (
+                                <circle
+                                  key={i}
+                                  className="dash-line-point"
+                                  cx={p.x}
+                                  cy={p.y}
+                                  r="1.5"
+                                />
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                      <div className="dash-line-labels">
+                        {applicationsByMonth.map(d => (
+                          <span key={d.label}>{d.label}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -984,11 +1119,23 @@ export default function DashboardCandidat() {
               {/* petites cartes récap JSON */}
               <div className="dash-cards-row" style={{marginBottom:18}}>
                 <StatCard
-                  label="Famille dominante"
-                  value={scoreJson?.familleDominante || "—"}
+                  label="Score global"
+                  value={
+                    scoreJson && typeof scoreJson.scoreGlobal === "number"
+                      ? Math.round(scoreJson.scoreGlobal)
+                      : null
+                  }
                   icon={Award}
-                  trend={scoreJson?.metadataSector || "Secteur non détecté"}
-                  dir="flat"
+                  trend={scoreJson?.familleDominante || "Famille non détectée"}
+                  dir={
+                    scoreJson && typeof scoreJson.scoreGlobal === "number"
+                      ? scoreJson.scoreGlobal >= 70
+                        ? "up"
+                        : scoreJson.scoreGlobal <= 40
+                          ? "down"
+                          : "flat"
+                      : "flat"
+                  }
                   delay={40}
                 />
                 <StatCard
@@ -1055,7 +1202,7 @@ export default function DashboardCandidat() {
                           cy="18"
                           r="15.9"
                           fill="none"
-                          stroke="var(--cr)"
+                          stroke="var(--ruby)"
                           strokeWidth="3.2"
                           strokeDasharray={`${
                             scoreJson && typeof scoreJson.scoreGlobal === "number"
@@ -1068,9 +1215,9 @@ export default function DashboardCandidat() {
                       </svg>
                       <div className="dash-score-ring-val">
                         {scoreJson && typeof scoreJson.scoreGlobal === "number"
-                          ? Math.round(scoreJson.scoreGlobal)
+                          ? `${Math.round(scoreJson.scoreGlobal)}`
                           : "--"}
-                        <span>/100</span>
+                        <span>%</span>
                       </div>
                       <div className="dash-score-ring-label">Score Global</div>
                       {decisionLabel && (
@@ -1144,23 +1291,44 @@ export default function DashboardCandidat() {
                       {scoreJson && Array.isArray(scoreJson.skills) ? scoreJson.skills.length : 0} skills
                     </span>
                   </div>
-                  <div className="dash-skills-cloud">
-                    {scoreJson && Array.isArray(scoreJson.skills) && scoreJson.skills.length > 0 ? (
-                      scoreJson.skills.map((s, i) => (
-                        <span
-                          key={`${s.name}-${i}`}
-                          className={`dash-skill-tag${i%3===0?"":" dash-skill-tag--neutral"}`}
-                          title={s.scope || ""}
-                        >
-                          {s.name} · {Math.round(s.score)} / 100
-                        </span>
-                      ))
-                    ) : (
-                      <span className="dash-skill-tag dash-skill-tag--neutral">
-                        Les compétences IA apparaîtront ici après la première analyse.
-                      </span>
-                    )}
-                  </div>
+                  {scoreJson && Array.isArray(scoreJson.skills) && scoreJson.skills.length > 0 ? (
+                    <div className="dash-skills-list">
+                      {scoreJson.skills
+                        .slice()
+                        .sort((a, b) => (b.score || 0) - (a.score || 0))
+                        .map((s, i) => {
+                          const raw = typeof s.score === "number" ? s.score : 0;
+                          const pct = Math.max(0, Math.min(100, Math.round((raw / 100) * 100 || raw * 25)));
+                          return (
+                            <div className="dash-skill-row" key={`${s.name}-${i}`}>
+                              <div className="dash-skill-main">
+                                <div className="dash-skill-name">{s.name || "Compétence"}</div>
+                                <div className="dash-skill-meta">
+                                  <span className="dash-skill-score">
+                                    {Math.round(raw)} / 100
+                                  </span>
+                                  {s.scope && (
+                                    <span className={`dash-skill-scope dash-skill-scope--${(s.scope || "").toLowerCase()}`}>
+                                      {s.scope === "core" ? "Noyau" : "Secondaire"}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="dash-skill-bar-track">
+                                <div
+                                  className="dash-skill-bar-fill"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <p style={{color:"var(--t3)",fontSize:13}}>
+                      Les compétences IA apparaîtront ici après la première analyse.
+                    </p>
+                  )}
                 </div>
 
                 <div className="dash-panel">
@@ -1193,38 +1361,32 @@ export default function DashboardCandidat() {
           )}
 
           {/* ═══════════════════════════════════
-              MATCHING (candidatures)
+              MATCHING (hero placeholder)
           ═══════════════════════════════════ */}
           {active === "matching" && (
-            <div className="dash-content">
-              <div className="dash-page-header">
-                <h1 className="dash-page-title">Matching</h1>
-                <p className="dash-page-sub">Suivez le matching de vos candidatures avec les offres.</p>
-              </div>
-              <div className="dash-section-page">
-                <div className="dash-section-card">
-                  {applications.length === 0
-                    ? <p>Aucune candidature enregistrée pour le moment.</p>
-                    : <div className="cand-list">
-                        {applications.map(app => {
-                          const st = (app.status||"").toUpperCase();
-                          const sl = st==="ACCEPTEE"?"Acceptée":st==="REFUSEE"?"Refusée":"En cours";
-                          const sc = st==="ACCEPTEE"?"accepted":st==="REFUSEE"?"refused":"pending";
-                          const dt = app.validatedAt ? new Date(app.validatedAt).toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"2-digit"}) : "-";
-                          return (
-                            <div className="cand-row" key={app.id}>
-                              <div className="cand-job">
-                                <div className="cand-job-title">{app.jobTitle||"Poste non renseigné"}</div>
-                                {app.company && <div className="cand-job-company">{app.company}</div>}
-                              </div>
-                              <div className="cand-status"><span className={`cand-status-pill cand-status-pill--${sc}`}>{sl}</span></div>
-                              <div className="cand-date">{dt}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                  }
+            <div className="dash-content dash-content--formation">
+              <div className="formation-hero">
+                <div className="formation-icon">
+                  <BriefcaseBusiness size={24} />
                 </div>
+                <h1 className="formation-title">Matching intelligent</h1>
+                <p className="formation-sub">
+                  Bientôt, un moteur IA fera correspondre automatiquement votre profil
+                  aux offres les plus pertinentes, avec un score de compatibilité clair.
+                </p>
+                <button type="button" className="formation-pill" disabled>
+                  <span className="formation-pill-icon">i</span>
+                  <span className="formation-pill-text">Bientôt disponible</span>
+                </button>
+                <div className="formation-divider" />
+                <button
+                  type="button"
+                  className="formation-back"
+                  onClick={() => setActive("dashboard")}
+                >
+                  <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
+                  <span>Retour au dashboard</span>
+                </button>
               </div>
             </div>
           )}
@@ -1593,18 +1755,32 @@ export default function DashboardCandidat() {
           )}
 
           {/* ═══════════════════════════════════
-              ENTRETIEN IA (reprend Entretiens)
+              ENTRETIEN IA (hero placeholder)
           ═══════════════════════════════════ */}
           {active === "entretien-ia" && (
-            <div className="dash-content">
-              <div className="dash-page-header">
-                <h1 className="dash-page-title">Entretien IA</h1>
-                <p className="dash-page-sub">Gérez et organisez vos entretiens assistés par l’IA.</p>
-              </div>
-              <div className="dash-section-page">
-                <div className="dash-section-card">
-                  <p>Historique de vos entretiens passés, prochaines étapes et rappels automatiques pour ne rien manquer.</p>
+            <div className="dash-content dash-content--formation">
+              <div className="formation-hero">
+                <div className="formation-icon">
+                  <CalendarCheck size={24} />
                 </div>
+                <h1 className="formation-title">Entretien IA</h1>
+                <p className="formation-sub">
+                  Bientôt, vous pourrez vous entraîner avec un simulateur d’entretien
+                  intelligent, avec feedback détaillé sur vos réponses.
+                </p>
+                <button type="button" className="formation-pill" disabled>
+                  <span className="formation-pill-icon">i</span>
+                  <span className="formation-pill-text">Bientôt disponible</span>
+                </button>
+                <div className="formation-divider" />
+                <button
+                  type="button"
+                  className="formation-back"
+                  onClick={() => setActive("dashboard")}
+                >
+                  <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
+                  <span>Retour au dashboard</span>
+                </button>
               </div>
             </div>
           )}

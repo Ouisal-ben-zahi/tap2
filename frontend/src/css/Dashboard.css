@@ -480,9 +480,22 @@
   color:var(--ruby);
 }
 .dash-card-value{
-  font-family:var(--display);font-size:46px;font-weight:800;
+  font-family:var(--display);font-size:32px;font-weight:500;
   letter-spacing:-.02em;color:var(--t0);line-height:1;
   margin-bottom:10px;
+  animation:statValueIn .6s var(--spring) both;
+}
+.dash-card.dash-card--danger .dash-card-value{color:var(--ruby);}
+
+@keyframes statValueIn{
+  from{
+    opacity:0;
+    transform:translateY(6px) scale(.96);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
 }
 .dash-card-trend{display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono)}
 .dash-card-trend--up{color:var(--emerald)}
@@ -614,6 +627,88 @@
   box-shadow:0 0 6px var(--gold-glow);
 }
 
+/* ─── DONUT & LINE CHART (STATISTIQUES) ─── */
+.dash-ring-wrap{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+.dash-ring-svg{
+  width:120px;
+  height:120px;
+  transform:rotate(-90deg);
+}
+.dash-ring-bg{
+  fill:none;
+  stroke:rgba(255,255,255,0.04);
+  stroke-width:3.2;
+}
+.dash-ring-seg{
+  fill:none;
+  stroke-width:3.2;
+  stroke-linecap:round;
+  transition:stroke-dasharray 1.4s cubic-bezier(.22,1,.36,1),
+             stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1);
+}
+.dash-ring-legend{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:11px;
+  color:var(--t2);
+}
+.dash-ring-legend-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.dash-ring-legend-item .val{
+  margin-left:auto;
+  font-family:var(--mono);
+  color:var(--t1);
+}
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+}
+.dot--pending{background:var(--gold);}
+.dot--accepted{background:#22c55e;}
+.dot--refused{background:#4b5563;}
+
+.dash-line-chart{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.dash-line-svg{
+  width:100%;
+  height:140px;
+}
+.dash-line-bg{
+  fill:none;
+  stroke:rgba(255,255,255,0.06);
+  stroke-width:0.8;
+}
+.dash-line-main{
+  fill:none;
+  stroke:url(#lineGrad);
+  stroke-width:1.4;
+  filter:drop-shadow(0 0 8px rgba(201,168,76,0.45));
+}
+.dash-line-point{
+  fill:var(--gold2);
+  stroke:var(--void);
+  stroke-width:0.4;
+}
+.dash-line-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:9px;
+  color:var(--t3);
+  font-family:var(--mono);
+}
+
 /* ─── LLM GRID ─── */
 .dash-llm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .dash-llm-badge{
@@ -627,20 +722,71 @@
 .dash-llm-badge-key{font-size:9px;color:var(--t3);letter-spacing:.16em;text-transform:uppercase;font-family:var(--mono)}
 .dash-llm-badge-val{font-size:12px;color:var(--gold2);font-weight:500;font-family:var(--mono)}
 
-/* ─── SKILLS CLOUD ─── */
-.dash-skills-cloud{display:flex;flex-wrap:wrap;gap:7px}
-.dash-skill-tag{
-  font-size:10px;font-weight:600;
-  letter-spacing:.10em;text-transform:uppercase;
-  color:var(--t1);
-  background:var(--layer3);
-  border:1px solid var(--seam2);
-  padding:4px 10px;border-radius:6px;
-  font-family:var(--mono);
-  transition:all .2s var(--ease);cursor:default;
+/* ─── SKILLS LIST ─── */
+.dash-skills-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
-.dash-skill-tag:hover{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
-.dash-skill-tag--neutral{color:var(--t2);background:var(--layer2)}
+.dash-skill-row{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:8px 10px;
+  border-radius:8px;
+  background:var(--layer2);
+  border:1px solid var(--seam);
+}
+.dash-skill-main{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+.dash-skill-name{
+  font-size:12px;
+  color:var(--platinum);
+  font-weight:500;
+}
+.dash-skill-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:11px;
+}
+.dash-skill-score{
+  font-family:var(--mono);
+  color:var(--t2);
+}
+.dash-skill-scope{
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--seam2);
+}
+.dash-skill-scope--core{
+  border-color:rgba(224,82,82,0.6);
+  color:var(--ruby);
+}
+.dash-skill-scope--secondaire{
+  border-color:rgba(91,141,238,0.6);
+  color:var(--sapphire);
+}
+.dash-skill-bar-track{
+  height:3px;
+  border-radius:999px;
+  background:var(--layer3);
+  overflow:hidden;
+}
+.dash-skill-bar-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2));
+  box-shadow:0 0 6px var(--gold-glow);
+  transition:width 0.9s cubic-bezier(.22,1,.36,1);
+}
 
 /* ─── ANOMALIES ─── */
 .dash-anomaly-list{display:flex;flex-direction:column;gap:8px}
