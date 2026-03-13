@@ -148,6 +148,45 @@ export class DashboardService {
     return candidate as { id: number; created_at: string };
   }
 
+
+  private async getOrCreateCandidate(userId: number): Promise<{ id: number; categorie_profil: string | null }> {
+    const { data: existing } = await this.supabase
+      .from("candidates")
+      .select("id, categorie_profil")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) return existing;
+
+    // Fetch user email for the new candidate profile
+    const { data: user } = await this.supabase
+      .from("users")
+      .select("email")
+      .eq("id", userId)
+      .single();
+
+    const idAgent = 'A1-' + Math.random().toString(16).slice(2, 8).toUpperCase();
+    const emailPrefix = (user?.email || 'candidat').split('@')[0];
+    const { data: created, error } = await this.supabase
+      .from("candidates")
+      .insert({
+        user_id: userId,
+        email: user?.email || null,
+        nom: emailPrefix,
+        prenom: '',
+        categorie_profil: 'Autres',
+        id_agent: idAgent,
+      })
+      .select("id, categorie_profil")
+      .single();
+
+    if (error || !created) {
+      throw new BadRequestException(error?.message || "Impossible de creer le profil candidat");
+    }
+    return created;
+  }
   async getCandidateStats(userId: number): Promise<CandidateDashboardStats> {
     if (!userId || Number.isNaN(userId)) {
       throw new BadRequestException('userId invalide');
@@ -762,7 +801,9 @@ export class DashboardService {
         name.endsWith('_one_page_fr.pdf') ||
         name.endsWith('_one_page_en.pdf');
       const isLong =
-        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf') ||
+        (name.endsWith('_fr.pdf') && !isShort) ||
+        (name.endsWith('_en.pdf') && !isShort);
 
       return isShort || isLong;
     });
@@ -800,7 +841,9 @@ export class DashboardService {
         name.endsWith('_one_page_fr.pdf') ||
         name.endsWith('_one_page_en.pdf');
       const isLong =
-        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf') ||
+        (name.endsWith('_fr.pdf') && !isShort) ||
+        (name.endsWith('_en.pdf') && !isShort);
 
       if (isShort) {
         portfolioShort.push(item);
@@ -872,7 +915,9 @@ export class DashboardService {
         name.endsWith('_one_page_fr.pdf') ||
         name.endsWith('_one_page_en.pdf');
       const isLong =
-        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf') ||
+        (name.endsWith('_fr.pdf') && !isShort) ||
+        (name.endsWith('_en.pdf') && !isShort);
 
       return isShort || isLong;
     });
@@ -910,7 +955,9 @@ export class DashboardService {
         name.endsWith('_one_page_fr.pdf') ||
         name.endsWith('_one_page_en.pdf');
       const isLong =
-        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf');
+        name.endsWith('_long_fr.pdf') || name.endsWith('_long_en.pdf') ||
+        (name.endsWith('_fr.pdf') && !isShort) ||
+        (name.endsWith('_en.pdf') && !isShort);
 
       if (isShort) {
         portfolioShort.push(item);
@@ -937,31 +984,8 @@ export class DashboardService {
       throw new BadRequestException('Seuls les fichiers PDF sont acceptés');
     }
 
-    const {
-      data: candidate,
-      error: candidateError,
-    } = await this.supabase
-      .from('candidates')
-      .select('id, categorie_profil')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (candidateError) {
-      throw new BadRequestException(
-        candidateError.message || 'Erreur lors du chargement du candidat',
-      );
-    }
-
-    if (!candidate) {
-      throw new BadRequestException(
-        "Aucun profil candidat associé à cet utilisateur",
-      );
-    }
-
-    const category =
-      (candidate.categorie_profil as string | null) || 'Autres';
+    const candidate = await this.getOrCreateCandidate(userId);
+    const category = (candidate.categorie_profil as string | null) || 'Autres';
     const candidateId = candidate.id as number;
     const basePath = `candidates/${category}/${candidateId}`;
 
@@ -999,6 +1023,50 @@ export class DashboardService {
 
     const size =
       typeof file.size === 'number' ? (file.size as number) : null;
+
+    // Fire-and-forget: trigger Flask AI analysis
+    const flaskUrl = this.config.get<string>('FLASK_AI_URL');
+    if (flaskUrl) {
+      try {
+        const FormData = require('form-data');
+        const http = require('http');
+        const https = require('https');
+        const { URL } = require('url');
+
+        const form = new FormData();
+        form.append('cv_file', file.buffer, { filename: safeName, contentType: 'application/pdf' });
+        form.append("existing_candidate_id", String(candidateId));
+        form.append('storage_prefix', basePath);
+
+        const parsed = new URL(flaskUrl + '/process');
+        const transport = parsed.protocol === 'https:' ? https : http;
+        const req = transport.request(
+          {
+            hostname: parsed.hostname,
+            port: parsed.port,
+            path: parsed.pathname,
+            method: 'POST',
+            headers: form.getHeaders(),
+            timeout: 300000,
+          },
+          (res) => {
+            let body = '';
+            res.on('data', (chunk) => (body += chunk));
+            res.on('end', () => {
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                console.log('[AI] Analyse lancee pour candidat ' + candidateId);
+              } else {
+                console.error('[AI] Erreur ' + res.statusCode + ' pour candidat ' + candidateId + ': ' + body);
+              }
+            });
+          },
+        );
+        req.on('error', (err) => console.error('[AI] Connexion echouee pour candidat ' + candidateId + ':', err.message));
+        form.pipe(req);
+      } catch (triggerErr) {
+        console.error('[AI] Exception trigger:', triggerErr.message);
+      }
+    }
 
     return {
       name: safeName,
@@ -1538,5 +1606,41 @@ export class DashboardService {
       softSkills,
     };
   }
-}
 
+  async deleteCandidateCvFile(userId: number, filePath: string): Promise<void> {
+    if (!userId || Number.isNaN(userId)) {
+      throw new BadRequestException('userId invalide');
+    }
+    if (!filePath) {
+      throw new BadRequestException('Chemin du fichier manquant');
+    }
+
+    const { data: candidate } = await this.supabase
+      .from('candidates')
+      .select('id, categorie_profil')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (!candidate) {
+      throw new BadRequestException('Aucun profil candidat associe');
+    }
+
+    const category = (candidate.categorie_profil as string | null) || 'Autres';
+    const candidateId = candidate.id as number;
+    const expectedPrefix = 'candidates/' + category + '/' + candidateId + '/';
+
+    if (!filePath.startsWith(expectedPrefix)) {
+      throw new BadRequestException('Acces non autorise a ce fichier');
+    }
+
+    const { error } = await this.supabase.storage
+      .from('tap_files')
+      .remove([filePath]);
+
+    if (error) {
+      throw new BadRequestException(error.message || 'Erreur lors de la suppression');
+    }
+  }
+}

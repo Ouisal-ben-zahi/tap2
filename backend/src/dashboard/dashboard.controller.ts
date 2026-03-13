@@ -1,10 +1,86 @@
-import { Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DashboardService, type RecruiterJobPayload } from './dashboard.service';
 
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
+
+
+  // === JWT-based routes (no userId in URL) ===
+
+  @Get('candidat/stats')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidateStatsByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidateStats(req.user.sub);
+  }
+
+  @Get('candidat/portfolio')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidatePortfolioByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidatePortfolio(req.user.sub);
+  }
+
+  @Get('candidat/applications')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidateApplicationsByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidateApplications(req.user.sub);
+  }
+
+  @Get('candidat/cv-files')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidateCvFilesByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidateCvFiles(req.user.sub);
+  }
+
+  @Get('candidat/talentcard-files')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidateTalentcardFilesByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidateTalentcardFiles(req.user.sub);
+  }
+
+  @Get('candidat/portfolio-pdf-files')
+  @UseGuards(AuthGuard('jwt'))
+  async getCandidatePortfolioPdfFilesByJwt(@Req() req: any) {
+    return this.dashboardService.getCandidatePortfolioPdfFiles(req.user.sub);
+  }
+
+  @Post('candidat/upload-cv')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCandidateCvByJwt(@Req() req: any, @UploadedFile() file: any) {
+    return this.dashboardService.uploadCandidateCv(req.user.sub, file);
+  }
+
+  @Delete("candidat/cv-file")
+  @UseGuards(AuthGuard("jwt"))
+  async deleteCandidateCvFileByJwt(@Req() req: any, @Query("path") path: string) {
+    await this.dashboardService.deleteCandidateCvFile(req.user.sub, path);
+    return { success: true };
+  
+  }
+
+
+  @Get('recruteur/jobs')
+  @UseGuards(AuthGuard('jwt'))
+  async getRecruiterJobsByJwt(@Req() req: any) {
+    return this.dashboardService.getRecruiterJobsWithCounts(req.user.sub);
+  }
+
+  @Post('recruteur/jobs')
+  @UseGuards(AuthGuard('jwt'))
+  async createRecruiterJobByJwt(@Req() req: any, @Body() body: RecruiterJobPayload) {
+    return this.dashboardService.createRecruiterJob(req.user.sub, body);
+  }
+
+  @Get('recruteur/overview')
+  @UseGuards(AuthGuard('jwt'))
+  async getRecruiterOverviewByJwt(@Req() req: any) {
+    return this.dashboardService.getRecruiterOverview(req.user.sub);
+  }
+
+  // === Legacy routes with userId in URL ===
 
   @Get('candidat/:userId')
   async getCandidateDashboard(@Param('userId') userId: string) {

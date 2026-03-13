@@ -7,6 +7,7 @@ import {
   type LoginDto,
   type RequestPasswordResetDto,
   type ResetPasswordDto,
+  type RefreshDto,
 } from './auth.service';
 
 @Controller('auth')
@@ -36,6 +37,11 @@ export class AuthController {
   @Post('request-password-reset')
   async requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
     return this.authService.requestPasswordReset(dto);
+  }
+
+  @Post('refresh')
+  async refresh(@Body() dto: { refreshToken: string }) {
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @Post('reset-password')

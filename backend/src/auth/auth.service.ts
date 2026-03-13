@@ -42,6 +42,10 @@ export interface RequestPasswordResetDto {
   email: string;
 }
 
+export interface RefreshDto {
+  refreshToken: string;
+}
+
 export interface ResetPasswordDto {
   email: string;
   code: string;
@@ -94,6 +98,47 @@ export class AuthService {
       code += Math.floor(Math.random() * 10).toString();
     }
     return code;
+  }
+
+
+  private createRefreshToken(payload: {
+    id: number;
+    email: string;
+    role: ProfileRole;
+  }): string {
+    const secret = this.config.get<string>("JWT_SECRET") ?? "change-me-in-env";
+    const expiresRaw = this.config.get<string>("JWT_REFRESH_EXPIRATION") ?? "7d";
+    return this.jwtService.sign(
+      { sub: payload.id, email: payload.email, role: payload.role, type: "refresh" },
+      { secret, expiresIn: expiresRaw as any },
+    );
+  }
+
+  private buildAuthResponse(user: { id: number; email: string; role: ProfileRole }) {
+    const accessToken = this.createAccessToken(user);
+    const refreshToken = this.createRefreshToken(user);
+    return {
+      user: { id: user.id, email: user.email, role: user.role },
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refresh(rt) {
+    if (!rt) throw new (require("@nestjs/common").UnauthorizedException)("Refresh token requis");
+    const secret = this.config.get("JWT_SECRET") ?? "change-me-in-env";
+    let payload;
+    try {
+      payload = this.jwtService.verify(rt, { secret });
+    } catch {
+      throw new (require("@nestjs/common").UnauthorizedException)("Refresh token invalide ou expiré");
+    }
+    if (payload.type !== "refresh") throw new (require("@nestjs/common").UnauthorizedException)("Token invalide");
+    const { data: users, error } = await this.supabase
+      .from("users").select("id, email, role").eq("id", payload.sub).limit(1);
+    if (error || !users || users.length === 0) throw new (require("@nestjs/common").UnauthorizedException)("Utilisateur introuvable");
+    const user = users[0];
+    return this.buildAuthResponse(user);
   }
 
   async sendVerificationEmail(
@@ -224,7 +269,7 @@ export class AuthService {
 
   async verifyAndRegister(
     dto: VerifyAndRegisterDto,
-  ): Promise<{ id: number; email: string; role: ProfileRole }> {
+  ): Promise<{ user: { id: number; email: string; role: ProfileRole }; accessToken: string; refreshToken: string }> {
     const email = dto.email?.trim().toLowerCase();
     const code = dto.code?.trim().replace(/\s/g, '');
     if (!email || !code) {
@@ -309,11 +354,7 @@ export class AuthService {
       .update({ used: true })
       .eq('id', token.id);
 
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role as ProfileRole,
-    };
+    return this.buildAuthResponse({ id: user.id, email: user.email, role: user.role as ProfileRole });
   }
 
   async register(dto: RegisterDto): Promise<{
@@ -368,10 +409,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<{
-    id: number;
-    email: string;
-    role: ProfileRole;
+    user: { id: number; email: string; role: ProfileRole };
     accessToken: string;
+    refreshToken: string;
   }> {
     const email = dto.email?.trim().toLowerCase();
     if (!email || !dto.password) {
@@ -413,18 +453,7 @@ export class AuthService {
       );
     }
 
-    const accessToken = this.createAccessToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      accessToken,
-    };
+    return this.buildAuthResponse({ id: user.id, email: user.email, role: user.role });
   }
 
   async requestPasswordReset(
